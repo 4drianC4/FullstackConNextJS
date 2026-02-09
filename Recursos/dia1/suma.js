@@ -10,6 +10,6 @@ const sumarv2 = (a, b) => {
 // "Si lo que sigue a la flecha es una expresión, retórnala automáticamente"
 const sumarv3 = (a, b) => a + b;
 
-console.log(sumarv1(2, 6));
-console.log(sumarv2(2, 1));
-console.log(sumarv3(8, 3));
+console.log(sumarv1("hola", " mundo"));
+console.log(sumarv2('a', 'b'));
+console.log(sumarv3(true, false));
