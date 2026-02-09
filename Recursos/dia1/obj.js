@@ -1,7 +1,7 @@
 const usuario = {
     nombre: "Ana",
     edad: 28,
-    ciudad: "Cochabamba",
+    ciudad: "cochabamba",
     // un objeto anidado dentro de usuario
     redes: { twitter: "@ana" }
 };
