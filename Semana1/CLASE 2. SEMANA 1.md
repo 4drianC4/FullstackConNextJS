@@ -1,235 +1,67 @@
->[!INFO] Objetivo de la Clase
->Dejar de escribir componentes "monoliticos" (todo en un archivo) y empezar a pensar en piezas de LEGO reutilizables. Entender qué hace React tras bambalinas para ser tan rápido
+# Entorno Next.js, Variables de Entorno y Despliegue Continuo
+
+**Módulo:** Semana 1 - Setup y Arquitectura
+## 1. El Ecosistema Next.js y el App Router
+
+React es una librería increíble para construir interfaces, pero no nos dice cómo enrutar páginas, manejar bases de datos o mejorar el SEO. Next.js es el framework construido sobre React que nos da todas estas herramientas listas para usar.
+
+### El Paradigma del App Router
+Desde su versión 13, Next.js introdujo el **App Router** (la carpeta `app/`). Este nuevo sistema cambia la forma en que pensamos sobre el renderizado:
+
+* **Server Components por defecto:** Todo componente dentro de la carpeta `app/` se renderiza en el servidor (Backend) a menos que indiquemos lo contrario. Esto significa que pueden acceder a la base de datos directamente de forma segura y envían menos JavaScript al navegador (haciendo la app más rápida).
+* **Client Components:** Si un componente necesita interactividad (como botones con `onClick`, usar estados con `useState` o efectos con `useEffect`), debemos agregar la directiva `"use client"` en la primera línea del archivo. Esto le dice a Next.js que ese pedazo de código debe ejecutarse en el navegador del usuario.
+
+### Estructura de Carpetas del Proyecto Base
+Al clonar nuestro repositorio de trabajo, encontrarán una estructura específica. Estos son los archivos clave:
+
+* `app/layout.tsx`: Es el esqueleto principal de la aplicación. Aquí va el HTML base, el `<body>` y elementos globales como el Navbar o el Footer.
+* `app/page.tsx`: Representa la ruta principal (`/` o el Home) de nuestra aplicación.
+* `tailwind.config.ts`: El archivo donde configuraremos nuestros colores corporativos y tipografías para el diseño.
+* `package.json`: El "manifiesto" del proyecto. Lista todas las dependencias (librerías) instaladas y los comandos (scripts) para correr el proyecto.
 
 ---
 
-# 0. Configuración del Entorno (Vite)
-Antes de entender la teoría, necesitamos un lugar donde trabajar. Ya no usamos `create-react-app` (es lento y pesado). El estándar moderno es **Vite**.
+## 2. El Misterio de las Variables de Entorno (.env)
 
-> [!CHECK] Requisito Previo
-> Tener **Node.js** instalado (versión 18 o superior). 
-> Comprobar en terminal: `node -v`
+En el desarrollo de software, existen datos sensibles que **jamás** deben ser públicos: contraseñas de bases de datos, llaves secretas de APIs o tokens de autenticación.
 
-### Paso 1: Crear el proyecto
-Abre tu terminal en la carpeta donde guardas tus proyectos y ejecuta:
+### ¿Qué es un archivo .env?
+Es un archivo de texto plano que vive en la raíz de tu proyecto y almacena "secretos" en formato `CLAVE=VALOR`. Tu código puede leer estos valores durante la ejecución, pero el archivo en sí nunca se sube a GitHub.
 
-```bash
-npm create vite@latest mi-primer-react
-# Selecciona: React
-# Selecciona: JavaScript (o TypeScript si te animas, pero empezaremos con JS)
-```
-### Paso 2: Instalación de dependencias
+* **.env o .env.local:** Aquí pones tus secretos reales para trabajar en tu computadora. Este archivo **debe** estar ignorado en tu archivo `.gitignore`.
+* **.env.example:** Es una plantilla que sí se sube a GitHub. Contiene los nombres de las claves necesarias, pero con valores vacíos o falsos. Sirve de guía para que otros desarrolladores sepan qué variables necesitan configurar al clonar el proyecto.
 
-Vite crea la carpeta vacía de módulos para ser rápido. Debemos instalarlos:
-```Bash
-cd mi-primer-react
-npm install
-npm run dev
-```
-### Paso 3: Limpieza inicial (Boilerplate)
+### La Regla de Oro en Next.js
+Next.js tiene un sistema estricto de seguridad para las variables de entorno:
 
-Vite trae archivos de ejemplo que no necesitamos.
-1. Ve a src/App.jsx.
-2. Borra todo el contenido del return (...).
-3. Déjalo así para empezar limpio:
+* **Variables privadas:** Si creas una variable llamada `DATABASE_URL="postgres://..."`, **solo** el código del servidor (Backend) podrá leerla. Si intentas usarla en un Client Component, Next.js te devolverá `undefined` para evitar que filtres tu contraseña a los navegadores de los usuarios.
+* **Variables públicas:** Si necesitas que una variable esté disponible en el Frontend (por ejemplo, la URL pública de una API externa), **debes** agregarle el prefijo `NEXT_PUBLIC_`. Ejemplo: `NEXT_PUBLIC_API_KEY="12345"`.
 
-```JavaScript
+---
 
-function App() {
-  return (
-    <div>
-      <h1>Hola Mundo desde React</h1>
-    </div>
-  )
-}
-export default App
-```
+## 3. Despliegue (Deploy) Automático en Vercel
 
-# 1. JSX Bajo el Capó (Under the hood)
-JSX no es HTML. Los navegadores no entienden JSX. Necesitan un traductor (Babel/SWC) que convierte esas etiquetas en **Objetos de JavaScript**.
+Tener el proyecto en "localhost" es genial, pero el objetivo final es que los usuarios puedan usarlo. Para esto, utilizaremos **Vercel**, la plataforma en la nube creada por los mismos desarrolladores de Next.js.
 
-## Análisis de Código: La Transpilación
+### Por qué Vercel
+Vercel ofrece un entorno de "Zero Configuration" (Cero Configuración) para Next.js. Entiende automáticamente cómo construir y servir nuestra aplicación en una red global (Edge Network) sin que tengamos que configurar servidores Linux manualmente.
 
-Lo que tú escribes:
-```jsx
-const elemento = (
-  <h1 className="saludo">
-    Hola, mundo!
-  </h1>
-);
-```
+### Pasos para el Deploy Inicial
+1.  **Conexión:** Iniciar sesión en Vercel usando nuestra cuenta de GitHub.
+2.  **Importación:** Seleccionar el repositorio del proyecto "Gestión de Tareas".
+3.  **Configuración de Variables:** Antes de darle a "Deploy", Vercel nos pedirá que ingresemos las variables de entorno de producción (las mismas de nuestro `.env` local, pero para el entorno real).
+4.  **Despliegue:** Al hacer clic en Deploy, Vercel descargará el código, instalará las dependencias (`npm install`), construirá el proyecto (`npm run build`) y nos dará una URL pública viva.
 
-Lo que React realmente ve (y ejecuta):
+---
 
-```jsx
-const elemento = React.createElement(
-'h1',                    // Tipo de etiqueta
-  { className: 'saludo' }, // Props (atributos)
-  'Hola, mundo!'           // Children (contenido)
-);
-```
+## 4. Integración Continua (CI) desde el Día 1
 
-Resultando en este objeto JS:
-```JavaScript
-const objeto = {
-  type: 'h1',
-  props: {
-    className: 'saludo',
-    children: 'Hola, mundo!'
-  }
-};
-```
->[!NOTE] ¿Por qué importa esto?
->Porque demuestra que los componentes son solo objetos. Puedes pasarlos como variables, retornarlos en funciones o guardarlos en arrays. React compara estos objetos (Virtual DOM) para saber qué cambiar en la pantalla real.
+Configurar Vercel no es solo para tener un link final; es para establecer un flujo de **Integración Continua (CI)**. 
 
-# 2. Componentes Puros vs. Impuros
+### ¿Qué significa esto para nuestro equipo?
+A partir de hoy, cada vez que alguien haga un cambio, la nube trabajará por nosotros.
 
-React se basa en el concepto de Funciones Puras (traído de la programación funcional).
-## Regla de Oro de la Pureza
+* **Deploy en Producción:** Cualquier código que se apruebe y se una (merge) a la rama `main` en GitHub, Vercel lo detectará automáticamente y actualizará la página web oficial en cuestión de minutos.
+* **Preview Deployments (Entornos de Vista Previa):** Esta es la magia de Vercel. Cuando un desarrollador abra un Pull Request (PR) desde su rama (ej. `feature/modal-login`), Vercel creará una URL temporal y secreta **solo para ese código**. 
 
-=="Para las mismas entradas (Props), siempre debe devolver la misma salida (JSX)".==
-
-## Componente Impuro (Mala Práctica)
-
-Este componente cambia cada vez que se renderiza, aunque las props no cambien. Esto causa bugs visuales y problemas de rendimiento.
-```JavaScript
-let invitados = 0; // Variable externa (Side Effect)
-
-function CopaVino() {
-  invitados = invitados + 1; // Modifica algo fuera de su scope
-  return <h2>Copa para el invitado #{invitados}</h2>;
-}
-```
-## Componente Puro
-
-No depende de nada externo ni modifica nada fuera de él. Solo usa sus props.
-```JavaScript
-function CopaVino({ numeroInvitado }) {
-  return <h2>Copa para el invitado #{numeroInvitado}</h2>;
-}
-```
->[!WARNING] Strict Mode
->¿Notaste que en desarrollo tus console.log salen dobles? Es el React Strict Mode. React renderiza tus componentes dos veces a propósito para detectar si son impuros. Si la UI se ve diferente entre el render 1 y el 2, tienes un componente impuro.
-
-# 3. Props Avanzados: La prop children
-
-Hasta ahora pasamos datos (nombre="Juan"). Pero, ¿cómo pasamos otros componentes o HTML dentro de un componente?
-
-Imagina un marco de fotos. El marco no sabe qué foto pondrás dentro, pero la envuelve. Eso es children.
-## Análisis de Código: El componente "Wrapper"
-```JavaScript
-// Definición del componente contenedor
-function Tarjeta({ titulo, children }) {
-  return (
-    <div className="borde-negro p-4 shadow-lg">
-      <h3 className="text-xl bold">{titulo}</h3>
-      <div className="contenido-dinamico">
-        {children} {/* Aquí se "imprime" lo que pongas dentro */}
-      </div>
-    </div>
-  );
-}
-
-// Uso (Composición)
-function App() {
-  return (
-    <main>
-       {/* Caso A: Con texto */}
-       <Tarjeta titulo="Bienvenida">
-          <p>Hola a todos</p>
-       </Tarjeta>
-
-       {/* Caso B: Con formulario */}
-       <Tarjeta titulo="Login">
-          <input type="text" placeholder="Usuario" />
-          <button>Entrar</button>
-       </Tarjeta>
-    </main>
-  );
-}
-```
-# 4. Evitar el "Prop Drilling" (Taladrado de Props)
-
-El problema: Pasar un dato del Abuelo -> Padre -> Hijo -> Nieto, cuando solo el Nieto lo necesita. El Padre y el Hijo solo "pasan el paquete" sin usarlo.
-## El Problema (Drilling)
-```JavaScript
-function App() {
-  const usuario = { name: "Alex" };
-  return <Navbar usuario={usuario} />; // App pasa a Navbar
-}
-
-function Navbar({ usuario }) {
-  return <Avatar usuario={usuario} />; // Navbar pasa a Avatar (¡Navbar no usa usuario!)
-}
-
-function Avatar({ usuario }) {
-  return <img src={usuario.avatar} />; // Avatar finalmente lo usa
-}
-```
-
-## La Solución: Composición de Componentes
-
-En lugar de pasar el dato, pasamos el componente ya armado como prop (generalmente como children o un prop personalizado).
-
-```JavaScript
-
-function App() {
-  const usuario = { name: "Alex" };
-  // App conecta directamente App -> Avatar. Navbar ya no estorba.
-  return (
-    <Navbar>
-      <Avatar usuario={usuario} />
-    </Navbar>
-  );
-}
-
-function Navbar({ children }) {
-  return (
-    <nav className="barra-superior">
-      <h1>Mi Logo</h1>
-      {children} {/* Aquí renderiza el Avatar que le enviaron */}
-    </nav>
-  );
-}
-```
-
->[!TIP]
->No siempre necesitas Context API (que veremos después) para solucionar el Prop Drilling. A veces solo necesitas acomodar mejor tus componentes ("Lift Content Up").
-
-# Practica del día
-
-Objetivo: Crear un layout reutilizable usando children.
-
-Instrucciones:
-
-1. Crear un componente llamado Layout que tenga:
-    - Un header fijo que diga "Mi App Increíble".
-    - Un footer fijo que diga "Derechos Reservados 2024".
-    - Un main en el centro que reciba children.
-
-2. Crear dos "Páginas" (componentes simples): Home y Contacto.
-
-3. Usar el Layout para envolver a Home y luego a Contacto.
-   
-4. Pregunta trampa: ¿El header se vuelve a crear (desmonta/monta) cuando cambiamos el contenido de children? (Respuesta teórica: React es inteligente y trata de mantener lo estático, pero depende de cómo gestionemos el estado).
-
-Solución:
-```JavaScript
-
-const Layout = ({ children }) => (
-  <div className="contenedor">
-    <header>Mi App Increíble</header>
-    <main style={{ minHeight: '80vh' }}>
-      {children}
-    </main>
-    <footer>Derechos Reservados</footer>
-  </div>
-);
-
-const App = () => (
-  <Layout>
-     <h1>Bienvenido al Home</h1>
-     <button>Click</button>
-  </Layout>
-);
-```
+> 💡 **Impacto en el flujo de trabajo:** Antes de aprobar el PR de un compañero, el equipo no solo leerá el código, sino que podrá hacer clic en el link de "Preview" que Vercel deja en GitHub y probar la funcionalidad viva en internet. ¡Si funciona bien en el Preview, es seguro unirlo a `main`!
