@@ -64,4 +64,5 @@ A partir de hoy, cada vez que alguien haga un cambio, la nube trabajará por nos
 * **Deploy en Producción:** Cualquier código que se apruebe y se una (merge) a la rama `main` en GitHub, Vercel lo detectará automáticamente y actualizará la página web oficial en cuestión de minutos.
 * **Preview Deployments (Entornos de Vista Previa):** Esta es la magia de Vercel. Cuando un desarrollador abra un Pull Request (PR) desde su rama (ej. `feature/modal-login`), Vercel creará una URL temporal y secreta **solo para ese código**. 
 
-> 💡 **Impacto en el flujo de trabajo:** Antes de aprobar el PR de un compañero, el equipo no solo leerá el código, sino que podrá hacer clic en el link de "Preview" que Vercel deja en GitHub y probar la funcionalidad viva en internet. ¡Si funciona bien en el Preview, es seguro unirlo a `main`!
+>[!IMPORTANT] Impacto en el flujo de trabajo: 
+>Antes de aprobar el PR de un compañero, el equipo no solo leerá el código, sino que podrá hacer clic en el link de "Preview" que Vercel deja en GitHub y probar la funcionalidad viva en internet. ¡Si funciona bien en el Preview, es seguro unirlo a `main`!
