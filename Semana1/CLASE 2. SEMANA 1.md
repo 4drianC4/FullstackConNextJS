@@ -1,6 +1,7 @@
 # Entorno Next.js, Variables de Entorno y Despliegue Continuo
 
-**Módulo:** Semana 1 - Setup y Arquitectura
+---
+
 ## 1. El Ecosistema Next.js y el App Router
 
 React es una librería increíble para construir interfaces, pero no nos dice cómo enrutar páginas, manejar bases de datos o mejorar el SEO. Next.js es el framework construido sobre React que nos da todas estas herramientas listas para usar.

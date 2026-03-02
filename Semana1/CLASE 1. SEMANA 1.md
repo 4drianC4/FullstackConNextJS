@@ -1,6 +1,7 @@
 # Fundamentos, Entorno y Flujo de Trabajo Colaborativo
 
-**Módulo:** Semana 1 - Setup y Arquitectura
+---
+
 ## 1. La Arquitectura Fullstack (Modelo Cliente-Servidor)
 
 En el desarrollo web moderno, una aplicación no es un solo bloque de código, sino una conversación constante entre dos entidades principales.
