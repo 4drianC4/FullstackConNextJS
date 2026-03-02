@@ -48,10 +48,7 @@ Es el estándar de la industria. Para este curso, estandarizaremos nuestro entor
 
 ## 3. Flujo de Trabajo Colaborativo (Git y GitHub)
 
-En este curso, no trabajaremos solos. Trabajarán en un único repositorio centralizado. Si todos editamos el código al mismo tiempo en la misma rama, el proyecto colapsará. Aquí entra el **Feature Branch Workflow**.
-
-_Feature Branch Workflow_ (flujo de trabajo de ramas de características) aísla el desarrollo de nuevas funcionalidades, correcciones o experimentos en ramas separadas creadas desde `main` o `master`. Esto permite trabajar en paralelo, realizar revisiones de código mediante _pull requests_ y mantener la rama principal siempre estable y lista para producción.
-``
+En este curso, no trabajaremos solos. Trabajarán en un único repositorio centralizado. Si todos editamos el código al mismo tiempo en la misma rama, el proyecto colapsará. Aquí entra el **Feature Branch Workflow** (flujo de trabajo de ramas de características) aísla el desarrollo de nuevas funcionalidades, correcciones o experimentos en ramas separadas creadas desde `main` o `master`. Esto permite trabajar en paralelo, realizar revisiones de código mediante _pull requests_ y mantener la rama principal siempre estable y lista para producción.
 ### Conceptos Clave
 * **Git:** El motor local de control de versiones. Toma "fotografías" (commits) de tu código.
 * **GitHub:** La plataforma en la nube donde guardamos nuestro código y colaboramos.
