@@ -19,7 +19,8 @@ Es el "cerebro" y el guardián de la aplicación. Vive en una computadora remota
 1.  El Cliente hace una **Petición (Request)** HTTP al Servidor (Ej: "Dame la lista de proyectos de este usuario").
 2.  El Servidor recibe la petición, consulta la Base de Datos, procesa la información y devuelve una **Respuesta (Response)** (Ej: un JSON con los proyectos y un código de estado `200 OK`).
 
-> **💡 Nota sobre Next.js:** Tradicionalmente, Frontend y Backend vivían en repositorios separados. Next.js es un framework *Fullstack* porque nos permite escribir tanto el código del Cliente como el código del Servidor en el mismo proyecto, simplificando enormemente el despliegue y la tipificación de datos.
+> [!INFO] Nota sobre Next.js:
+> Tradicionalmente, Frontend y Backend vivían en repositorios separados. Next.js es un framework *Fullstack* porque nos permite escribir tanto el código del Cliente como el código del Servidor en el mismo proyecto, simplificando enormemente el despliegue y la tipificación de datos.
 
 ---
 
@@ -49,10 +50,12 @@ Es el estándar de la industria. Para este curso, estandarizaremos nuestro entor
 
 En este curso, no trabajaremos solos. Trabajarán en un único repositorio centralizado. Si todos editamos el código al mismo tiempo en la misma rama, el proyecto colapsará. Aquí entra el **Feature Branch Workflow**.
 
+_Feature Branch Workflow_ (flujo de trabajo de ramas de características) aísla el desarrollo de nuevas funcionalidades, correcciones o experimentos en ramas separadas creadas desde `main` o `master`. Esto permite trabajar en paralelo, realizar revisiones de código mediante _pull requests_ y mantener la rama principal siempre estable y lista para producción.
+``
 ### Conceptos Clave
 * **Git:** El motor local de control de versiones. Toma "fotografías" (commits) de tu código.
 * **GitHub:** La plataforma en la nube donde guardamos nuestro código y colaboramos.
-* **Rama `main` (o `master`):** Es código sagrado. Lo que está en `main` debe funcionar perfectamente porque es lo que está en producción (lo que ven los usuarios). **Nadie sube código directamente a `main`.**
+* **Rama `main` (o `master`):** Es código sagrado. Lo que está en `main` debe funcionar perfectamente porque es lo que está en producción (lo que ven los usuarios). **Nadie sube código directamente a `main` o `dev`.**
 
 ### El Flujo de Trabajo Diario
 1.  **Sincronizar local:** Antes de empezar tu día, descargas los últimos cambios aprobados.
