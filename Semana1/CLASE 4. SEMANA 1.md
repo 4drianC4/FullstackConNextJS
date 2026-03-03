@@ -66,8 +66,10 @@ Para probar que nuestro backend funciona, siempre configuraremos tres partes en 
 1. **La URL y el Método:** Seleccionamos `POST` y escribimos `http://localhost:3000/api/tasks`.
 2. **Los Headers (Cabeceras):** Metadatos ocultos. El más importante que usaremos es `Content-Type: application/json` para avisarle al servidor que le enviaremos datos en formato JSON.
 3. **El Body (Cuerpo):** El "paquete" de datos que enviamos. Aquí escribimos el objeto JSON:
+
 ```json
 {
   "title": "Aprender Next.js",
   "columnId": "123-abc"
 }
+```

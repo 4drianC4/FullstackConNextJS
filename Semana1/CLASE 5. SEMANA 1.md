@@ -75,3 +75,37 @@ Next.js, en modo desarrollo (`npm run dev`), recarga los archivos constantemente
 ### La Solución: El Patrón Singleton
 Para evitar esto, debemos crear un archivo en la raíz de nuestro proyecto (ej. `lib/prisma.ts`) que guarde la conexión de Prisma en el objeto global de Node. Así, Next.js reciclará la misma conexión en cada recarga.
 
+``` Typescript
+import { PrismaClient } from '@prisma/client'
+
+const prismaClientSingleton = () => {
+  return new PrismaClient()
+}
+
+declare global {
+  var prismaGlobal: undefined | ReturnType<typeof prismaClientSingleton>
+}
+
+const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
+
+export default prisma
+
+if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma
+```
+
+### Ejecutando la Primera Query
+
+Ahora, en cualquier parte de nuestro Backend (ej. un archivo Route Handler en `app/api/users/route.ts`), podemos importar esta instancia y hablar con la base de datos:
+
+```Typescript
+import prisma from '@/lib/prisma';
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  // Prisma va a la DB, busca todos los usuarios y los devuelve.
+  const users = await prisma.user.findMany();
+  
+  // Respondemos al cliente con un JSON de los usuarios
+  return NextResponse.json(users);
+}
+```
