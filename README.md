@@ -207,24 +207,24 @@ Testing, optimización y preparación para producción.
 ## 🛠️ Stack Tecnológico
 
 ### Frontend
-| Tecnología   | Versión | Descripción                         |
-| ------------ | ------- | ----------------------------------- |
-| ⚛️ **React**        | 18+     | Librería para interfaces de usuario con Server Components |
-| ▲ **Next.js**      | 14+     | Framework React fullstack con App Router           |
-| 🎨 **Tailwind CSS** | 3+      | Framework CSS utility-first         |
-| 🎭 **shadcn/ui**    | Latest  | Componentes UI reutilizables y accesibles |
-| 🐻 **Zustand**      | 4+      | Gestión de estado global minimalista |
-| 📋 **React Hook Form** | 7+   | Manejo eficiente de formularios |
+| Tecnología             | Versión | Descripción                                               |
+| ---------------------- | ------- | --------------------------------------------------------- |
+| ⚛️ **React**           | 18+     | Librería para interfaces de usuario con Server Components |
+| ▲ **Next.js**          | 14+     | Framework React fullstack con App Router                  |
+| 🎨 **Tailwind CSS**    | 3+      | Framework CSS utility-first                               |
+| 🎭 **shadcn/ui**       | Latest  | Componentes UI reutilizables y accesibles                 |
+| 🐻 **Zustand**         | 4+      | Gestión de estado global minimalista                      |
+| 📋 **React Hook Form** | 7+      | Manejo eficiente de formularios                           |
 
 ### Backend
-| Tecnología   | Versión | Descripción                         |
-| ------------ | ------- | ----------------------------------- |
-| 🟢 **Node.js**      | 18+     | Runtime de JavaScript              |
-| ▲ **Next.js API**  | 14+     | Route Handlers para APIs RESTful   |
-| 🔷 **Prisma ORM**   | Latest  | ORM moderno para bases de datos    |
-| 🐘 **PostgreSQL**   | Latest  | Base de datos relacional           |
-| 🔐 **NextAuth.js**  | 5+      | Autenticación completa            |
-| ✅ **Zod**          | 3+      | Validación de schemas TypeScript   |
+| Tecnología         | Versión | Descripción                      |
+| ------------------ | ------- | -------------------------------- |
+| 🟢 **Node.js**     | 18+     | Runtime de JavaScript            |
+| ▲ **Next.js API**  | 14+     | Route Handlers para APIs RESTful |
+| 🔷 **Prisma ORM**  | Latest  | ORM moderno para bases de datos  |
+| 🐘 **PostgreSQL**  | Latest  | Base de datos relacional         |
+| 🔐 **NextAuth.js** | 5+      | Autenticación completa           |
+| ✅ **Zod**          | 3+      | Validación de schemas TypeScript |
 
 ### DevOps & Tools
 | Tecnología   | Versión | Descripción                         |
