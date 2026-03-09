@@ -1,21 +1,19 @@
 **Metodología:** Desarrollo por "Verticales" (Slices) y Code Review
 
-## 🎯 1. Visión General del Proyecto
+## 1. Visión General del Proyecto
 
 Construiremos desde cero una plataforma de gestión de proyectos basada en la metodología Kanban. Los usuarios podrán registrarse, crear espacios de trabajo, administrar tableros y mover tareas entre diferentes estados de progreso. 
 
 El objetivo principal no es solo que el código funcione, sino simular un **entorno de trabajo real**. Todo el código se integrará en un único repositorio centralizado, y cada avance deberá ser revisado y aprobado mediante *Pull Requests*.
 
-
-
-## 🛠️ 2. Stack Tecnológico
+## 2. Stack Tecnológico
 
 * **Frontend (Cliente):** Next.js (App Router), React, Tailwind CSS, Zustand (Estado global), React Hook Form + Zod (Formularios).
 * **Backend (Servidor):** Next.js (Route Handlers / API Routes), Node.js.
 * **Base de Datos y ORM:** PostgreSQL (alojado en Supabase/Neon), Prisma ORM.
 * **Infraestructura y Herramientas:** Vercel (CI/CD y Hosting), GitHub (Control de versiones), Git, ESLint/Prettier.
 
-## 🏗️ 3. Arquitectura y Metodología de Trabajo
+## 3. Arquitectura y Metodología de Trabajo
 
 Para evitar bloqueos y conflictos graves de código, utilizaremos el enfoque de **Desarrollo Vertical**. 
 
@@ -30,7 +28,7 @@ En lugar de que una persona haga "todo el frontend" y otra "todo el backend", ca
 
 ---
 
-## 🧑‍💻 4. Módulos de Desarrollo (Asignaciones Individuales)
+## 4. Módulos de Desarrollo (Asignaciones Individuales)
 
 El proyecto se divide en módulos aislados pero interconectados. Cada estudiante es responsable de uno de los siguientes:
 
@@ -47,7 +45,7 @@ El proyecto se divide en módulos aislados pero interconectados. Cada estudiante
 
 ---
 
-## 🚀 5. Criterios de Éxito y Calificación
+## 5. Criterios de Éxito y Calificación
 
 El proyecto se considerará exitoso y aprobado si cumple con:
 * **Funcionalidad:** La característica asignada funciona en el entorno de producción (Vercel) sin errores de consola o caídas del servidor (`HTTP 500`).
