@@ -28,8 +28,7 @@ En lugar de que una persona haga "todo el frontend" y otra "todo el backend", ca
 
 ---
 
-## 4. Módulos de Desarrollo (Asignaciones Individuales)
-
+## 4. Módulos de Desarrollo
 El proyecto se divide en módulos aislados pero interconectados. Cada estudiante es responsable de uno de los siguientes:
 
 1.  **Autenticación y Sesión:** Modelos de usuario y protección de rutas.
