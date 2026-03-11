@@ -102,7 +102,7 @@ Durante este mes, no haremos ejercicios aislados. Vamos a construir un **Sistema
 
 * **El Escenario:** Somos una startup tecnológica. Yo soy el *Tech Lead / Product Manager* (líder técnico), y ustedes son los desarrolladores Fullstack.
 * **Metodología:** Cada uno de ustedes será dueño de un "módulo" (ej. Autenticación, Creación de Tareas, Tableros, etc.). Desarrollarán desde la base de datos hasta la interfaz visual de esa funcionalidad.
-* **Dinámica de Clase:** No me verán escribir código durante 2 horas. Las clases serán para explicar arquitectura, revisar sus Pull Requests en vivo (Code Review) y desbloquearlos de problemas complejos. Ustedes programarán de forma asíncrona basándose en las tareas asignadas.
+* **Dinámica de Clase:** No me verán escribir código durante 2 horas. Las clases serán para explicar arquitectura, revisar sus Pull Requests en vivo (Code Review) y desbloquearlos de problemas complejos. Ustedes programarán de forma asíncrona basándose en las tareassignadas.
 
 > [!IMPORTANT] Tu primera tarea: 
 > Clona el repositorio base, asegúrate de que puedes correrlo localmente (`npm run dev`) y explora la estructura de carpetas.
