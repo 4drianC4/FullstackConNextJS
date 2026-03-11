@@ -42,7 +42,7 @@ Node.js es un entorno de ejecución que nos permite correr JavaScript fuera del 
 Es el estándar de la industria. Para este curso, estandarizaremos nuestro entorno con las siguientes extensiones obligatorias:
 1.  **ESLint:** Encuentra y arregla problemas en el código JavaScript/TypeScript en tiempo real.
 2.  **Prettier - Code formatter:** Formatea el código automáticamente al guardar (adiós a las peleas por espacios o tabulaciones).
-3.  **GitLens:** Nos permite ver quién escribió cada línea de código, en qué commit y por qué (esencial para trabajo en equipo).
+3.  **GitLens:** Nos (Asignaciones Individuales)permite ver quién escribió cada línea de código, en qué commit y por qué (esencial para trabajo en equipo).
 4.  **Prisma:** (La usaremos más adelante) Autocompletado y resaltado de sintaxis para nuestra base de datos.
 
 ---
