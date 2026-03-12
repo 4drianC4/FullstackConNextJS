@@ -2,13 +2,13 @@
 Docker es una plataforma que permite **crear, distribuir y ejecutar aplicaciones en contenedores**. 
 Un **contenedor** es una unidad ligera y portátil que incluye todo lo necesario para ejecutar una aplicación: código, dependencias, configuraciones, etc.
 # Conceptos Básicos
-|Concepto|Descripción|
-|---|---|
-|**Imagen**|Plantilla lista para crear contenedores (como un ISO)|
-|**Contenedor**|Instancia en ejecución de una imagen|
-|**Dockerfile**|Archivo con instrucciones para crear una imagen personalizada|
-|**Docker Hub**|Repositorio público de imágenes|
-|**docker-compose**|Herramienta para definir y ejecutar múltiples contenedores|
+| Concepto           | Descripción                                                   |
+| ------------------ | ------------------------------------------------------------- |
+| **Imagen**         | Plantilla lista para crear contenedores (como un ISO)         |
+| **Contenedor**     | Instancia en ejecución de una imagen                          |
+| **Dockerfile**     | Archivo con instrucciones para crear una imagen personalizada |
+| **Docker Hub**     | Repositorio público de imágenes                               |
+| **docker-compose** | Herramienta para definir y ejecutar múltiples contenedores    |
 
 # Instalación de Docker  en Linux para sistemas basados en Debian
 1. Copia y corre el siguiente conjunto de comandos:
