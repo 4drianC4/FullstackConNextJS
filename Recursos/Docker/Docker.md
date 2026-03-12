@@ -175,7 +175,6 @@ nano docker-compose.yml
 ```
 para este caso utilizaremos el mismo proyecto que en dockerfile, en el archivo docker-compose.yml que creamos agregaremos node y postgress
 ```
-version: '3.8'
 services:
   web:
     build: ./app
