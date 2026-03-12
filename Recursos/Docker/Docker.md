@@ -96,7 +96,7 @@ docker version
 	```
 - Entrar a un contenedor (modo terminal)
 	```
-	docker exec -it mi_contenedor bash
+	docker exec -it mi_contenedor
 	```
 - Ejemplo práctico con Base de Datos: Si tienes un contenedor de PostgreSQL, puedes entrar directamente a su consola de comandos de SQL:
 ```Bash
