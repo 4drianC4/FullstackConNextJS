@@ -1,0 +1,58 @@
+# Asignación de Tareas del Proyecto
+
+**Proyecto:** Plataforma de Gestión de Tareas (Clon de Trello/Jira)
+**Dinámica:** Cada estudiante es "Dueño" (Owner) de un dominio de la aplicación. Tendrán una **Tarea Core (Fase 1)** fundamental para que la app funcione, y una **Tarea Avanzada (Fase 2)** que agregará valor y complejidad al producto final.
+
+Todas las tareas son **Fullstack**: requieren modificar la Base de Datos (`schema.prisma`), crear el endpoint (API) y conectar la Interfaz de Usuario (Frontend).
+
+---
+
+## Asignaciones por Estudiante
+
+### Estudiante 1: Identidad y Perfil
+* **Tarea 1 (Core): Autenticación Base.** Configurar NextAuth/Auth.js. Modelos `User` y `Account`. Conectar el Login/Registro maquetado y proteger rutas.
+* **Tarea 2 (Avanzada): Perfil de Usuario.** Crear la vista de "Mi Perfil". Endpoint y formulario para que el usuario pueda cambiar su nombre, biografía y subir/enlazar un Avatar.
+
+### Estudiante 2: Espacios de Trabajo (Workspaces)
+* **Tarea 1 (Core): CRUD de Workspaces.** Modelo `Workspace`. Endpoints para crear, listar y eliminar. Conectar el modal de creación y el menú lateral (Sidebar).
+* **Tarea 2 (Avanzada): Miembros del Workspace.** Tabla intermedia `WorkspaceMember`. Interfaz para "Invitar usuarios" al workspace buscando por su email y listando quiénes tienen acceso.
+
+### Estudiante 3: Tableros (Boards)
+* **Tarea 1 (Core): CRUD de Tableros.** Modelo `Board` relacionado al Workspace. Crear tableros, listarlos en el dashboard y poder cambiarles el nombre.
+* **Tarea 2 (Avanzada): Personalización de Tableros.** Añadir la capacidad de elegir un "Color de fondo" o "Imagen de portada" (usando URLs de Unsplash, por ejemplo) y aplicarlo dinámicamente al layout del tablero.
+
+### Estudiante 4: Estructura de Columnas (Listas)
+* **Tarea 1 (Core): CRUD de Columnas.** Modelo `Column`. Poder crear columnas (ej. "To Do", "Done") dentro de un tablero, editarlas y eliminarlas (verificando qué pasa con las tareas adentro).
+* **Tarea 2 (Avanzada): Reordenamiento de Columnas.** Añadir un campo `order` en la base de datos. Implementar la lógica y los endpoints para que, al mover una columna hacia la izquierda/derecha, se actualice su posición.
+
+### Estudiante 5: Tareas Base (Cards)
+* **Tarea 1 (Core): CRUD de Tareas.** Modelo `Task`. Crear tareas rápidas al final de una columna, abrir el modal para editar su título y poder eliminarlas.
+* **Tarea 2 (Avanzada): Reordenamiento de Tareas (Drag & Drop).** Lógica compleja: actualizar el `columnId` y el `order` en la base de datos cuando un usuario arrastra una tarjeta de "To Do" a "Doing".
+
+### Estudiante 6: Detalles de la Tarea
+* **Tarea 1 (Core): Descripción Rica.** Añadir el campo `description` a la tarea. Integrar un editor de texto simple (o soporte para Markdown) en el Frontend para que las descripciones tengan negritas, listas, etc.
+* **Tarea 2 (Avanzada): Registro de Actividad (Audit Log).** Modelo `ActivityLog`. Cada vez que se crea una tarea o cambia de columna, registrar automáticamente "El usuario X movió esta tarea a Done" y mostrar este historial en el modal.
+
+### Estudiante 7: Asignaciones y Fechas
+* **Tarea 1 (Core): Responsables (Assignees).** Relacionar usuarios con tareas. Crear el selector (dropdown) en la tarea para asignar a un miembro del workspace. Mostrar su avatar en la tarjeta.
+* **Tarea 2 (Avanzada): Fechas Límite (Due Dates).** Añadir campo `dueDate`. Integrar un DatePicker. Si la fecha ya pasó y la tarea no está en "Done", pintar la fecha de rojo en el tablero.
+
+### Estudiante 8: Sistema de Etiquetas (Tags)
+* **Tarea 1 (Core): Gestión de Etiquetas.** Modelo `Tag` (nombre y color). Endpoint para crear etiquetas a nivel de Workspace.
+* **Tarea 2 (Avanzada): Asignación de Etiquetas.** Relación N:M entre `Task` y `Tag`. Modal para seleccionar/deseleccionar etiquetas en una tarea y mostrarlas como "píldoras" de color en el tablero.
+
+### Estudiante 9: Sistema de Comentarios
+* **Tarea 1 (Core): CRUD de Comentarios.** Modelo `Comment`. Input en el modal de la tarea para escribir comentarios. Mostrar la lista de comentarios ordenados por fecha.
+* **Tarea 2 (Avanzada): Edición de Comentarios y "Hace X tiempo".** Permitir que el autor edite o borre su propio comentario. Formatear las fechas en el Frontend usando una librería como `date-fns` (ej. "Hace 5 minutos").
+
+### Estudiante 10: Subtareas (Checklists)
+* **Tarea 1 (Core): CRUD de Subtareas.** Modelo `Subtask` (relacionado a una Task). Interfaz para añadir un checklist dentro de una tarea mayor (ej. Tarea: "Hacer deploy" -> Subtareas: "Configurar env", "Subir a Vercel").
+* **Tarea 2 (Avanzada): Barra de Progreso.** Calcular en el Backend o Frontend el porcentaje de subtareas completadas y mostrar una barra de progreso visual (ej. 2/4 completadas - 50%) en la tarjeta del tablero.
+
+### Estudiante 11: Buscador y Filtros
+* **Tarea 1 (Core): Buscador Global.** Crear un endpoint que reciba un término de búsqueda y devuelva tareas que coincidan en el título. Crear el input en el Navbar (con "debounce" para no saturar la API).
+* **Tarea 2 (Avanzada): Filtros de Tablero.** Añadir botones en la parte superior del tablero para filtrar las tarjetas visibles: "Solo mis tareas" o filtrar por una Etiqueta específica.
+
+### Estudiante 12: Vistas y Analíticas
+* **Tarea 1 (Core): Mi Dashboard (Home).** Crear una vista principal (fuera de los tableros) que consulte y muestre todas las tareas asignadas al usuario logueado en todos los tableros, ordenadas por fecha límite.
+* **Tarea 2 (Avanzada): Estadísticas del Workspace.** Crear tarjetas de resumen (Cards) que consulten agregaciones de base de datos: "Total de tareas completadas esta semana", "Tableros activos", etc.
