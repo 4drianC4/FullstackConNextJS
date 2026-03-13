@@ -1,4 +1,4 @@
-<div align="center">
+gmail<div align="center">
 
 # 🚀 Desarrollo Fullstack con Next.js
 
@@ -75,7 +75,7 @@ Fundamentos del desarrollo fullstack, configuración del entorno y primeros paso
 #### 📌 Día 5: Backend II - ORMs y Conexión
 - ¿Qué es un ORM y por qué usarlo?
 - Configuración de Prisma ORM
-- Conexión a base de datos en la nube (Supabase/Neon)
+- Conexión a bgmailase de datos en la nube (Supabase/Neon)
 - Primeras queries con Prisma Client
 
 </details>
