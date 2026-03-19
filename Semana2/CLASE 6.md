@@ -39,7 +39,8 @@ Las bases de datos relacionales brillan por su capacidad de conectar informació
 
 Un registro de la Tabla A se asocia con exactamente un registro de la Tabla B.
 Ejemplo: Un User tiene un único Profile.
-Fragmento de código
+
+``` Typescript
 
 model User {
   id      String   @id @default(uuid())
@@ -54,15 +55,17 @@ model Profile {
   userId String @unique // El @unique es obligatorio en relaciones 1:1
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+```
 
-    💡 Nota sobre onDelete: Cascade: Significa que si eliminas al usuario de la base de datos, su perfil también se eliminará automáticamente, manteniendo la integridad de los datos.
+>[!INFO] Nota sobre onDelete: 
+>Cascade: Significa que si eliminas al usuario de la base de datos, su perfil también se eliminará automáticamente, manteniendo la integridad de los datos.
 
-B. Relación Uno a Muchos (1:N)
+### B. Relación Uno a Muchos (1:N)
 
 Un registro de la Tabla A se asocia con múltiples registros de la Tabla B.
 Ejemplo: Un User puede crear muchos Post.
-Fragmento de código
 
+``` Typescript
 model User {
   id    String @id @default(uuid())
   posts Post[] // Un usuario tiene un array de Posts
@@ -76,58 +79,55 @@ model Post {
   authorId String
   author   User   @relation(fields: [authorId], references: [id])
 }
+```
 
-C. Relación Muchos a Muchos (M:N)
+### C. Relación Muchos a Muchos (M:N)
 
 Múltiples registros de la Tabla A se asocian con múltiples de la Tabla B.
 Ejemplo: Un Post tiene muchas Category, y una Category pertenece a muchos Post.
 
 Prisma permite manejar esto de forma "implícita", creando la tabla intermedia (join table) por ti automáticamente por detrás:
-Fragmento de código
-
+```Typescript
 model Post {
   id         String     @id @default(uuid())
   categories Category[] // M:N implícita
 }
-
 model Category {
   id    String @id @default(uuid())
   name  String @unique
   posts Post[] // M:N implícita
 }
+```
 
-3. Generación de Migraciones
+## 3. Generación de Migraciones
 
 El schema.prisma solo vive en tu código. Para que estos cambios se reflejen en tu base de datos real (Supabase, Neon, PostgreSQL local), usamos migraciones.
 
 Una migración es como un commit de Git pero para tu base de datos. Mantiene un historial exacto de cómo evoluciona la estructura de tus tablas a lo largo del tiempo.
-El Comando Principal
+### El Comando Principal
 
 Abre tu terminal y ejecuta:
-Bash
-
+```Bash
 npx prisma migrate dev --name init_schema
+```
+#### ¿Qué hace este comando paso a paso?
+1. Compara tu esquema actual con el estado de la base de datos.
+2. Genera un archivo .sql dentro de la carpeta prisma/migrations/ con las instrucciones necesarias (ej. CREATE TABLE, ALTER TABLE).
+3. Ejecuta ese código SQL en tu base de datos.
+4. Genera nuevamente el Prisma Client en la carpeta node_modules para que tu TypeScript conozca los nuevos modelos y el autocompletado funcione.
 
-¿Qué hace este comando paso a paso?
+|**Comando**|**Cuándo Usarlo**|
+|---|---|
+|`npx prisma migrate dev`|**Desarrollo Local.** Crea el historial SQL de forma permanente, actualiza la DB y regenera el cliente. Es el estándar.|
+|`npx prisma db push`|**Prototipado rápido.** Sincroniza el esquema sin generar ni guardar un historial SQL. Útil cuando estás experimentando mucho y borrando tablas constantemente.|
 
-    Compara tu esquema actual con el estado de la base de datos.
-
-    Genera un archivo .sql dentro de la carpeta prisma/migrations/ con las instrucciones necesarias (ej. CREATE TABLE, ALTER TABLE).
-
-    Ejecuta ese código SQL en tu base de datos.
-
-    Genera nuevamente el Prisma Client en la carpeta node_modules para que tu TypeScript conozca los nuevos modelos y el autocompletado funcione.
-
-Comando	Cuándo Usarlo
-npx prisma migrate dev	Desarrollo Local. Crea el historial SQL de forma permanente, actualiza la DB y regenera el cliente. Es el estándar.
-npx prisma db push	Prototipado rápido. Sincroniza el esquema sin generar ni guardar un historial SQL. Útil cuando estás experimentando mucho y borrando tablas constantemente.
-4. Seeding: Sembrado de Datos de Prueba
+## 4. Seeding: Sembrado de Datos de Prueba
 
 Trabajar en el backend y frontend con una base de datos vacía es frustrante. El "Seeding" nos permite poblar automáticamente la base de datos con información inicial (ej. un usuario administrador, categorías por defecto, posts de prueba).
-Paso 1: Crear el Script (prisma/seed.ts)
+### Paso 1: Crear el Script (prisma/seed.ts)
 
 Crea un archivo TypeScript en la carpeta prisma. Utilizaremos el método upsert (actualizar o insertar) en lugar de create. Esto hace que nuestro script sea idempotente: si lo ejecutamos varias veces, no nos dará errores por intentar crear datos que ya existen.
-TypeScript
+```TypeScript
 
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
@@ -163,6 +163,7 @@ main()
     // Es vital desconectar el cliente al terminar
     await prisma.$disconnect()
   })
+```
 
 Paso 2: Configurar package.json
 
