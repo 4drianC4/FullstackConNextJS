@@ -165,14 +165,14 @@ main()
   })
 ```
 
-Paso 2: Configurar package.json
+### Paso 2: Configurar package.json
 
 Dile a Prisma cómo debe ejecutar tu script agregando este bloque al final de tu archivo package.json:
-JSON
-
+```JSON
 "prisma": {
   "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
 }
+```
 
 (Nota: Esto requiere tener ts-node instalado en el proyecto. Si no lo tienes, ejecuta: npm i -D ts-node)
 Paso 3: Ejecutar el Seed
