@@ -151,7 +151,7 @@ Antes de pasar al Frontend en la Semana 3, asegurémonos de que nuestro Backend 
 
 - [ ] Base de Datos: Tenemos un diagrama ERD claro y un esquema de Prisma que lo refleja. Las tablas tienen relaciones correctas (1:N, M:N).
 - [ ] Arquitectura: Usamos un modelo MVC adaptado. Los Route Handlers son delgados, los Controladores manejan el HTTP, y los Servicios manejan la lógica de negocio y Prisma.
-- [ ] [x] Seguridad: Las contraseñas están hasheadas (Bcrypt). Usamos JWT seguros en Cookies HttpOnly a través de NextAuth.
-- [ ] [x] Robustez: Zod valida que no entre basura a la base de datos, y el Middleware asegura que no entren usuarios sin permiso. El manejo de errores es predecible y no expone detalles internos al cliente.
+- [ ] Seguridad: Las contraseñas están hasheadas (Bcrypt). Usamos JWT seguros en Cookies HttpOnly a través de NextAuth.
+- [ ] Robustez: Zod valida que no entre basura a la base de datos, y el Middleware asegura que no entren usuarios sin permiso. El manejo de errores es predecible y no expone detalles internos al cliente.
 
 ¡Nuestro Backend está listo para producción!
