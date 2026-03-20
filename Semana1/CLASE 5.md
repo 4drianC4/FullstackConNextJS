@@ -19,7 +19,8 @@ El ORM nos permite interactuar con las tablas de la base de datos como si fueran
 | **Crear un usuario**          | `db.query("INSERT INTO users (name) VALUES ('Ana');")` | `db.user.create({ data: { name: 'Ana' } })` |
 | **Seguridad**                 | Vulnerable a inyecciones SQL si no se limpia.          | Sanitiza los datos automáticamente.         |
 
-> 💡 **Decisión del Proyecto:** Existen muchos ORMs en el ecosistema Node (TypeORM, Sequelize, Drizzle). Nosotros usaremos **Prisma ORM** porque tiene la mejor experiencia de desarrollador (DX), una documentación impecable y genera tipos de TypeScript automáticamente basándose en nuestra base de datos.
+>[!IMPORTANT] Decisión del Proyecto:
+> Existen muchos ORMs en el ecosistema Node (TypeORM, Sequelize, Drizzle). Nosotros usaremos **Prisma ORM** porque tiene la mejor experiencia de desarrollador (DX), una documentación impecable y genera tipos de TypeScript automáticamente basándose en nuestra base de datos.
 
 ---
 

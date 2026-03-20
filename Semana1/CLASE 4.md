@@ -59,8 +59,6 @@ El navegador web (Chrome, Edge) solo sabe hacer peticiones `GET` por defecto cua
 * **Postman:** Es el estándar de la industria. Un programa independiente muy robusto para organizar colecciones de APIs.
 * **Thunder Client:** Una extensión dentro de VSCode. Es más ligera y excelente para este curso porque nos permite probar la API sin salir de nuestro editor de código.
 
-
-
 ### Anatomía de una Petición en Thunder Client
 Para probar que nuestro backend funciona, siempre configuraremos tres partes en la herramienta:
 1. **La URL y el Método:** Seleccionamos `POST` y escribimos `http://localhost:3000/api/tasks`.
