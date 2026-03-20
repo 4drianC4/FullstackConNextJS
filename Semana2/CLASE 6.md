@@ -174,12 +174,14 @@ Dile a Prisma cómo debe ejecutar tu script agregando este bloque al final de tu
 }
 ```
 
-(Nota: Esto requiere tener ts-node instalado en el proyecto. Si no lo tienes, ejecuta: npm i -D ts-node)
-Paso 3: Ejecutar el Seed
+>[!INFO] Nota: 
+>Esto requiere tener ts-node instalado en el proyecto. Si no lo tienes, ejecuta: npm i -D ts-node
+
+### Paso 3: Ejecutar el Seed
 
 En la terminal, corre el siguiente comando para ejecutar el script y llenar tu base de datos:
-Bash
-
+```Bash
 npx prisma db seed
-
-    🛠️ Tip Extra (Prisma Studio): Puedes ver todos los datos que acabas de sembrar y gestionar tu base de datos fácilmente ejecutando npx prisma studio. Esto abrirá un panel de administración visual y moderno directamente en tu navegador web.
+```
+>[!TIP] Tip Extra (Prisma Studio): 
+>Puedes ver todos los datos que acabas de sembrar y gestionar tu base de datos fácilmente ejecutando npx prisma studio. Esto abrirá un panel de administración visual y moderno directamente en tu navegador web.
