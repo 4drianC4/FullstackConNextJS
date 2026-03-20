@@ -131,14 +131,12 @@ export async function POST(request: NextRequest) {
   return handleCreateUser(request);
 }
 ```
-Resumen del Día 7
+## Resumen del Día 7
 
 Hoy aprendimos que la arquitectura no se trata del framework que uses, sino de cómo separas las responsabilidades.
 
-    Al mantener nuestros Route Handlers delgados, es fácil ver qué endpoints existen.
-
-    Al usar Controladores, unificamos cómo nuestra API responde al cliente.
-
-    Al encapsular la lógica en Servicios, nuestro código de base de datos es reutilizable y fácil de testear.
+- Al mantener nuestros Route Handlers delgados, es fácil ver qué endpoints existen.
+- Al usar Controladores, unificamos cómo nuestra API responde al cliente.
+- Al encapsular la lógica en Servicios, nuestro código de base de datos es reutilizable y fácil de testear.
 
 ¡Esta estructura nos salvará de muchos dolores de cabeza cuando la aplicación empiece a crecer masivamente en las siguientes semanas!
