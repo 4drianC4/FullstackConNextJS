@@ -116,10 +116,10 @@ npx prisma migrate dev --name init_schema
 3. Ejecuta ese código SQL en tu base de datos.
 4. Genera nuevamente el Prisma Client en la carpeta node_modules para que tu TypeScript conozca los nuevos modelos y el autocompletado funcione.
 
-|**Comando**|**Cuándo Usarlo**|
-|---|---|
-|`npx prisma migrate dev`|**Desarrollo Local.** Crea el historial SQL de forma permanente, actualiza la DB y regenera el cliente. Es el estándar.|
-|`npx prisma db push`|**Prototipado rápido.** Sincroniza el esquema sin generar ni guardar un historial SQL. Útil cuando estás experimentando mucho y borrando tablas constantemente.|
+| **Comando**              | **Cuándo Usarlo**                                                                                                                                               |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npx prisma migrate dev` | **Desarrollo Local.** Crea el historial SQL de forma permanente, actualiza la DB y regenera el cliente. Es el estándar.                                         |
+| `npx prisma db push`     | **Prototipado rápido.** Sincroniza el esquema sin generar ni guardar un historial SQL. Útil cuando estás experimentando mucho y borrando tablas constantemente. |
 
 ## 4. Seeding: Sembrado de Datos de Prueba
 
@@ -149,6 +149,7 @@ async function main() {
         }
       }
     },
+    
   })
   
   console.log('✅ Seed completado con éxito:', admin.email)
