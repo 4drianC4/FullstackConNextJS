@@ -15,7 +15,7 @@ Los modelos en Prisma representan las tablas de tu base de datos. Se componen de
 * `@@map("nombre_tabla")`: Permite nombrar el modelo en singular en tu código (ej. `User`), pero guardarlo en plural en la base de datos real (ej. `users`), siguiendo las convenciones y buenas prácticas.
 
 **Ejemplo de Modelo Base:**
-```prisma
+```Typescript
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
