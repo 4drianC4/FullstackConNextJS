@@ -155,7 +155,7 @@ export const transferPostOwnership = async (postId: string, newAuthorId: string)
     console.error("La transacción falló. Haciendo rollback...", error);
     throw new Error("No se pudo completar la transferencia");
   }
-};
+}; 
 ```
 >[!IMPORTANT] Nota de Arquitectura: 
 >Las transacciones son el ejemplo perfecto de por qué usamos Servicios. El controlador no debería saber nada sobre "commits" o "rollbacks", solo llama a transferPostOwnership() y espera un éxito o un error.
