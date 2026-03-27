@@ -126,8 +126,7 @@ Una Transacción asegura que un grupo de operaciones se ejecuten como una sola u
 ### Implementando Transacciones con Prisma
 
 Prisma usa el método $transaction. Veamos un ejemplo en un servicio que transfiere un Post a otro Usuario y elimina el original de su cuenta:
-```
-TypeScript
+```TypeScript
 
 export const transferPostOwnership = async (postId: string, newAuthorId: string) => {
   // Envolvemos las operaciones en un array dentro de $transaction
