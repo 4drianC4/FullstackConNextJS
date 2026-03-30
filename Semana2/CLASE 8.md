@@ -9,7 +9,7 @@ Siguiendo nuestra arquitectura del Día 7, vamos a implementar la actualización
 ### Paso 1: Los Servicios (`src/services/userService.ts`)
 Añadimos las funciones para actualizar y eliminar a nuestro servicio existente.
 
-```typescript
+```Typescript
 // Actualizar un usuario existente
 export const updateUser = async (id: string, data: { name?: string; email?: string }) => {
   // Prisma actualizará solo los campos que vengan en 'data'
