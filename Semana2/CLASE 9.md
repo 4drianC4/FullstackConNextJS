@@ -19,7 +19,7 @@ Usar algoritmos de *hashing* obsoletos como MD5 o SHA-1.
 **El Ataque:** Los hackers usan "Rainbow Tables" (bases de datos gigantes con billones de contraseñas ya convertidas a MD5). Si tu hash MD5 se filtra, lo descifran en milisegundos.
 
 ### La Solución Definitiva (Bcrypt / Argon2):
-Antes de que nuestro Servicio (Día 7) guarde al usuario usando Prisma, debemos aplicar un algoritmo de hashing moderno con un **"Salt"** (texto aleatorio que se añade a la contraseña antes de encriptarla).
+Antes de que nuestro Servicio (Día 7) guarde al usuario usando Prisma, debemos aplicar un algoritmo de hashing moderno con un **"Salt"** (texto aleatorio que se añade a la contraseña antes de encriptarla). 
 
 ```typescript
 // src/services/userService.ts
