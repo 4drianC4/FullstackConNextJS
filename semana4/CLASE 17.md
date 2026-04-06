@@ -136,5 +136,16 @@ const procesarPago = (usuario, monto) => {
 ```
 
 ** Early Returns (Código plano y elegante):** Comprobamos los errores primero y "expulsamos" la ejecución. Si el código sobrevive a la barrera de `ifs`,sabemos que todo está correcto.
-```
+
+```typescript
+
+const procesarPago = (usuario, monto) => {
+  // Barrera de validaciones (Early Returns)
+  if (!usuario) throw new Error("Usuario no encontrado");
+  if (!usuario.isVerified) throw new Error("Usuario no verificado");
+  if (monto <= 0) throw new Error("El monto debe ser mayor a 0");
+
+  // Si llega aquí, es imposible que falle. Lógica principal:
+  return realizarTransaccion(usuario, monto);
+}
 ```
