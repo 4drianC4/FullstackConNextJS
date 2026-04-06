@@ -153,4 +153,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ---
 ### Resumen del Día 12
-- Dejamos atrás la lucha con archivos `.css` gigantes
+- Dejamos atrás la lucha con archivos `.css` gigantes y adoptamos el desarrollo ultra-rápido de **Tailwind CSS**.
+- Entendimos que **shadcn/ui** nos da lo mejor de dos mundos: componentes profesionales, accesibles y hermosos, manteniendo nosotros el control absoluto del código fuente.
+- Dominamos el enfoque **Mobile-First**, asegurando que nuestra app nazca pensada para celulares y escale a monitores grandes con prefijos como `md:` o `lg:`.
+- Implementamos un **Modo Oscuro** perfecto y sin parpadeos utilizando `next-themes` y el modificador `dark:`.
