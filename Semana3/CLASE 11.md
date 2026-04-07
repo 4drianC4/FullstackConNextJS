@@ -148,9 +148,6 @@ export default function MiNavegacion() {
 Hoy hemos establecido las fundaciones visuales de nuestra app:
 
 - Entendimos la separación entre **Server Components** (estáticos, rápidos, seguros) y **Client Components** (interactivos, "use client").
-    
 - Vimos cómo organizar nuestras carpetas usando el **App Router** (`app/ruta/page.tsx`).
-    
 - Aprendimos a estructurar nuestra UI sin duplicar código gracias a los **Layouts**.
-    
 - Optimizamos la navegación interna utilizando el componente **`<Link>`** para transiciones instantáneas.
