@@ -50,18 +50,14 @@ Olvídate de librerías como `react-router-dom`. En Next.js, **el sistema de car
 ### Las Reglas del Enrutamiento
 
 1. **Las Carpetas definen la ruta (URL):** Si creas una carpeta llamada `dashboard`, estás definiendo la ruta `midominio.com/dashboard`.
-    
 2. **El archivo `page.tsx` hace que la ruta sea pública:** Puedes tener mil carpetas (ej. `app/components/ui`), pero si no hay un archivo llamado exactamente `page.tsx` dentro, esa ruta no existe en el navegador.
-    
 
 ### Rutas Dinámicas
 
 Si queremos ver el perfil de un usuario específico, no podemos crear una carpeta para cada usuario. Usamos **corchetes `[]`** para indicar un parámetro dinámico (igual que hicimos en el backend).
 
 - Estructura: `app/users/[id]/page.tsx`
-    
 - URL resultante: `midominio.com/users/123`
-    
 - Next.js le pasará el valor `123` a tu componente `page.tsx` a través de las `props`.
 
 ---
