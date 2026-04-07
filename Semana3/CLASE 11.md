@@ -107,7 +107,6 @@ En HTML tradicional, para ir de una página a otra usamos la etiqueta de ancla: 
 **¡NUNCA uses la etiqueta `<a>` clásica para navegación interna en Next.js!**
 
 ### El Problema de la etiqueta `<a>`
-four brothers 
 Si usas `<a>`, el navegador hace un **Hard Reload**. Es decir, destruye todo el estado de tu aplicación en memoria, vuelve a pedir el HTML al servidor, vuelve a cargar los archivos CSS y JS. Es lento y arruina la experiencia de usuario (UX).
 
 ### La Solución: El componente `<Link>` de Next.js
