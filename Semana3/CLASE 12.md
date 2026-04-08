@@ -32,7 +32,6 @@ Tailwind CSS cambia las reglas del juego. En lugar de crear clases semánticas, 
 <div className="tarjeta-usuario">
   <h2>Juan Perez</h2>
 </div>
-
 // Enfoque Tailwind (todo en el mismo archivo)
 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
   <h2 className="text-xl font-bold text-gray-800">Juan Perez</h2>
