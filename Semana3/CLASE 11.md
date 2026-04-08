@@ -119,10 +119,10 @@ import Link from 'next/link';
 export default function MiNavegacion() {
   return (
     <nav>
-      {/* ❌ Forma incorrecta */}
+      {/* Forma incorrecta */}
       <a href="/dashboard">Dashboard Lento</a> 
 
-      {/* ✅ Forma correcta */}
+      {/* Forma correcta */}
       <Link href="/dashboard">
         Dashboard Ultra Rápido
       </Link>
