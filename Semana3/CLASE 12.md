@@ -61,13 +61,13 @@ Históricamente, usaríamos librerías como Material UI o Bootstrap. El problema
 Para inicializarlo en la terminal ejecutamos:
 ```Bash
 
-npx shadcn-ui@latest init
+npx shadcn@latest init
 ```
 
 Y luego, si necesitamos un botón y un formulario:
 ```Bash
 
-npx shadcn-ui@latest add button input form
+npx shadcn@latest add button input form
 ```
 
 ---
