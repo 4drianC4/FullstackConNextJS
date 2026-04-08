@@ -78,14 +78,10 @@ Tu aplicación debe verse bien en un iPhone y en un monitor de 32 pulgadas. Tail
 
 **El Vacío Teórico - Mobile First:** Significa que cualquier clase que escribas en Tailwind sin prefijo, se aplicará **primero a pantallas pequeñas (móviles)**. Luego, usas "prefijos de ruptura" (breakpoints) para sobrescribir ese estilo cuando la pantalla se hace más grande.
 
-- `sm:` (Tablets pequeñas, > 640px)
-    
+- `sm:` (Tablets pequeñas, > 640px)  
 - `md:` (Tablets grandes/Laptops, > 768px)
-    
 - `lg:` (Monitores, > 1024px)
-    
 - `xl:` (Monitores grandes, > 1280px)
-    
 
 **Ejemplo Práctico de Responsive:**
 ```Typescript
@@ -121,12 +117,10 @@ Tailwind tiene un modificador especial llamado `dark:`. Funciona exactamente igu
 ```
 ### B. El Problema del Parpadeo (FOUC) y `next-themes`
 
-**El Vacío Teórico:** Si guardas la preferencia de modo oscuro en el `localStorage`, el usuario notará un "parpadeo blanco" al recargar la página. Esto ocurre porque el HTML llega del servidor en modo claro, y milisegundos después, el JavaScript del cliente lee el `localStorage` y lo cambia a oscuro.
-
+Si guardas la preferencia de modo oscuro en el `localStorage`, el usuario notará un "parpadeo blanco" al recargar la página. Esto ocurre porque el HTML llega del servidor en modo claro, y milisegundos después, el JavaScript del cliente lee el `localStorage` y lo cambia a oscuro.
 Para evitar esto en Next.js App Router, usamos un paquete llamado `next-themes`. Este paquete inyecta un pequeño script que bloquea el renderizado de la página hasta que sabe qué tema prefirió el usuario, evitando el parpadeo.
 
 **Implementación en el Root Layout (`app/layout.tsx`):**
-
 ```Typescript
 
 import { ThemeProvider } from "@/components/theme-provider"
