@@ -18,11 +18,8 @@ Durante años, la forma estándar de dar estilos a una web era usar CSS tradicio
 Tailwind CSS cambia las reglas del juego. En lugar de crear clases semánticas, Tailwind te da miles de "clases de utilidad" pequeñitas, donde cada clase hace **una sola cosa**.
 
 - `bg-blue-500` = `background-color: #3b82f6;`
-    
 - `text-center` = `text-align: center;`
-    
 - `p-4` = `padding: 1rem;`
-    
 - `rounded-lg` = `border-radius: 0.5rem;`
 
 **Ejemplo Práctico:**
