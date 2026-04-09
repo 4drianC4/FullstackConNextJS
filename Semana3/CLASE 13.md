@@ -16,13 +16,11 @@ El problema surge cuando varios componentes separados necesitan acceder a la mis
 
 Si usas el estado local, tendrías que pasar la información de componente padre a componente hijo, a nieto, a bisnieto... Esto se conoce como **Prop Drilling** (Perforación de Props) y hace que tu código sea un infierno de mantener.
 
-**Las soluciones antiguas:** * **Redux:** El estándar de la industria por años, pero requiere escribir cientos de líneas de código extra (boilerplate) solo para actualizar un simple número.
-
+### Las soluciones antiguas:
+- **Redux:** El estándar de la industria por años, pero requiere escribir cientos de líneas de código extra (boilerplate) solo para actualizar un simple número.
 - **Context API (nativo de React):** Fácil de usar, pero tiene un problema de rendimiento grave: si el carrito de compras se actualiza, **TODOS** los componentes envueltos en ese contexto se vuelven a renderizar (parpadean en memoria), aunque no necesiten el carrito.
-    
 
 ### La Solución Moderna: Zustand
-
 Zustand (que significa "estado" en alemán) es un gestor de estado global microscópico, rápido y sin dolores de cabeza. Funciona por fuera del árbol de React, por lo que evita renders innecesarios.
 
 **Ejemplo: Creando un "Store" (Almacén) para el carrito:**
@@ -69,7 +67,7 @@ export const BotonComprar = () => {
 ---
 ## 2. Formularios Eficientes con React Hook Form
 
-### El Vacío Teórico: Componentes Controlados vs. No Controlados
+### Componentes Controlados vs. No Controlados
 
 En el React clásico, los formularios se manejan mediante **Componentes Controlados**. Esto significa que por cada input (nombre, email, contraseña), creas un `useState`. Cada vez que el usuario teclea _una sola letra_, ejecutas un `onChange` que actualiza el estado, lo cual provoca que **todo el formulario se vuelva a renderizar en pantalla**.
 
