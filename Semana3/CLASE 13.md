@@ -1,21 +1,18 @@
 # Día 13: Frontend III - Estado y Formularios
 
-Si el Día 12 fue sobre cómo se _ve_ nuestra aplicación, el Día 13 es sobre cómo se _siente_ y cómo interactúa con el usuario. Hoy abordaremos dos de los temas que históricamente han causado más dolores de cabeza en React: el manejo del estado global y la gestión de formularios complejos.
+Si el Día 12 fue sobre cómo se ve nuestra aplicación, el Día 13 es sobre cómo se siente y cómo interactúa con el usuario. Hoy abordaremos dos de los temas que históricamente han causado más dolores de cabeza en React: el manejo del estado global y la gestión de formularios complejos.
 
-Vamos a llenar esos "vacíos teóricos" para entender por qué las herramientas modernas que usaremos hoy son casi obligatorias en cualquier proyecto profesional.
-
+---
 ## 1. Gestión de Estado Global con Zustand
 
-### El Vacío Teórico: Local State vs. Prop Drilling vs. Global State
+### Local State vs. Prop Drilling vs. Global State
 
 En React, el estado es la memoria del componente (ej. saber si un menú está abierto o cerrado). Normalmente usamos `useState` para esto, lo cual se llama **Estado Local**.
 
 El problema surge cuando varios componentes separados necesitan acceder a la misma "memoria". Imagina un carrito de compras:
 
 - El componente `<BotonAgregar />` (dentro de una lista de productos) necesita actualizar el número de ítems.
-    
-- El componente `<Navbar />` (en la parte superior de la página) necesita mostrar ese número.
-    
+- El componente `<Navbar />` (en la parte superior de la página) necesita mostrar ese número
 
 Si usas el estado local, tendrías que pasar la información de componente padre a componente hijo, a nieto, a bisnieto... Esto se conoce como **Prop Drilling** (Perforación de Props) y hace que tu código sea un infierno de mantener.
 
