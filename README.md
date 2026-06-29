@@ -234,14 +234,14 @@ Testing, optimización y preparación para producción.
 | ✅ **Zod**          | 3+      | Validación de schemas TypeScript |
 
 ### DevOps & Tools
-| Tecnología   | Versión | Descripción                         |
-| ------------ | ------- | ----------------------------------- |
-| 🔷 **TypeScript**   | 5+      | JavaScript tipado                  |
-| 📦 **npm/pnpm**     | Latest  | Gestión de paquetes               |
-| 🔧 **Git**          | Latest  | Control de versiones              |
-| 🐙 **GitHub**       | -       | Repositorio y colaboración        |
-| ▲ **Vercel**        | -       | Plataforma de deployment          |
-| 🔨 **Postman**      | Latest  | Testing de APIs                   |
+| Tecnología        | Versión | Descripción                |
+| ----------------- | ------- | -------------------------- |
+| 🔷 **TypeScript** | 5+      | JavaScript tipado          |
+| 📦 **npm/pnpm**   | Latest  | Gestión de paquetes        |
+| 🔧 **Git**        | Latest  | Control de versiones       |
+| 🐙 **GitHub**     | -       | Repositorio y colaboración |
+| ▲ **Vercel**      | -       | Plataforma de deployment   |
+| 🔨 **Postman**    | Latest  | Testing de APIs            |
 
 ---
 
