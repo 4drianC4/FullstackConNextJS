@@ -38,6 +38,13 @@ Al finalizar este curso serás capaz de:
 
 ---
 
+er
+- ￼✅￼ ￼￼Base de Datos￼￼: Diseñar y gestionar bases de datos relacionales con Prisma ORM
+- ￼✅￼ ￼￼Autenticación￼￼: Implementar sistemas de autenticación seguros con NextAuth.js
+- ￼✅￼ ￼￼Validación￼￼: Manejar validaciones con Zod en frontend y backend
+- ￼✅￼ ￼￼Estado￼￼: Gestionar estado global eficientemente con Zustand
+- ￼✅￼ ￼￼Despliegue￼￼: Deploy automático en producción con CI/CD
+- ￼✅￼ **Colaboración**: Trabajar en equipo con Git, GitHub y metodologías ágiles
 ## 📚 Contenido del Curso
 
 ### 📘 Semana 1: Setup, Arquitectura y Fundamentos de Backend
