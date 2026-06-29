@@ -98,7 +98,7 @@ Ocurren cuando dos personas editaron *exactamente el mismo archivo y la misma l�
 
 ## 5. Presentación del Proyecto Final
 
-Durante este mes, no haremos ejercicios aislados. Vamos a construir un **Sistema de Gestión de Tareas (tipo Trello o Jira)**.
+Durante este mes, no haremos ejercicios aislados.
 
 * **El Escenario:** Somos una startup tecnológica. Yo soy el *Tech Lead / Product Manager* (líder técnico), y ustedes son los desarrolladores Fullstack.
 * **Metodología:** Cada uno de ustedes será dueño de un "módulo" (ej. Autenticación, Creación de Tareas, Tableros, etc.). Desarrollarán desde la base de datos hasta la interfaz visual de esa funcionalidad.
