@@ -216,7 +216,7 @@ Testing, optimización y preparación para producción.
 ### Frontend
 | Tecnología             | Versión | Descripción                                               |
 | ---------------------- | ------- | --------------------------------------------------------- |
-| ⚛️ **React**           | 18+     | Librería para interfaces de usuario con Server Components |
+| ⚛️ **React**           | 22+     | Librería para interfaces de usuario con Server Components |
 | ▲ **Next.js**          | 14+     | Framework React fullstack con App Router                  |
 | 🎨 **Tailwind CSS**    | 3+      | Framework CSS utility-first                               |
 | 🎭 **shadcn/ui**       | Latest  | Componentes UI reutilizables y accesibles                 |
@@ -226,7 +226,7 @@ Testing, optimización y preparación para producción.
 ### Backend
 | Tecnología         | Versión | Descripción                      |
 | ------------------ | ------- | -------------------------------- |
-| 🟢 **Node.js**     | 18+     | Runtime de JavaScript            |
+| 🟢 **Node.js**     | 22+     | Runtime de JavaScript            |
 | ▲ **Next.js API**  | 14+     | Route Handlers para APIs RESTful |
 | 🔷 **Prisma ORM**  | Latest  | ORM moderno para bases de datos  |
 | 🐘 **PostgreSQL**  | Latest  | Base de datos relacional         |
