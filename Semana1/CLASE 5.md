@@ -74,7 +74,7 @@ npm install @prisma/client
 Next.js, en modo desarrollo (`npm run dev`), recarga los archivos constantemente cada vez que guardamos un cambio (Hot Reloading). Si instanciamos una conexión a la base de datos de forma normal, Next.js abrirá una conexión nueva con cada guardado, agotando el límite de conexiones de nuestra base de datos gratuita en minutos.
 
 ### La Solución: El Patrón Singleton
-Para evitar esto, debemos crear un archivo en la raíz de nuestro proyecto (ej. `lib/prisma.ts`) que guarde la conexión de Prisma en el objeto global de Node. Así, Next.js reciclará la misma conexión en cada recarga.
+Para evitar esto, debemos crear un archivo en la raíz de nuestro proyecto (ej. `lib/prisma.ts`) que guarde la conexión de Prisma en el objeto global dinstall cuid pnpme Node. Así, Next.js reciclará la misma conexión en cada recarga.
 
 ``` Typescript
 import { PrismaClient } from '@prisma/client'
