@@ -1,4 +1,3 @@
-
 # ¿Qué es docker?
 Docker es una plataforma que permite **crear, distribuir y ejecutar aplicaciones en contenedores**. 
 Un **contenedor** es una unidad ligera y portátil que incluye todo lo necesario para ejecutar una aplicación: código, dependencias, configuraciones, etc.
