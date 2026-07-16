@@ -20,12 +20,12 @@ mi-proyecto/
 ├── app/
 │   └── api/
 │       └── users/
-│           └── route.ts       # 📍 Definición de Endpoints (Rutas)
+│           └── route.ts       # Definición de Endpoints (Rutas)
 ├── prisma/
-│   └── schema.prisma          # 📍 Modelos de Datos (Models)
+│   └── schema.prisma          # Modelos de Datos (Models)
 └── src/
-    ├── controllers/           # 📍 Controladores: Manejan req/res de Next.js
-    └── services/              # 📍 Servicios: Lógica de negocio pesada y DB
+    ├── controllers/           # Controladores: Manejan req/res de Next.js
+    └── services/              # Servicios: Lógica de negocio pesada y DB
 ```
 ## 2. Separación de Responsabilidades (La Regla de Oro)
 
