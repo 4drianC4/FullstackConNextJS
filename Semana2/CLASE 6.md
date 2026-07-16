@@ -38,7 +38,7 @@ Las bases de datos relacionales brillan por su capacidad de conectar informació
 ### A. Relación Uno a Uno (1:1)
 
 Un registro de la Tabla A se asocia con exactamente un registro de la Tabla B.
-Ejemplo: Un User tiene un único Profile.
+Ejemplo: Un User tiene userId String @uniqu un único Profile.
 
 ``` Typescript
 
