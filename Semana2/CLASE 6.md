@@ -133,7 +133,7 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('🌱 Iniciando seed...');
+  console.log('Iniciando seed...');
 
   // Creamos un usuario admin con un post anidado usando las relaciones
   const admin = await prisma.user.upsert({
@@ -152,7 +152,7 @@ async function main() {
     
   })
   
-  console.log('✅ Seed completado con éxito:', admin.email)
+  console.log('Seed completado con éxito:', admin.email)
 }
 
 main()
