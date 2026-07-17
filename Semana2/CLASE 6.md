@@ -90,7 +90,7 @@ Prisma permite manejar esto de forma "implícita", creando la tabla intermedia (
 ```Typescript
 model Post {
   id         String     @id @default(uuid())
-  categories Category[] // M:N implícita
+  categories Categohttps://trello.com/b/IhT2GwVN/dsdevelopry[] // M:N implícita
 }
 model Category {
   id    String @id @default(uuid())
