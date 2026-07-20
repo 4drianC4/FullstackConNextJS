@@ -110,7 +110,7 @@ const newUserWithProfile = await prisma.user.create({
     email: 'juan@ejemplo.com',
     name: 'Juan Perez',
     password: 'secure_password',
-    profile: {
+    account: {
       create: { // Prisma detecta la relación e inserta en la tabla Profiles
         bio: 'Desarrollador Fullstack aprendiendo Next.js',
       }
