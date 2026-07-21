@@ -1,168 +1,236 @@
 # Día 8: Backend V - CRUD Completo y Operaciones Complejas
 
+Ayer sentamos las bases de nuestra arquitectura modular construyendo los métodos para leer (GET) y crear (POST) registros. Hoy vamos a completar nuestro CRUD y a enfrentarnos al mundo real: paginación, relaciones y transacciones seguras.
+
 ## 1. Completando el CRUD: Endpoints PUT y DELETE
 
-Para actualizar y eliminar un recurso específico (como un usuario o un post), necesitamos saber su `id`. En Next.js (App Router), esto se logra mediante **Rutas Dinámicas**. En lugar de crear un archivo `route.ts` normal, lo colocamos dentro de una carpeta con corchetes: `app/api/users/[id]/route.ts`.
+Para actualizar y eliminar un recurso específico, necesitamos saber su `id`. En Next.js (App Router), esto se logra mediante **Rutas Dinámicas**. En lugar de crear un archivo `route.ts` normal, lo colocamos dentro de una carpeta con corchetes: `app/api/users/[id]/route.ts`.
 
-Siguiendo nuestra arquitectura del Día 7, vamos a implementar la actualización y eliminación de un usuario.
+Siguiendo la estructura de la carpeta `features/users` que vimos en el Día 7, vamos a implementar la actualización y eliminación de un usuario paso a paso.
 
-### Paso 1: Los Servicios (`src/services/userService.ts`)
-Añadimos las funciones para actualizar y eliminar a nuestro servicio existente.
+### Paso 1: Schemas y DTOs
 
+Para actualizar, no siempre recibimos todos los campos, por lo que creamos un schema donde los campos son opcionales. Además, necesitamos validar que el `id` que viaja en la URL sea un identificador válido (por ejemplo, un UUID o un CUID).
+
+**`src/features/users/shared/schemas/user.schema.ts`**
 ```Typescript
-// Actualizar un usuario existente
-export const updateUser = async (id: string, data: { name?: string; email?: string }) => {
-  // Prisma actualizará solo los campos que vengan en 'data'
+import { z } from "zod";
+
+// Schema para actualizar (todos los campos opcionales)
+export const updateUserSchema = z.object({
+  name: z.string().min(2).optional(),
+  email: z.string().email().optional(),
+  role: z.string().optional(),
+});
+
+// Schema para validar el ID de la URL
+export const userIdSchema = z.object({
+  id: z.string().uuid("Formato de ID inválido"),
+});
+```
+**`src/features/users/backend/dto/put-user.dto.ts` y `user-id.dto.ts`**
+```Typescript
+import type { z } from "zod";
+import { updateUserSchema, userIdSchema } from "@/features/users/shared/schemas/user.schema";
+
+export type PutUserDto = z.infer<typeof updateUserSchema>;
+export type UserIdDto = z.infer<typeof userIdSchema>;
+```
+### Paso 2: Los Servicios
+
+Añadimos las funciones a nuestra "cocina". Estos servicios solo reciben datos limpios y se comunican con Prisma.
+
+**`src/features/users/backend/services/put.ts`**
+
+```TypeScript
+import { prisma } from "@/shared/lib/prisma";
+import type { PutUserDto } from "../dto/put-user.dto";
+import { toUserDto } from "./shared";
+
+export const updateUserService = async (id: string, data: PutUserDto) => {
+  // Prisma actualizará solo los campos que vengan definidos en 'data'
   const updatedUser = await prisma.user.update({
-    where: { id: id },
-    data: data,
+    where: { id },
+    data,
   });
-  return updatedUser;
-};
-
-// Eliminar un usuario
-export const deleteUser = async (id: string) => {
-  const deletedUser = await prisma.user.delete({
-    where: { id: id },
-  });
-  return deletedUser;
+  return toUserDto(updatedUser);
 };
 ```
-### Paso 2: Los Controladores (src/controllers/userController.ts)
+**`src/features/users/backend/services/delete.ts`**
+```Typescript
+import { prisma } from "@/shared/lib/prisma";
 
-Creamos los manejadores para estas nuevas acciones. Observa cómo recibimos el id a través del objeto params que Next.js nos proporciona.
-```TypeScript
-
-import { NextRequest, NextResponse } from 'next/server';
-import * as userService from '@/src/services/userService';
-
-export const handleUpdateUser = async (req: NextRequest, params: { id: string }) => {
-  try {
-    const body = await req.json();
-    const updatedUser = await userService.updateUser(params.id, body);
-    return NextResponse.json(updatedUser, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Error al actualizar el usuario' }, { status: 400 });
-  }
-};
-
-export const handleDeleteUser = async (req: NextRequest, params: { id: string }) => {
-  try {
-    await userService.deleteUser(params.id);
-    return NextResponse.json({ message: 'Usuario eliminado correctamente' }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Error al eliminar el usuario' }, { status: 400 });
-  }
+export const deleteUserService = async (id: string) => {
+  await prisma.user.delete({
+    where: { id },
+  });
+  return true; 
 };
 ```
-### Paso 3: El Route Handler (app/api/users/[id]/route.ts)
+### Paso 3: Los Controladores
 
-Conectamos la ruta dinámica a nuestros controladores.
-```TypeScript
+Creamos los manejadores. Observa cómo validamos no solo el `body` (para el PUT), sino también el parámetro `id` de la URL antes de tocar el servicio.
 
-import { NextRequest } from 'next/server';
-import { handleUpdateUser, handleDeleteUser } from '@/src/controllers/userController';
+**`src/features/users/backend/controllers/put.ts`**
+```Typescript
 
-// Endpoint: PUT /api/users/:id
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  return handleUpdateUser(request, params);
-}
+import { updateUserSchema, userIdSchema } from "@/features/users/shared/schemas/user.schema";
+import { updateUserService } from "../services/put";
+import { handleUsersControllerError } from "./shared";
+import { ok } from "@/shared/lib/api-response";
 
-// Endpoint: DELETE /api/users/:id
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  return handleDeleteUser(request, params);
+export async function putUserController(request: Request, params: { id: string }) {
+  try {
+    const { id } = userIdSchema.parse(params); // Validamos el ID
+    const body = await request.json();
+    const payload = updateUserSchema.parse(body); // Validamos el Body
+
+    const updatedUser = await updateUserService(id, payload);
+    return ok(updatedUser, 200);
+  } catch (error) {
+    return handleUsersControllerError(error);
+  }
 }
 ```
+
+**`src/features/users/backend/controllers/delete.ts`**
+```Typescript
+
+// Importaciones similares...
+export async function deleteUserController(request: Request, params: { id: string }) {
+  try {
+    const { id } = userIdSchema.parse(params);
+    await deleteUserService(id);
+    return ok({ message: 'Usuario eliminado' }, 200);
+  } catch (error) {
+    return handleUsersControllerError(error);
+  }
+}
+```
+
+### Paso 4: El Route Handler
+
+Conectamos la ruta dinámica a nuestros controladores. La limpieza de este archivo demuestra el poder de esta arquitectura.
+
+**`src/app/api/users/[id]/route.ts`**
+```Typescript
+
+import { putUserController, deleteUserController } from '@/features/users';
+
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  return putUserController(request, params);
+}
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  return deleteUserController(request, params);
+}
+```
+
 ## 2. Operaciones Complejas: Filtrado, Paginación y Relaciones
 
 El mundo real requiere consultas más sofisticadas que simplemente traer todos los registros. Prisma hace que operaciones complejas de SQL se sientan como manipular objetos en JavaScript.
-### Paginación y Filtrado
 
-Si tuviéramos un millón de posts, un findMany() colapsaría nuestro servidor. Así es como implementamos paginación y ordenamiento en un servicio de Posts (src/services/postService.ts):
-```TypeScript
+### Paginación y Filtrado (Ejemplo: Módulo 4 - Catálogo Público)
 
-export const getPublishedPosts = async (page: number = 1, limit: number = 10) => {
+Si tuviéramos diez mil productos, un `findMany()` colapsaría nuestro servidor y el navegador del cliente. Así es como implementamos paginación y ordenamiento en un servicio de Productos:
+
+**`src/features/catalog/backend/services/get-public-products.ts`**
+```Typescript
+
+export const getActiveProductsService = async (page: number = 1, limit: number = 10) => {
   const skip = (page - 1) * limit;
 
-  const posts = await prisma.post.findMany({
-    where: { published: true },         // Filtrado (solo publicados)
-    orderBy: { createdAt: 'desc' },     // Ordenamiento (más recientes primero)
-    skip: skip,                         // Paginación: cuántos saltar
-    take: limit,                        // Paginación: cuántos tomar
-    include: {                          // Traer relaciones unidas (JOIN)
-      author: {
-        select: { name: true, email: true } // Seleccionamos campos específicos del autor
-      },
-      categories: true
+  const products = await prisma.product.findMany({
+    where: { isActive: true, stock: { gt: 0 } }, // Filtrado: Solo activos y con stock > 0
+    orderBy: { createdAt: 'desc' },              // Ordenamiento: Novedades primero
+    skip: skip,                                  // Paginación: Cuántos saltar
+    take: limit,                                 // Paginación: Cuántos tomar
+    include: {                                   // JOIN: Traer datos de tablas relacionadas
+      category: {
+        select: { name: true }                   // Solo queremos el nombre de la categoría
+      }
     }
   });
 
-  return posts;
+  return products;
 };
 ```
-### Nested Writes (Escrituras Anidadas)
 
-Prisma te permite insertar datos en múltiples tablas relacionadas con una sola consulta. Por ejemplo, crear un usuario y su perfil al mismo tiempo:
-```TypeScript
+### Escrituras Anidadas (Nested Writes)
 
-const newUserWithProfile = await prisma.user.create({
+Prisma te permite insertar datos en múltiples tablas relacionadas con una sola consulta. Por ejemplo, si un administrador crea un Producto y, al mismo tiempo, quiere registrar la entrada inicial de inventario (Módulo 2 y 3):
+```Typescript
+
+const newProductWithStock = await prisma.product.create({
   data: {
-    email: 'juan@ejemplo.com',
-    name: 'Juan Perez',
-    password: 'secure_password',
-    account: {
-      create: { // Prisma detecta la relación e inserta en la tabla Profiles
-        bio: 'Desarrollador Fullstack aprendiendo Next.js',
+    name: 'Laptop Gamer',
+    price: 1500,
+    sku: 'LAP-123',
+    inventoryLogs: {
+      create: { // Prisma detecta la relación e inserta en la tabla InventoryLog automáticamente
+        quantity: 50,
+        type: 'ENTRADA_INICIAL',
       }
     }
   }
 });
 ```
+
 ## 3. Manejo de Transacciones (Transactions)
 
-¿Qué pasa si tienes una operación de lógica de negocio que requiere hacer tres cosas en la base de datos (por ejemplo, descontar dinero de una cuenta, sumarlo a otra, y guardar un registro)? Si el paso 1 tiene éxito pero el paso 2 falla (por una caída de red o un error), tus datos quedarán inconsistentes: el dinero desapareció.
+¿Qué pasa si tienes una operación crítica que requiere alterar dos tablas? Por ejemplo (Módulo 6), marcar una Orden de Compra como "PAGADA" y descontar las unidades del Inventario.
 
-Una Transacción asegura que un grupo de operaciones se ejecuten como una sola unidad: O todas tienen éxito (Commit), o todas fallan y la base de datos vuelve a su estado original (Rollback).
+Si el Paso 1 tiene éxito, pero el Paso 2 falla (por error de red o porque alguien más compró la última unidad un segundo antes), tus datos quedarán inconsistentes: cobraste un producto que ya no tienes.
+
+Una **Transacción** asegura que un grupo de operaciones se ejecuten como una sola unidad: O todas tienen éxito (_Commit_), o todas fallan y la base de datos vuelve a su estado original (_Rollback_).
+
 ### Implementando Transacciones con Prisma
 
-Prisma usa el método $transaction. Veamos un ejemplo en un servicio que transfiere un Post a otro Usuario y elimina el original de su cuenta:
-```TypeScript
+Prisma usa el método `$transaction`. Veamos cómo se implementa en un servicio de Órdenes:
 
-export const transferPostOwnership = async (postId: string, newAuthorId: string) => {
-  // Envolvemos las operaciones en un array dentro de $transaction
+**`src/features/orders/backend/services/confirm-order.ts`**
+```Typescript
+
+export const confirmOrderPaymentService = async (orderId: string, productId: string, quantityToDeduct: number) => {
   try {
+    // Envolvemos las operaciones en un array dentro de $transaction
     const result = await prisma.$transaction([
-      // Operación 1: Actualizar el Post con el nuevo autor
-      prisma.post.update({
-        where: { id: postId },
-        data: { authorId: newAuthorId }
+      
+      // Operación 1: Cambiar el estado de la orden
+      prisma.order.update({
+        where: { id: orderId },
+        data: { status: 'PAGADO' }
       }),
-      // Operación 2: Crear un registro de auditoría (asumiendo que tenemos esta tabla)
-      prisma.auditLog.create({
-        data: {
-          action: 'POST_TRANSFERRED',
-          targetId: postId,
+      
+      // Operación 2: Descontar el stock real del producto
+      prisma.product.update({
+        where: { id: productId },
+        data: { 
+          stock: { decrement: quantityToDeduct } 
         }
       })
+      
     ]);
 
-    // Si ambas tienen éxito, result contendrá un array con los resultados de ambas
+    // Si ambas tienen éxito, result contiene los datos actualizados
     return result;
     
   } catch (error) {
     // Si *CUALQUIERA* de las dos falla, Prisma hace un rollback automático.
-    // Nada se guarda en la base de datos.
-    console.error("La transacción falló. Haciendo rollback...", error);
-    throw new Error("No se pudo completar la transferencia");
+    // Nada se guarda en la base de datos y lanzamos el error al controlador.
+    throw new Error("Transacción fallida: No se pudo procesar la orden y el stock.");
   }
-}; 
+};
 ```
->[!IMPORTANT] Nota de Arquitectura: 
->Las transacciones son el ejemplo perfecto de por qué usamos Servicios. El controlador no debería saber nada sobre "commits" o "rollbacks", solo llama a transferPostOwnership() y espera un éxito o un error.
+
+> **Nota de Arquitectura:** Las transacciones son el ejemplo perfecto de por qué usamos Servicios. El controlador no sabe nada sobre "commits" o "rollbacks", solo llama a `confirmOrderPaymentService()` y espera un resultado o atrapa un error.
 
 ## Resumen del Día 8
 
-¡Felicidades! Tienes un Backend funcional y robusto.
-- Hemos dominado los métodos HTTP principales (GET, POST, PUT, DELETE) conectándolos a las rutas dinámicas de Next.js.
-- Integramos la lógica de Prisma para hacer JOINs (con include) e inserts complejos (Nested Writes).
-- Aprendimos a garantizar la integridad de nuestra base de datos agrupando operaciones críticas con Transacciones.
+¡Felicidades! Ahora tienes las herramientas para construir un Backend robusto de grado de producción.
+
+1. Hemos dominado los métodos HTTP (GET, POST, PUT, DELETE) gestionando parámetros dinámicos y validándolos con Zod.
+    
+2. Integramos la lógica de Prisma para hacer JOINs (con `include`), paginación eficiente, e inserts complejos (_Nested Writes_).
+    
+3. Aprendimos a blindar la integridad del E-commerce utilizando Transacciones para flujos críticos como el cobro y manejo de stock.
