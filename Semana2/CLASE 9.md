@@ -22,7 +22,7 @@ Usar algoritmos de *hashing* obsoletos como MD5 o SHA-1.
 Antes de que nuestro Servicio (Día 7) guarde al usuario usando Prisma, debemos aplicar un algoritmo de hashing moderno con un **"Salt"** (texto aleatorio que se añade a la contraseña antes de encriptarla). 
 
 ```typescript
-// src/services/userService.ts
+// userService.ts
 import bcrypt from 'bcrypt';
 import prisma from '@/lib/prisma';
 
