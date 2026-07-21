@@ -53,7 +53,7 @@ Un JWT es un string codificado en 3 partes que contiene información del usuario
     
 - **El Ataque (JWT Forgery):** Un hacker toma su token, decodifica el Payload (que es público), cambia su `"role": "USER"` a `"role": "ADMIN"`. Como adivinó tu clave "12345", vuelve a firmar el token. ¡Felicidades, acabas de darle control total de tu sistema a un atacante!
     
-- **La Prevención:** Usar cadenas criptográficas largas y aleatorias (ej. generadas con `openssl rand -base64 32`) en tu `.env`.
+- **La Prevención:** Usar cadenas criptográficas largas y aleatorias (ej. generadas con `openssl rand -base64 64`) en tu `.env`.
     
 
 ### B. El Peligro del `localStorage` (Ataques XSS)
