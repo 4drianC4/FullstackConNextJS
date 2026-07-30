@@ -68,7 +68,7 @@ export default function ListaUsuarios() {
 ---
 ## 3. Estados de Carga: Loaders y Skeletons
 
-El "Vacío Teórico" de la experiencia de usuario (UX) es el **Layout Shift** (salto de diseño). Ocurre cuando una página está vacía y, de repente, aparecen los datos y "empujan" todo el contenido hacia abajo. Esto es molesto y se siente poco profesional.
+El **Layout Shift** (salto de diseño) ocurre cuando una página está vacía y, de repente, aparecen los datos y "empujan" todo el contenido hacia abajo. Esto es molesto y se siente poco profesional.
 
 ### A. Archivo `loading.tsx` (Estrategia de Next.js)
 
