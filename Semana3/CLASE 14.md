@@ -1,4 +1,4 @@
-code# Día 14: Frontend IV - Integración (Lectura de Datos)
+# Día 14: Frontend IV - Integración (Lectura de Datos)
 
 ## 1. El Dilema: ¿Dónde pedir los datos? (Server vs. Client Fetching)
 
