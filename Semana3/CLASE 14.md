@@ -6,7 +6,7 @@ En Next.js App Router, tenemos dos estrategias principales para obtener informac
 
 ### A. Fetching en Server Components (La opción recomendada)
 
-Como vimos en el Día 11, los Server Components pueden hablar directamente con la base de datos o con tu API sin pasar por el navegador.
+Los Server Components pueden hablar directamente con la base de datos o con tu API sin pasar por el navegador.
 
 - **Cómo se hace:** Simplemente defines tu componente como `async` y usas `await fetch()` o incluso llamadas directas a **Prisma**.
     
@@ -110,7 +110,7 @@ const res = await fetch('https://api.ejemplo.com/data', { next: { revalidate: 36
 ```
 ### Revalidación On-Demand (Bajo demanda)
 
-Esto es lo más potente. Imagina que un usuario crea un post nuevo. No quieres esperar 1 hora para que aparezca en la lista. Usamos `revalidatePath` en nuestras **Server Actions** (lo veremos a fondo mañana):
+Esto es lo más potente. Imagina que un usuario crea un post nuevo. No quieres esperar 1 hora para que aparezca en la lista. Usamos `revalidatePath` en nuestras **Server Actions** :
 ```Typescript
 
 // Esto le dice a Next.js: "Borra el caché de la página de inicio porque hay datos nuevos"
