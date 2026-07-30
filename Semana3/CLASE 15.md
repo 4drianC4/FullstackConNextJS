@@ -62,7 +62,7 @@ export default function CrearPostForm() {
 ---
 ## 2. Optimistic Updates (El Secreto de la Mejor UX)
 
-### El Vacío Teórico: La Latencia de Red
+### La Latencia de Red
 
 Imagina que estás en Twitter/X y le das "Me gusta" a un post.
 
