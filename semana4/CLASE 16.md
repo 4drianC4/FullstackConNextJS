@@ -10,20 +10,16 @@ El **Testing End-to-End (E2E o De extremo a extremo)** consiste en simular el co
 
 ### ¿Cómo hacer Testing Manual E2E efectivo?
 
-Antes de usar herramientas automatizadas complejas como _Cypress_ o _Playwright_ (que se ven en cursos avanzados), todo equipo debe saber hacer testing manual riguroso. Para esto, no probamos a lo loco, creamos **Casos de Uso (Test Cases)**.
+Antes de usar herramientas automatizadas complejas como _Cypress_ o _Playwright_, todo equipo debe saber hacer testing manual riguroso. Para esto, no probamos a lo loco, creamos **Casos de Uso (Test Cases)**.
 
 Debes poner a prueba dos caminos principales:
 
 1. **El "Happy Path" (El Camino Feliz):** El usuario hace exactamente lo que esperas. Entra al login, pone credenciales correctas y entra al Dashboard. Todo sale bien.
     
 2. **Los "Edge Cases" (Casos Extremos / Camino Triste):** Aquí es donde el software suele romperse.
-    
     - ¿Qué pasa si el usuario intenta enviar el formulario de registro con el internet apagado?
-        
     - ¿Qué pasa si hace doble clic rapidísimo en el botón de "Pagar"?
-        
     - ¿Qué pasa si pone un emoji en el campo de "Edad"?
-        
 
 **Regla de oro del Testing Fullstack:** Nunca asumas que el Frontend va a detener un error. Si un usuario salta tu validación de Zod en el navegador y manda datos corruptos, tu API Backend **debe** rechazar esa petición y no dejar que la base de datos se corrompa.
 
@@ -31,12 +27,10 @@ Debes poner a prueba dos caminos principales:
 
 ## 2. Sincronización Frontend/Backend (El problema de la verdad)
 
-Cuando tienes una aplicación Fullstack, tienes un problema fundamental: **¿Dónde está la verdad?** * La verdad "absoluta" vive en tu base de datos (Backend).
-
+Cuando tienes una aplicación Fullstack, tienes un problema fundamental: **¿Dónde está la verdad?** 
+* La verdad "absoluta" vive en tu base de datos (Backend).
 - La verdad "temporal" vive en la pantalla del usuario (Frontend / Caché).
-    
-
-### El Vacío Teórico: La Desincronización
+### La Desincronización
 
 Imagina que dos usuarios (Ana y Carlos) están viendo la misma lista de tareas en sus respectivas computadoras. Ana borra la "Tarea 1". El servidor elimina la Tarea 1. Pero la pantalla de Carlos sigue mostrando la Tarea 1 porque su Frontend no se ha enterado del cambio. Si Carlos intenta editar la Tarea 1, el servidor le lanzará un error 500 porque ese registro ya no existe.
 
@@ -56,30 +50,20 @@ En el Día 14 usamos TanStack Query. Esta librería tiene configuraciones nativa
 ## 3. Llevando la Optimistic UI al Límite (Rollbacks)
 
 En el Día 15 vimos cómo la **Optimistic UI** (engañar al usuario asumiendo que el servidor dirá que "sí" a una mutación) hace que la app se sienta rapidísima.
-
 Pero en una revisión Fullstack real, tenemos que planear el **Rollback** (dar marcha atrás).
-
 **El Flujo Completo de la Experiencia de Usuario (UX):**
-
 1. **Acción:** El usuario le da "Like" a un Post.
-    
 2. **Optimismo:** El corazón se pone rojo en el Frontend al instante.
-    
 3. **Desastre:** El servidor responde con Error 500 (La base de datos se cayó).
-    
 4. **Rollback:** El Frontend le quita el color rojo al corazón silenciosamente.
-    
 5. **¡Feedback!:** Aquí fallan muchos desarrolladores. Si le quitas el color rojo y no dices nada, el usuario pensará que no hizo clic bien y volverá a hacer clic. Debes informarle.
-    
 
 ---
 
 ## 4. Feedback al Usuario: Toasts y Snackbars
-
 Para darle feedback al usuario sin arruinar su experiencia, no uses el viejo y molesto `alert("Error")` que bloquea toda la pantalla. La industria usa **Toasts** (notificaciones no bloqueantes que aparecen en una esquina y desaparecen solas).
 
 En Next.js y `shadcn/ui`, el estándar actual es usar una librería llamada **Sonner**.
-
 ### Implementación de Feedback Fullstack
 
 1. Primero, agregas el componente base en tu `layout.tsx` para que esté disponible en toda la app:

@@ -3,20 +3,13 @@
 ## 1. Identificación de "Code Smells" (Olores de Código)
 
 ### ¿Qué es un Code Smell?
-
 Un _Code Smell_ no es un bug. Tu código compila, funciona y pasa los tests. Sin embargo, "huele mal". Es un indicador, una pista visual de que hay un problema de diseño subyacente que, si tu aplicación crece, se convertirá en un dolor de cabeza gigante (Deuda Técnica).
 
 **Ejemplos clásicos de Code Smells en React/Next.js:**
-
 1. **Componentes Dios (God Components):** Un archivo `page.tsx` que tiene 500 líneas de código, maneja peticiones a la base de datos, tiene 10 estados (`useState`) y renderiza toda la interfaz visual.
-    
 2. **Números o Strings Mágicos:** Ver un `if (status === 3)` en tu código. ¿Qué significa el 3? Nadie lo sabe.
-    
 3. **Código Duplicado:** Copiar y pegar el mismo bloque de validación de un formulario en tres páginas distintas.
-    
 4. **Código Flecha (Arrow Code):** Múltiples `if/else` anidados que hacen que tu código se vaya empujando hacia la derecha formando la punta de una flecha `>>>>`.
-    
-
 ---
 
 ## 2. Refactorización de Componentes Grandes
