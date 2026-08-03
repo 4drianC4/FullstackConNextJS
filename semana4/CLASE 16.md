@@ -2,7 +2,7 @@
 
 ## 1. Testing Manual End-to-End (E2E)
 
-### El Vacío Teórico: La Pirámide del Testing
+### La Pirámide del Testing
 
 Normalmente, los desarrolladores prueban su código revisando funciones individuales (Unit Testing) o viendo si un componente se renderiza bien (Integration Testing). Sin embargo, en el mundo real, los usuarios no usan "funciones", usan "flujos".
 
