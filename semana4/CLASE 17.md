@@ -2,7 +2,7 @@
 
 ## 1. Identificación de "Code Smells" (Olores de Código)
 
-### El Vacío Teórico: ¿Qué es un Code Smell?
+### ¿Qué es un Code Smell?
 
 Un _Code Smell_ no es un bug. Tu código compila, funciona y pasa los tests. Sin embargo, "huele mal". Es un indicador, una pista visual de que hay un problema de diseño subyacente que, si tu aplicación crece, se convertirá en un dolor de cabeza gigante (Deuda Técnica).
 
