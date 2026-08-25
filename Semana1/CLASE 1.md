@@ -58,8 +58,8 @@ En este curso, no trabajaremos solos. Trabajarán en un único repositorio centr
 ### El Flujo de Trabajo Diario
 1.  **Sincronizar local:** Antes de empezar tu día, descargas los últimos cambios aprobados.
     ```bash
-    git checkout main
-    git pull origin main
+    git checkout dev
+    git pull origin dev
     ```
 2.  **Crear tu rama de trabajo:** Creas un universo paralelo para tu tarea específica.
     ```bash
