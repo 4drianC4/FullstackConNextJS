@@ -4,7 +4,7 @@
 
 ## 1. El Ecosistema Next.js y el App Router
 
-React es una librería increíble para construir interfaces, pero no nos dice cómo enrutar páginas, manejar bases de datos o mejorar el SEO. Next.js es el framework construido sobre React que nos da todas estas herramientas listas para usar.
+*React es una librería* increíble para construir interfaces, pero no nos dice cómo enrutar páginas, manejar bases de datos o mejorar el SEO. Next.js es el framework construido sobre React que nos da todas estas herramientas listas para usar.
 
 ### El Paradigma del App Router
 Desde su versión 13, Next.js introdujo el **App Router** (la carpeta `app/`). Este nuevo sistema cambia la forma en que pensamos sobre el renderizado:
