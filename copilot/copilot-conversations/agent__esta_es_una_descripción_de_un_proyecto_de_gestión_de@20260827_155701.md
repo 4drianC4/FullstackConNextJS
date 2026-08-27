@@ -3,6 +3,8 @@ epoch: 1787860621626
 mode: agent
 backendId: opencode
 sessionId: "ses_fbb3e9bdfffel4qsUxyHZaKwhR"
+agentLabel: "Reescritura proyecto inventario a sistema restaurante"
+usage: '{"usedTokens":30221,"contextWindow":200000,"updatedAt":1787860901383}'
 tags:
   - copilot-conversation
 ---
@@ -60,5 +62,29 @@ Déjame crear un plan de tareas.
 
 Ahora voy a reescribir el archivo completo como un sistema de gestión para restaurante con 6 módulos, manteniendo la estructura y metodología del documento original pero adaptándola al dominio de un restaurante.
 
+He reescrito el archivo. Déjame verificar el resultado final.
 
+El documento quedó completo. Marquemos la tarea como completada.
+
+Listo. Reescribí [[1. Proyecto Sistema de Gestión de Restaurante]] y lo convertí en el **Proyecto Sistema de Gestión para Restaurante**. Mantuve intacta la estructura y la metodología del documento original (desarrollo por verticales, stack, flujo de vida de la tarea, criterios de calificación), cambiando únicamente el dominio y los módulos.
+
+## Los 6 módulos (uno por estudiante)
+
+1. **Autenticación, Usuarios y Roles** (núcleo) — NextAuth.js, roles Admin/Mesero/Cocina/Cliente y middleware de protección. Provee la sesión que el resto consume pasivamente.
+2. **Menú y Categorías** (núcleo) — CRUD de platillos y categorías con Zod. Es la "carta" del restaurante.
+3. **Gestión de Mesas y Reservaciones** (núcleo) — CRUD de mesas, mapa visual del salón y sistema de reservas que evita dobles reservas.
+4. **Comandas y Control de Pedidos** (núcleo) — pedido por mesa con estados (Enviado a cocina → En preparación → Servido → Pagado).
+5. **Inventario de Insumos de Cocina** (núcleo) — stock de ingredientes, movimientos y alertas de stock mínimo.
+6. **Reportes y Estadísticas de Ventas** (extensión) — dashboard con agregaciones y exportación CSV.
+
+## Cómo responde a tus requerimientos
+
+- **6 módulos, uno por estudiante:** sí, son exactamente 6.
+- **Se pueden hacer con el contenido del curso:** todos usan solo lo que enseña el curso — CRUD con Prisma, Route Handlers de Next.js, NextAuth, Zustand, React Hook Form, Zod, Tailwind, shadcn/ui y deploy en Vercel. No requieren nada fuera del temario.
+- **Mínima dependencia entre ellos:** mantuve el concepto de "punto de desacoplamiento" original. Los únicos enganches son pactos de datos (JSON) que se definen en la semana 1, y cada módulo puede funcionar con *mock data* si el compañero se retrasa o abandona:
+  - Módulo 1 es el único que toca autenticación; el resto asume que la sesión existe.
+  - Módulo 4 (Comandas) usa el **ID** de platillos del Módulo 2 y el **número** de mesa del Módulo 3, pero funciona con datos simulados si faltan.
+  - Módulos 3, 5 y 6 son aislados o de solo lectura, así que no bloquean ni son bloqueados.
+
+Una nota: mantuve el nombre del archivo original ("Inventario"). Si quieres, puedo renombrarlo a algo como `1. Proyecto Sistema de Gestión de Restaurante.md` para que coincida mejor. ¿Te gustaría que hiciera eso o también quieres que actualice los otros archivos del proyecto (la guía de contribución y las asignaciones de tareas)?
 [Timestamp: 2026/08/27 15:57:01]
