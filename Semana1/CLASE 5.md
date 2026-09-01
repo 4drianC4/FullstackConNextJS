@@ -70,7 +70,7 @@ Una vez conectada la base de datos, necesitamos instalar el "cliente" que se eje
 ```bash
 npm install @prisma/client
 ```
-### El Problema de Next.js en Desarrollo (¡Atención aquí!)
+### El ProbeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiItLSIsInJvbGVJZCI6ImJiYmJiYmIxLWJiYmItYmJiYi1iYmJiLTExMTExMTExMTExMSIsImlhdCI6MTc4ODI5MTIyNCwiZXhwIjoxNzg4Mjk0ODI0fQ.MI-Hsg3CMF89my4EH5yXwNYpmKk0h9B2ng7Ggu0dhzAlema de Next.js en Desarrollo (¡Atención aquí!)
 Next.js, en modo desarrollo (`npm run dev`), recarga los archivos constantemente cada vez que guardamos un cambio (Hot Reloading). Si instanciamos una conexión a la base de datos de forma normal, Next.js abrirá una conexión nueva con cada guardado, agotando el límite de conexiones de nuestra base de datos gratuita en minutos.
 
 ### La Solución: El Patrón Singleton
