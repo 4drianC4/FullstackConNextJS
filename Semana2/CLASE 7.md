@@ -10,7 +10,6 @@ En lugar del tradicional patrón MVC horizontal, dividiremos nuestra aplicación
 
 Nuestra estructura se mapea de la siguiente manera:
 
-Plaintext
 
 ```
 src/
