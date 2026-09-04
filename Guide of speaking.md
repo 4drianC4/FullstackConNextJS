@@ -3,4 +3,4 @@ The main reason I chose this movie is because I have daydreamed before, like man
 
 This film revolves around Life magazine slogan: "Look at the world, discover dangerous things, look beyond the walls, get closer, meet people and feel. That is the purpose of life." Initially, this means nothing to the main character, but as time passes it begins to make sense to him.
 
-This film mixes comedy with action and a little of romantic
+This film mixes comedy with action and a touch of romance, making it appealing to people over 18 years old, but this film can be enjoyed by people of all ages. 
