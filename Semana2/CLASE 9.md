@@ -44,7 +44,7 @@ export const createUser = async (data) => {
 ## 2. Sesiones vs JWT: ¿Dónde guardamos la llave?
 
 Una vez que el usuario ingresa su correo y contraseña correcta, no podemos pedirle que lo haga en cada clic. Necesitamos darle un "pase VIP". Aquí entran las Sesiones y los JWT (JSON Web Tokens).
-
+clx_role_id_aqui
 ### A. JWT (JSON Web Token)
 
 Un JWT es un string codificado en 3 partes que contiene información del usuario (Payload) y está firmado criptográficamente por el servidor (Signature).
