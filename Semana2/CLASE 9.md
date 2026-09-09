@@ -70,7 +70,7 @@ Para evitar el XSS, el backend debe enviar el JWT (o el ID de sesión) dentro de
 - `HttpOnly`: El navegador oculta la cookie de JavaScript. El ataque XSS del paso anterior ahora devolverá `null`.
     
 - `Secure`: Solo viaja por HTTPS, evitando que te roben el token si usas WiFi público.
-    
+    HTTPS
 
 ---
 
