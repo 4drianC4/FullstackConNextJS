@@ -1,1 +1,6 @@
 .obsidian/
+.claude/
+.copilot/
+.agents/
+.opencode/
+copilot/
