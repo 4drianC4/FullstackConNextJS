@@ -1,4 +1,4 @@
-b# Día 12: Frontend II - Sistema de Diseño y UI
+# Día 12: Frontend II - Sistema de Diseño y UI
 
 ## 1. El Paradigma de Tailwind CSS (Utility-First)
 
