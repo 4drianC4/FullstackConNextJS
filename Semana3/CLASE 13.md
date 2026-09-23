@@ -73,8 +73,7 @@ En el React clásico, los formularios se manejan mediante **Componentes Controla
 
 Si tienes un formulario de 10 campos y un usuario teclea rápido, tu componente se renderiza decenas de veces por segundo. En computadoras lentas, el teclado se sentirá "trabado" o con lag (latencia).
 
-### La Solución: React Hook Form (RHF)
-
+### La Solución: React Hook Form (RHF) 
 RHF utiliza **Componentes No Controlados**. En lugar de seguir cada pulsación de tecla con un estado, RHF simplemente "engancha" (registra) el input de HTML usando una referencia (un `ref`). React ignora el input hasta el momento exacto en que el usuario hace clic en "Enviar". ¡El rendimiento es perfecto, con cero re-renders innecesarios!
 
 ---
