@@ -79,7 +79,7 @@ RHF utiliza **Componentes No Controlados**. En lugar de seguir cada pulsación d
 
 ---
 
-## 3. Validación en el Cliente con Zod (Single Source of Truth)
+## 3. Validación en el Cliente con Zod (Single Source of￼￼ Truth)
 
 ¿Recuerdas que en el Día 10 creamos un esquema de Zod en el backend para validar que nadie enviara basura a nuestra base de datos? ¡Vamos a reciclar ese mismo código en el Frontend!
 
@@ -157,7 +157,7 @@ export default function FormularioRegistro() {
 
 Observa la línea `disabled={isSubmitting}` en el botón de arriba. Este es un detalle crítico de UX (User Experience).
 
-**El Vacío Teórico:** Si un usuario hace clic en "Registrarse", y el servidor tarda 2 segundos en responder, el usuario pensará que el botón no funcionó y hará clic 5 veces más. Esto enviará 5 peticiones a tu base de datos (lo que podría crear registros duplicados o errores de servidor).
+Si un usuario hace clic en "Registrarse", y el servidor tarda 2 segundos en responder, el usuario pensará que el botón no funcionó y hará clic 5 veces más. Esto enviará 5 peticiones a tu base de datos (lo que podría crear registros duplicados o errores de servidor).
 
 React Hook Form nos provee el estado `isSubmitting` de forma nativa. Mientras la función `onSubmit` esté corriendo (porque es asíncrona y tiene un `await`), `isSubmitting` será verdadero. Bloquear el botón y mostrar un texto de "Cargando..." o un _spinner_ es la marca de una aplicación profesional.
 
