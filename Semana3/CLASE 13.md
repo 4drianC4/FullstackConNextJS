@@ -116,7 +116,7 @@ export default function FormularioRegistro() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 max-w-md">
       
-      {/* Input de Nombre */}
+      {/* Input de Nombre */} 
       <div>
         <label>Nombre</label>
         {/* register("name") conecta este input a RHF sin causar re-renders */}
