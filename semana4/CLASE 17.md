@@ -1,4 +1,4 @@
-b# Día 17: Fullstack II - Refactorización y Clean Code
+# Día 17: Fullstack II - Refactorización y Clean Code
 
 ## 1. Identificación de "Code Smells" (Olores de Código)
 
