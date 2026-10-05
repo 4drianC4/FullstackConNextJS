@@ -9,7 +9,6 @@ Normalmente, los desarrolladores prueban su código revisando funciones individu
 El **Testing End-to-End (E2E o De extremo a extremo)** consiste en simular el comportamiento de un usuario real, desde que entra a la página web, hace clics, llena formularios y espera que la base de datos se actualice correctamente.
 
 ### ¿Cómo hacer Testing Manual E2E efectivo?
-
 Antes de usar herramientas automatizadas complejas como _Cypress_ o _Playwright_, todo equipo debe saber hacer testing manual riguroso. Para esto, no probamos a lo loco, creamos **Casos de Uso (Test Cases)**.
 
 Debes poner a prueba dos caminos principales:
