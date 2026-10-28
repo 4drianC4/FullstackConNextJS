@@ -33,7 +33,7 @@ Al finalizar podrás:
 
 ### Semana 1 — Introducción y fundamentos del backend
 
-[[Semana1/INDICE|Índice y entregable de la semana]]
+[[0 INDICE|Índice y entregable de la semana]]
 
 - [[Semana1/CLASE 1|Clase 1]] — Introducción, entorno y trabajo colaborativo.
 - [[Semana1/CLASE 2|Clase 2]] — TypeScript aplicado al backend.

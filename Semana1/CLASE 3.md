@@ -11,7 +11,7 @@ tags:
 
 # Clase 3 — Docker I - PostgreSQL local
 
-[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · ← [[Semana1/CLASE 2|Clase 2]] · [[Semana1/CLASE 4|Clase 4]] →
+[[README|Inicio]] · [[0 INDICE|Semana 1]] · ← [[Semana1/CLASE 2|Clase 2]] · [[Semana1/CLASE 4|Clase 4]] →
 
 > [!abstract] Objetivo
 > Levantar PostgreSQL reproduciblemente y conservar los datos aunque se recree el contenedor.
@@ -95,4 +95,4 @@ Documentar comandos y solucionar un conflicto de puerto sin borrar datos. Subir 
 
 ---
 
-[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · ← [[Semana1/CLASE 2|Clase 2]] · [[Semana1/CLASE 4|Clase 4]] →
+[[README|Inicio]] · [[0 INDICE|Semana 1]] · ← [[Semana1/CLASE 2|Clase 2]] · [[Semana1/CLASE 4|Clase 4]] →

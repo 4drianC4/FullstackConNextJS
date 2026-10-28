@@ -11,7 +11,7 @@ tags:
 
 # Clase 1 — Introducción, entorno y trabajo colaborativo
 
-[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · [[Semana1/CLASE 2|Clase 2]] →
+[[README|Inicio]] · [[0 INDICE|Semana 1]] · [[Semana1/CLASE 2|Clase 2]] →
 
 > [!abstract] Objetivo
 > Comprender el proyecto, abrir los apuntes en Obsidian y colaborar mediante ramas y PR.
@@ -81,4 +81,4 @@ Leer el proyecto, elegir funcionalidad y acordar compañeros. Instalar entorno y
 
 ---
 
-[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · [[Semana1/CLASE 2|Clase 2]] →
+[[README|Inicio]] · [[0 INDICE|Semana 1]] · [[Semana1/CLASE 2|Clase 2]] →

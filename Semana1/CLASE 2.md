@@ -11,7 +11,7 @@ tags:
 
 # Clase 2 — TypeScript aplicado al backend
 
-[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · ← [[Semana1/CLASE 1|Clase 1]] · [[Semana1/CLASE 3|Clase 3]] →
+[[README|Inicio]] · [[0 INDICE|Semana 1]] · ← [[Semana1/CLASE 1|Clase 1]] · [[Semana1/CLASE 3|Clase 3]] →
 
 > [!abstract] Objetivo
 > Usar TypeScript para expresar contratos del backend sin volver a enseñar JavaScript.
@@ -91,4 +91,4 @@ Definir los contratos de entrada y salida de tu tarea y añadir ejemplos de JSON
 
 ---
 
-[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · ← [[Semana1/CLASE 1|Clase 1]] · [[Semana1/CLASE 3|Clase 3]] →
+[[README|Inicio]] · [[0 INDICE|Semana 1]] · ← [[Semana1/CLASE 1|Clase 1]] · [[Semana1/CLASE 3|Clase 3]] →
