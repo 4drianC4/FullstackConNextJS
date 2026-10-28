@@ -1,108 +1,84 @@
-# Fundamentos, Entorno y Flujo de Trabajo Colaborativo
-
+---
+tipo: clase
+clase: 1
+semana: 1
+duracion_minutos: 90
+proyecto: Discoteca
+tags:
+  - curso/fullstack
+  - semana/1
 ---
 
-## 1. La Arquitectura Fullstack (Modelo Cliente-Servidor)
+# Clase 1 — Introducción, entorno y trabajo colaborativo
 
-En el desarrollo web moderno, una aplicación no es un solo bloque de código, sino una conversación constante entre dos entidades principales.
+[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · [[Semana1/CLASE 2|Clase 2]] →
 
-### El Cliente (Frontend)
-Es todo lo que el usuario ve y con lo que interactúa. Vive en el navegador (Chrome, Safari, etc.).
-* **Responsabilidades:** Renderizar la Interfaz de Usuario (UI), manejar eventos (clics, scroll, formularios), mantener el estado local y ofrecer una buena Experiencia de Usuario (UX).
-* **Nuestras herramientas:** HTML, CSS (Tailwind), JavaScript/TypeScript, React y Next.js (Client Components).
+> [!abstract] Objetivo
+> Comprender el proyecto, abrir los apuntes en Obsidian y colaborar mediante ramas y PR.
 
-### El Servidor (Backend)
-Es el "cerebro" y el guardián de la aplicación. Vive en una computadora remota (en la nube) encendida 24/7.
-* **Responsabilidades:** Procesar la lógica de negocio, validar datos, comunicarse con la Base de Datos, manejar la autenticación y servir archivos o datos al cliente.
-* **Nuestras herramientas:** Node.js, Next.js (API Routes / Server Actions), ORMs y Bases de Datos.
+## Antes de empezar
 
-### El Ciclo de Petición-Respuesta (Request/Response)
-1.  El Cliente hace una **Petición (Request)** HTTP al Servidor (Ej: "Dame la lista de proyectos de este usuario").
-2.  El Servidor recibe la petición, consulta la Base de Datos, procesa la información y devuelve una **Respuesta (Response)** (Ej: un JSON con los proyectos y un código de estado `200 OK`).
+Requisitos: JavaScript, HTML y CSS; terminal básica. No se presupone React ni TypeScript. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
 
-> [!INFO] Nota sobre Next.js:
-> Tradicionalmente, Frontend y Backend vivían en repositorios separados. Next.js es un framework *Fullstack* porque nos permite escribir tanto el código del Cliente como el código del Servidor en el mismo proyecto, simplificando enormemente el despliegue y la tipificación de datos.
+## Desarrollo de la clase
 
----
+### El recorrido del curso
 
-## 2. Setup del Entorno de Desarrollo
+Primero construimos backend (semanas 1–2), después interfaz (semana 3) y finalmente integramos, desplegamos y trabajamos con IA (semana 4). No repasaremos JavaScript, HTML ni CSS.
 
-Para construir software profesional, necesitamos herramientas profesionales. No basta con un editor de texto básico.
+Una petición recorre navegador → ruta HTTP → servicio de una funcionalidad → PostgreSQL → respuesta. En esta etapa no necesitamos construir componentes de React.
 
-### Node.js y npm
-Node.js es un entorno de ejecución que nos permite correr JavaScript fuera del navegador (en nuestra computadora o en un servidor). 
-* **npm (Node Package Manager):** Es el gestor de paquetes que viene con Node. Nos permite instalar librerías de terceros (como React, Tailwind, o Prisma) en lugar de reinventar la rueda.
-* *Verificación en consola:* 
+### Obsidian desde el primer día
+
+Instala [Obsidian](https://obsidian.md/download), clona este repositorio y elige **Abrir carpeta como bóveda**. Abre `README.md`, después el índice de la semana. Activa enlaces salientes, backlinks, esquema y grafo local. No se necesitan plugins comunitarios para seguir el curso.
+
+Los enlaces `[[nota|nombre legible]]` conectan temas; los bloques de información destacan objetivos y errores. Consulta [[Recursos/Obsidian - Guia del curso|Cómo recorrer y ampliar los apuntes]]. Los dibujos Excalidraw son complementarios y requieren su plugin si se quieren editar.
+
+### Crear la aplicación del grupo
+
+Este repositorio contiene apuntes, no la aplicación. El instructor crea **otro repositorio** para el código, siguiendo [[Recursos/Stack y entorno|las versiones y comandos comunes]]. Cada alumno trabaja en una funcionalidad vertical de la discoteca. El instructor integra un esqueleto vacío de carpetas y scripts; todavía no hay backend resuelto.
+
+### Flujo mínimo de Git
+
 ```bash
-    node -v
-    npm -v
+git clone URL_DEL_REPOSITORIO_DE_APLICACION
+cd discoteca
+git switch main
+git pull --ff-only
+git switch -c feat/events-create
 ```
 
-### Visual Studio Code (VSCode)
-Es el estándar de la industria. Para este curso, estandarizaremos nuestro entorno con las siguientes extensiones obligatorias:
-1.  **ESLint:** Encuentra y arregla problemas en el código JavaScript/TypeScript en tiempo real.
-2.  **Prettier - Code formatter:** Formatea el código automáticamente al guardar (adiós a las peleas por espacios o tabulaciones).
-3.  **GitLens:** Nos (Asignaciones Individuales)permite ver quién escribió cada línea de código, en qué commit y por qué (esencial para trabajo en equipo).
-4.  **Prisma:** (La usaremos más adelante) Autocompletado y resaltado de sintaxis para nuestra base de datos.
+Después de trabajar: revisar `git diff`, seleccionar archivos, hacer commit y push. Abrir PR hacia `main`; un compañero revisa y el instructor integra. No usamos una rama `dev` adicional en este curso.
+
+```bash
+git add src/features/events
+git commit -m "feat: agrega contrato de eventos"
+git push -u origin feat/events-create
+```
+
+`git add` debe mencionar los archivos que realmente existan en la tarea. Ante un conflicto, hablar con quien modificó la misma zona y verificar el resultado; no aceptar ambas versiones sin leerlas.
+
+## Práctica guiada
+
+Abrir la bóveda; localizar proyecto, tareas e índice. Crear el repositorio de aplicación y el primer PR de documentación.
+
+## Tarea para casa
+
+Leer el proyecto, elegir funcionalidad y acordar compañeros. Instalar entorno y documentar cómo ejecutar el proyecto. No subir secretos.
+
+## Criterios de finalización
+
+- [ ] Puedes recorrer los apuntes mediante enlaces.
+- [ ] Existe una rama y un PR revisable.
+- [ ] Cada integrante identifica su tarea vertical.
+
+## Conexiones
+
+[[Recursos/Obsidian - Guia del curso|Obsidian]] · [[Proyecto/3. Guía de Contribución y Estándares del Proyecto|Contribución]] · [[Proyecto/2. Tareas por funcionalidad|Asignaciones]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
+
+> [!tip] Distribución orientativa de los 90 minutos
+> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
 
 ---
 
-## 3. Flujo de Trabajo Colaborativo (Git y GitHub)
-
-En este curso, no trabajaremos solos. Trabajarán en un único repositorio centralizado. Si todos editamos el código al mismo tiempo en la misma rama, el proyecto colapsará. Aquí entra el **Feature Branch Workflow** (flujo de trabajo de ramas de características) aísla el desarrollo de nuevas funcionalidades, correcciones o experimentos en ramas separadas creadas desde `main` o `master`. Esto permite trabajar en paralelo, realizar revisiones de código mediante _pull requests_ y mantener la rama principal siempre estable y lista para producción.
-### Conceptos Clave
-* **Git:** El motor local de control de versiones. Toma "fotografías" (commits) de tu código.
-* **GitHub:** La plataforma en la nube donde guardamos nuestro código y colaboramos.
-* **Rama `main` (o `master`):** Es código sagrado. Lo que está en `main` debe funcionar perfectamente porque es lo que está en producción (lo que ven los usuarios). **Nadie sube código directamente a `main` o `dev`.**
-
-### El Flujo de Trabajo Diario
-1.  **Sincronizar local:** Antes de empezar tu día, descargas los últimos cambios aprobados.
-    ```bash
-    git checkout dev
-    git pull origin dev
-    ```
-2.  **Crear tu rama de trabajo:** Creas un universo paralelo para tu tarea específica.
-    ```bash
-    git checkout -b feature/nombre-de-tu-tarea
-    # Ejemplo: git checkout -b feature/crear-modal-login
-    ```
-3.  **Trabajar y hacer Commits:** Escribes tu código y guardas tu progreso con mensajes descriptivos.
-    ```bash
-    git add .
-    git commit -m "feat: agrega formulario de login con validaciones"
-    ```
-4.  **Subir tu rama a GitHub:**
-    ```bash
-    git push origin feature/nombre-de-tu-tarea
-    ```
-
----
-
-## 4. Pull Requests (PR) y Merge Conflicts
-
-### Pull Requests (Peticiones de Integración)
-Una vez que terminas tu tarea y subes tu rama, no la unes a `main` tú mismo. Abres un **Pull Request (PR)** en GitHub.
-* Un PR es una petición formal a tu equipo: *"Terminé mi tarea, revisen mi código y si está bien, únanlo a `main`"*.
-* En este curso, **yo (el instructor) y al menos un compañero de equipo deberemos aprobar el PR** antes de que se pueda integrar. Esto garantiza la calidad del código.
-
-### Merge Conflicts (Conflictos de Fusión)
-Ocurren cuando dos personas editaron *exactamente el mismo archivo y la misma línea* en diferentes ramas, y Git no sabe cuál versión conservar.
-* **No entres en pánico:** Los conflictos son normales, no significa que rompiste nada.
-* **Resolución en VSCode:** Al intentar hacer un merge (o un pull) y detectar conflicto, VSCode resaltará el código en colores y te dará opciones:
-    * *Accept Current Change* (Mantener lo tuyo)
-    * *Accept Incoming Change* (Mantener lo de tu compañero)
-    * *Accept Both Changes* (Mantener ambos y tú arreglas la lógica)
-* *Regla de oro:* Si no estás seguro de qué hace el código de tu compañero, **habla con él antes de resolver el conflicto**.
-
----
-
-## 5. Presentación del Proyecto Final
-
-Durante este mes, no haremos ejercicios aislados.
-
-* **El Escenario:** Somos una startup tecnológica. Yo soy el *Tech Lead / Product Manager* (líder técnico), y ustedes son los desarrolladores Fullstack.
-* **Metodología:** Cada uno de ustedes será dueño de un "módulo" (ej. Autenticación, Creación de Tareas, Tableros, etc.). Desarrollarán desde la base de datos hasta la interfaz visual de esa funcionalidad.
-* **Dinámica de Clase:** No me verán escribir código durante 2 horas. Las clases serán para explicar arquitectura, revisar sus Pull Requests en vivo (Code Review) y desbloquearlos de problemas complejos. Ustedes programarán de forma asíncrona basándose en las tareassignadas.
-
-> [!IMPORTANT] Tu primera tarea: 
-> Clona el repositorio base, asegúrate de que puedes correrlo localmente (`npm run dev`) y explora la estructura de carpetas.
+[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · [[Semana1/CLASE 2|Clase 2]] →

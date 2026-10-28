@@ -1,76 +1,98 @@
+---
+tipo: clase
+clase: 3
+semana: 1
+duracion_minutos: 90
+proyecto: Discoteca
+tags:
+  - curso/fullstack
+  - semana/1
+---
 
-# Diseño de Bases de Datos y Modelado de Datos
+# Clase 3 — Docker I - PostgreSQL local
+
+[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · ← [[Semana1/CLASE 2|Clase 2]] · [[Semana1/CLASE 4|Clase 4]] →
+
+> [!abstract] Objetivo
+> Levantar PostgreSQL reproduciblemente y conservar los datos aunque se recree el contenedor.
+
+## Antes de empezar
+
+Repasa [[Semana1/CLASE 2|Clase 2]] y completa su tarea. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
+
+## Desarrollo de la clase
+
+### Imagen, contenedor y volumen
+
+La imagen es la plantilla; el contenedor ejecuta un proceso; el volumen conserva datos fuera de la capa efímera del contenedor. Docker no es una máquina virtual completa. Docker Compose describe los servicios del entorno.
+
+Instalar Docker Engine y el plugin Compose en Linux siguiendo [la guía oficial](https://docs.docker.com/engine/install/); en Windows/macOS usar la instalación oficial adecuada al equipo. No copiar un repositorio Debian con nombre de versión distinto al sistema real. Verificar:
+
+```bash
+docker version
+docker compose version
+```
+
+En Linux, el grupo `docker` permite operaciones con privilegios equivalentes a root; no es solo una comodidad inocua. Si Docker Desktop está activo, seleccionar el contexto correcto.
+
+### compose.yaml de la aplicación
+
+```yaml
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?define POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?define POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:?define POSTGRES_DB}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  pgdata:
+```
+
+Crear `.env` con valores locales propios, siguiendo [[Recursos/Stack y entorno|la plantilla de entorno]]. Los valores reales no se versionan.
+
+```bash
+docker compose up -d db
+docker compose ps
+docker compose logs db
+docker compose exec db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+docker compose down
+```
+
+`down` conserva el volumen. `down -v` lo elimina: no lo uses como forma habitual de reiniciar. Si el puerto 5432 está ocupado, publicar 5433 y actualizar la URL local. Cambiar una contraseña en `.env` no cambia automáticamente la de una base ya inicializada.
+
+La aplicación se ejecuta por ahora en el host: `DATABASE_URL` utiliza `localhost`. Dentro de Compose utilizará `db`; lo retomamos en la clase 17.
+
+## Práctica guiada
+
+Crear la base, insertar un dato con SQL y comprobar que sigue después de down/up.
+
+## Tarea para casa
+
+Documentar comandos y solucionar un conflicto de puerto sin borrar datos. Subir compose.yaml y .env.example.
+
+## Criterios de finalización
+
+- [ ] La base aparece healthy.
+- [ ] El volumen conserva datos.
+- [ ] Puedes explicar localhost frente al nombre db.
+
+## Conexiones
+
+[[Recursos/Docker/Docker|Mapa de Docker]] · [[semana4/CLASE 17|Clase 17]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
+
+> [!tip] Distribución orientativa de los 90 minutos
+> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
 
 ---
 
-## 1. Bases de Datos: Relacionales vs No Relacionales
-
-Antes de crear tablas, debemos elegir el motor adecuado para nuestro proyecto. El mundo de las bases de datos se divide en dos grandes familias: SQL (Relacionales) y NoSQL (No Relacionales).
-
-### Bases de Datos Relacionales (SQL)
-Imagina hojas de cálculo estrictas conectadas entre sí. Usan un lenguaje estándar llamado SQL (Structured Query Language).
-* **Estructura:** Los datos se guardan en Tablas compuestas por Filas (registros) y Columnas (atributos).
-* **Esquema Rígido:** Debes definir qué tipo de dato va en cada columna antes de guardar información. Si una columna dice "Número", no puedes guardar texto.
-* **Relaciones:** Su superpoder es conectar tablas a través de "Llaves" (Keys), asegurando que los datos huérfanos no existan.
-* **Ejemplos:** PostgreSQL, MySQL, SQLite.
-
-### Bases de Datos No Relacionales (NoSQL)
-Imagina un archivero flexible donde puedes guardar documentos con diferentes formatos.
-* **Estructura:** Los datos suelen guardarse como Documentos tipo JSON, Pares Clave-Valor o Grafos.
-* **Esquema Flexible:** Cada documento puede tener campos diferentes. Un usuario puede tener el campo "edad" y otro no, sin romper la base de datos.
-* **Escalabilidad:** Son excelentes para guardar volúmenes masivos de datos no estructurados rápidamente.
-* **Ejemplos:** MongoDB, Redis, DynamoDB.
-
-### Tabla Comparativa
-
-| Característica           | Relacional (SQL)                              | No Relacional (NoSQL)                             |
-| :----------------------- | :-------------------------------------------- | :------------------------------------------------ |
-| **Estructura de datos**  | Tablas, filas y columnas                      | Documentos (JSON), grafos, clave-valor            |
-| **Esquema**              | Rígido (Predefinido)                          | Flexible (Dinámico)                               |
-| **Relaciones complejas** | Excelentes y seguras                          | Difíciles de mantener                             |
-| **Ideal para...**        | Sistemas financieros, ERPs, gestión de tareas | Redes sociales, catálogos mutables, logs de datos |
-
->[!INFO] Decisión del Proyecto:
->Para nuestro Sistema de Gestión de Tareas, utilizaremos una **Base de Datos Relacional (PostgreSQL)**. La naturaleza del proyecto exige relaciones estrictas (Un usuario *tiene* tableros, un tablero *tiene* columnas, una columna *tiene* tareas).
-
----
-
-## 2. Diseño de Base de Datos del Proyecto
-
-El primer paso del diseño es identificar las "Entidades" (los sustantivos principales de nuestra aplicación) y cómo se relacionan entre sí.
-
-### Entidades Principales
-* **User (Usuario):** Quien interactúa con el sistema.
-* **Workspace (Espacio de trabajo):** El contenedor principal (ej. "Equipo de Marketing").
-* **Board (Tablero):** Un proyecto específico dentro del espacio de trabajo.
-* **Column (Columna/Estado):** Las listas dentro del tablero (ej. "To Do", "Done").
-* **Task (Tarea):** La unidad de trabajo asignada a un usuario.
-* **Comment (Comentario):** Notas dejadas en una tarea específica.
-* **Tag (Etiqueta):** Categorías visuales para las tareas.
-
-### Tipos de Relaciones
-* **Uno a Muchos (1:N):** Un `Workspace` tiene muchos `Boards`, pero un `Board` pertenece a un solo `Workspace`. (La relación más común).
-* **Muchos a Muchos (N:M):** Una `Task` puede tener múltiples `Tags`, y un `Tag` puede estar en múltiples `Tasks`. (Requiere una tabla intermedia).
-
----
-
-## 3. Diagrama Entidad-Relación (ERD)
-
-Un ERD es el plano arquitectónico de nuestra base de datos. Nos permite visualizar las tablas y las líneas que las conectan antes de escribir código.
-
-### Conceptos Clave del Diagrama
-* **Primary Key (PK - Llave Primaria):** El identificador único e irrepetible de cada fila en una tabla (ej. `id: 1` o un UUID). Toda tabla debe tener una PK.
-* **Foreign Key (FK - Llave Foránea):** Una columna que hace referencia a la Llave Primaria de otra tabla. Es el "gancho" que crea la relación. Ejemplo: La tabla `Task` tendrá una columna `columnId` (FK) para saber a qué columna pertenece.
-
----
-
-## 4. Normalización y Buenas Prácticas
-
-La normalización es el proceso de organizar los datos para reducir la redundancia y mejorar la integridad. 
-
-### Reglas de Oro para el Backend
-1. **No repetir información (Evitar redundancia):** No guardes el "Nombre del Usuario" dentro de la tabla "Task". Guarda solo el `userId` (FK). Si el usuario cambia su nombre, se actualizará automáticamente en todas sus tareas.
-2. **Tipos de datos correctos:** Usa `boolean` para verdadero/falso, `timestamp` para fechas y horas, y `varchar` o `text` para cadenas. No guardes números como texto.
-3. **Soft Deletes (Borrados Lógicos):** En aplicaciones reales, rara vez borramos registros permanentemente (`DELETE`). Es mejor agregar una columna `deletedAt` (tipo fecha). Si está nula, el registro está activo; si tiene fecha, se considera "eliminado" para el usuario, pero lo conservamos en la base de datos por seguridad.
-4. **Uso de UUIDs:** En lugar de usar IDs incrementales (1, 2, 3...), usaremos identificadores universales (UUIDs, ej: `123e4567-e89b-12d3-a456-426614174000`). Esto evita que un usuario malintencionado adivine cuántos registros tenemos o intente acceder a IDs consecutivos.
-5. **Auditoría básica:** Toda tabla importante debe tener al menos dos columnas automáticas: `createdAt` (fecha de creación) y `updatedAt` (fecha de última modificación).
+[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · ← [[Semana1/CLASE 2|Clase 2]] · [[Semana1/CLASE 4|Clase 4]] →

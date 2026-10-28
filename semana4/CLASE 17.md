@@ -1,144 +1,158 @@
-# Día 17: Fullstack II - Refactorización y Clean Code
-
-## 1. Identificación de "Code Smells" (Olores de Código)
-
-### ¿Qué es un Code Smell?
-Un _Code Smell_ no es un bug. Tu código compila, funciona y pasa los tests. Sin embargo, "huele mal". Es un indicador, una pista visual de que hay un problema de diseño subyacente que, si tu aplicación crece, se convertirá en un dolor de cabeza gigante (Deuda Técnica).
-
-**Ejemplos clásicos de Code Smells en React/Next.js:**
-	1. **Componentes Dios (God Components):** Un archivo `page.tsx` que tiene 500 líneas de código, maneja peticiones a la base de datos, tiene 10 estados (`useState`) y renderiza toda la interfaz visual. 
-1. **Números o Strings Mágicos:** Ver un `if (status === 3)` en tu código. ¿Qué significa el 3? Nadie lo sabe.
-2. **Código Duplicado:** Copiar y pegar el mismo bloque de validación de un formulario en tres páginas distintas.
-3. **Código Flecha (Arrow Code):** Múltiples `if/else` anidados que hacen que tu código se vaya empujando hacia la derecha formando la punta de una flecha `>>>>`.
+---
+tipo: clase
+clase: 17
+semana: 4
+duracion_minutos: 90
+proyecto: Discoteca
+tags:
+  - curso/fullstack
+  - semana/4
 ---
 
-## 2. Refactorización de Componentes Grandes
+# Clase 17 — Docker II, CI y despliegue
 
-El problema más común en el Frontend es meter toda la lógica y toda la vista en un solo lugar. Para solucionar el "Componente Dios", usamos un patrón clásico de React adaptado a la era moderna.
+[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[semana4/CLASE 16|Clase 16]] · [[semana4/CLASE 18|Clase 18]] →
 
-### Patrón Contenedor / Presentador (Separation of Concerns)
+> [!abstract] Objetivo
+> Ejecutar la aplicación en contenedores y preparar CI y un despliegue verificable.
 
-La regla es: **Un componente debe saber CÓMO se ven las cosas, o de DÓNDE vienen los datos, pero nunca ambas.**
+## Antes de empezar
 
-### El Componente Dios (Antes de refactorizar):
-```Typescript
+Repasa [[semana4/CLASE 16|Clase 16]] y completa su tarea. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
 
-export default function PerfilUsuario() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+## Desarrollo de la clase
 
-  useEffect(() => {
-    fetch('/api/user/me')
-      .then(res => res.json())
-      .then(data => { setUser(data); setLoading(false); });
-  }, []);
+### Next.js en Docker
 
-  if (loading) return <div>Cargando el perfil súper complejo...</div>;
+Mantener `next.config.ts` y añadir `output: "standalone"`. El build necesita generar Prisma; configurar `build: prisma generate && next build`. La base debe ser accesible durante build solo si alguna página consulta datos al prerenderizar; para datos privados usar renderizado por petición y no ejecutar migraciones durante build.
 
-  return (
-    <div className="bg-white p-10 rounded shadow-xl border">
-      <h1 className="text-3xl font-bold text-blue-600">Perfil de {user.name}</h1>
-      <p className="text-gray-500">{user.email}</p>
-      {/* ... 100 líneas más de HTML ... */}
-    </div>
-  );
-}
+Este Dockerfile parte de una aplicación con `public/`, package-lock y scripts del stack:
+
+```dockerfile
+FROM node:22-bookworm-slim AS build
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
+COPY package*.json ./
+RUN npm ci
+COPY . .
+ARG DATABASE_URL=postgresql://unused:unused@localhost:5432/build_only
+ENV DATABASE_URL=$DATABASE_URL
+RUN npm run build
+
+FROM node:22-bookworm-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
+COPY --from=build --chown=node:node /app/.next/standalone ./
+COPY --from=build --chown=node:node /app/.next/static ./.next/static
+COPY --from=build --chown=node:node /app/public ./public
+USER node
+EXPOSE 3000
+CMD ["node", "server.js"]
 ```
 
-**Refactorizado (Separando responsabilidades):**
+La URL ficticia solo permite cargar la configuración de Prisma al generar; no contiene credenciales reales ni permite ejecutar consultas. Si el build intenta consultar la base, corregir el renderizado en lugar de copiar secretos dentro de la imagen.
 
-1. Creamos un **Componente Presentacional** (Solo le importa cómo se ve. Es "tonto", recibe datos por _props_):
-```Typescript
+`.dockerignore`:
 
-// components/UI/UserCard.tsx
-export const UserCard = ({ name, email }) => (
-  <div className="bg-white p-10 rounded shadow-xl border">
-    <h1 className="text-3xl font-bold text-blue-600">Perfil de {name}</h1>
-    <p className="text-gray-500">{email}</p>
-  </div>
-);
+```text
+node_modules
+.next
+.git
+.env*
+!.env.example
+*.log
 ```
 
-2. Nuestro archivo principal se vuelve un **Componente Contenedor** (Solo le importa la lógica):
-```Typescript
+Añadir `web` al mismo `compose.yaml` de la clase 3:
 
-// app/profile/page.tsx
-import { UserCard } from '@/components/UI/UserCard';
-import { useQuery } from '@tanstack/react-query'; // Usamos lo aprendido en el Día 14
-
-export default function PerfilUsuario() {
-  const { data: user, isLoading } = useQuery({ queryKey: ['user'], queryFn: fetchUser });
-
-  if (isLoading) return <div>Cargando...</div>;
-
-  return <UserCard name={user.name} email={user.email} />;
-}
+```yaml
+  web:
+    build: .
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER:?define DATABASE_URL_DOCKER}
+      AUTH_SECRET: ${AUTH_SECRET:?define AUTH_SECRET}
+      APP_ORIGIN: http://localhost:3000
+      AUTH_URL: http://localhost:3000
+      AUTH_TRUST_HOST: "true"
+    depends_on:
+      db:
+        condition: service_healthy
 ```
+
+`DATABASE_URL_DOCKER` usa `db:5432`, con las mismas credenciales de PostgreSQL. Para este ensayo local confiamos en el host del contenedor; en producción configurar el dominio y proxy reales. No montar el código del host sobre los artefactos de producción.
+
+```bash
+docker compose up -d db
+npx prisma migrate deploy
+npm run db:seed
+docker compose up --build -d web
+docker compose logs web
+```
+
+Los comandos Prisma del host usan DATABASE_URL con localhost. El runtime usa db. El seed del ejemplo se prepara como script en la clase 4 y el stack. No volver a sembrar cuentas o datos de prueba en cada arranque de producción.
+
+### CI en GitHub Actions
+
+Crear `.github/workflows/ci.yml` **en el repositorio de aplicación**:
+
+```yaml
+name: CI
+on: [push, pull_request]
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://unused:unused@localhost:5432/build_only
+      AUTH_SECRET: ci-only-not-a-production-secret-0123456789
+      APP_ORIGIN: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+```
+
+Este job ejecuta pruebas puras; las de integración/E2E requieren además PostgreSQL de test, migraciones, seed y servidor. Configurar ese job con el instructor según los tests del grupo, sin apuntar a producción. El deploy automático no sustituye CI.
+
+### Despliegue en Vercel
+
+Conectar el repositorio de aplicación, configurar variables privadas y una base PostgreSQL alojada. Revisar límites del plan elegido antes de abrir cuentas. Usar una base separada para previews: las URLs de preview no son secretas por defecto.
+
+Aplicar `prisma migrate deploy` una vez por entrega contra la base correcta, antes de activar código incompatible. Configurar origen/dominio, callbacks de autenticación y limitación de intentos; crear el primer administrador por un procedimiento controlado. Verificar login, permisos y persistencia después del despliegue. Docker es otro modo de ejecución, no algo que Vercel necesite para desplegar Next.js.
+
+## Práctica guiada
+
+Arrancar la aplicación mediante Compose y ejecutar controles desde un clon limpio.
+
+## Tarea para casa
+
+Desplegar, comprobar los flujos críticos y documentar variables, migraciones y recuperación. No incluir secretos en capturas.
+
+## Criterios de finalización
+
+- [ ] La imagen construye y usa usuario no root.
+- [ ] CI ejecuta lint, tipos, tests y build.
+- [ ] La URL desplegada permite los flujos autorizados.
+
+## Conexiones
+
+[[Semana1/CLASE 3|Clase 3]] · [[Recursos/Stack y entorno|Scripts y versiones]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
+
+> [!tip] Distribución orientativa de los 90 minutos
+> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
 
 ---
-## 3. Eliminación de Código Duplicado (DRY)
 
-El principio **DRY (Don't Repeat Yourself)** es fundamental. En React, la mejor forma de extraer lógica duplicada que usa _Hooks_ es creando tus propios **Custom Hooks**.
-
-Imagina que en 5 páginas distintas necesitas saber si el usuario hizo scroll hacia abajo para cambiar el color del menú superior. Si repites el `useEffect` de escuchar el scroll 5 veces, tienes un problema.
-
-**La Refactorización (Creando un Custom Hook):**
-```Typescript
-
-// src/hooks/useScrollPosition.ts
-import { useState, useEffect } from 'react';
-
-export const useScrollPosition = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll); // Limpieza (Cleanup)
-  }, []);
-
-  return isScrolled; // El hook solo devuelve un booleano limpio
-};
-```
-Ahora, en cualquier componente que lo necesite, solo escribes una línea: `const isScrolled = useScrollPosition();`
-
----
-## 4. Mejores Prácticas: Early Returns (Retornos Tempranos)
-
-Este es el truco más rápido para que tu código pase de verse "Junior" a "Senior". Consiste en eliminar los `else` innecesarios invirtiendo la lógica de los `if` y retornando la función lo antes posible.
-
-**Código Flecha (Difícil de leer):**
-```Typescript
-
-const procesarPago = (usuario, monto) => {
-  if (usuario != null) {
-    if (usuario.isVerified) {
-      if (monto > 0) {
-        // Lógica de pago real
-        return true;
-      } else {
-        throw new Error("El monto debe ser mayor a 0");
-      }
-    } else {
-      throw new Error("Usuario no verificado");
-    }
-  } else {
-    throw new Error("Usuario no encontrado");
-  }
-}
-```
-
-** Early Returns (Código plano y elegante):** Comprobamos los errores primero y "expulsamos" la ejecución. Si el código sobrevive a la barrera de `ifs`,sabemos que todo está correcto.
-
-```typescript
-
-const procesarPago = (usuario, monto) => {
-  // Barrera de validaciones (Early Returns)
-  if (!usuario) throw new Error("Usuario no encontrado");
-  if (!usuario.isVerified) throw new Error("Usuario no verificado");
-  if (monto <= 0) throw new Error("El monto debe ser mayor a 0");
-
-  // Si llega aquí, es imposible que falle. Lógica principal:
-  return realizarTransaccion(usuario, monto);
-}
-```
+[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[semana4/CLASE 16|Clase 16]] · [[semana4/CLASE 18|Clase 18]] →

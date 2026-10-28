@@ -1,69 +1,94 @@
-# Entorno Next.js, Variables de Entorno y Despliegue Continuo
+---
+tipo: clase
+clase: 2
+semana: 1
+duracion_minutos: 90
+proyecto: Discoteca
+tags:
+  - curso/fullstack
+  - semana/1
+---
+
+# Clase 2 — TypeScript aplicado al backend
+
+[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · ← [[Semana1/CLASE 1|Clase 1]] · [[Semana1/CLASE 3|Clase 3]] →
+
+> [!abstract] Objetivo
+> Usar TypeScript para expresar contratos del backend sin volver a enseñar JavaScript.
+
+## Antes de empezar
+
+Repasa [[Semana1/CLASE 1|Clase 1]] y completa su tarea. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
+
+## Desarrollo de la clase
+
+### Tipos e inferencia
+
+TypeScript verifica código antes de ejecutarlo; los tipos se eliminan al compilar. No valida automáticamente un JSON recibido por HTTP.
+
+```ts
+type Role = "ADMIN" | "STAFF";
+type EventStatus = "DRAFT" | "OPEN" | "CLOSED";
+
+type EventSummary = {
+  id: string;
+  name: string;
+  capacity: number;
+  status: EventStatus;
+};
+
+function availablePlaces(capacity: number, sold: number): number {
+  return Math.max(0, capacity - sold);
+}
+
+async function example(): Promise<EventSummary[]> {
+  return [];
+}
+```
+
+Usar `type` o `interface` para contratos, uniones para estados y `?` para datos opcionales. Distinguir `undefined` (ausencia) de `null` (valor explícitamente vacío). No forzar con `as` datos que todavía no se verificaron.
+
+### unknown y estrechamiento
+
+```ts
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Error desconocido";
+}
+```
+
+Los datos externos entran como `unknown` y se validan con Zod en la clase 5. `any` desactiva comprobaciones y no se utiliza en nuestros ejemplos.
+
+### Contrato público frente a modelo persistido
+
+Un usuario en la base puede tener `passwordHash`; el contrato público solo contiene `id`, `name`, `email` y `role`. No enviar un modelo completo por comodidad.
+
+En dinero usaremos **centavos enteros**: Bs 25,50 se representa como `2550`. Para fechas HTTP usaremos ISO 8601; convertir a `Date` en el servidor y mostrar la zona horaria local en la interfaz.
+
+### Comprobación
+
+En la aplicación usar `strict: true` y el script `typecheck: tsc --noEmit`. Resolver el error, no silenciarlo. Todavía no usamos JSX: los archivos son `.ts`.
+
+## Práctica guiada
+
+Definir contratos para evento y bebida. Introducir un error de tipo y explicar el diagnóstico del compilador.
+
+## Tarea para casa
+
+Definir los contratos de entrada y salida de tu tarea y añadir ejemplos de JSON sin datos reales.
+
+## Criterios de finalización
+
+- [ ] No utilizas any.
+- [ ] Distingues tipo estático y validación en ejecución.
+- [ ] Los contratos no exponen datos privados.
+
+## Conexiones
+
+[[Proyecto/4. Arquitectura vertical y contratos|Contratos por funcionalidad]] · [[Semana1/CLASE 5|Clase 5]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
+
+> [!tip] Distribución orientativa de los 90 minutos
+> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
 
 ---
 
-## 1. El Ecosistema Next.js y el App Router
-
-*React es una librería* increíble para construir interfaces, pero no nos dice cómo enrutar páginas, manejar bases de datos o mejorar el SEO. Next.js es el framework construido sobre React que nos da todas estas herramientas listas para usar.
-
-### El Paradigma del App Router
-Desde su versión 13, Next.js introdujo el **App Router** (la carpeta `app/`). Este nuevo sistema cambia la forma en que pensamos sobre el renderizado:
-
-* **Server Components por defecto:** Todo componente dentro de la carpeta `app/` se renderiza en el servidor (Backend) a menos que indiquemos lo contrario. Esto significa que pueden acceder a la base de datos directamente de forma segura y envían menos JavaScript al navegador (haciendo la app más rápida).
-* **Client Components:** Si un componente necesita interactividad (como botones con `onClick`, usar estados con `useState` o efectos con `useEffect`), debemos agregar la directiva `"use client"` en la primera línea del archivo. Esto le dice a Next.js que ese pedazo de código debe ejecutarse en el navegador del usuario.
-
-### Estructura de Carpetas del Proyecto Base
-Al clonar nuestro repositorio de trabajo, encontrarán una estructura específica. Estos son los archivos clave:
-
-* `app/layout.tsx`: Es el esqueleto principal de la aplicación. Aquí va el HTML base, el `<body>` y elementos globales como el Navbar o el Footer.
-* `app/page.tsx`: Representa la ruta principal (`/` o el Home) de nuestra aplicación.
-* `tailwind.config.ts`: El archivo donde configuraremos nuestros colores corporativos y tipografías para el diseño.
-* `package.json`: El "manifiesto" del proyecto. Lista todas las dependencias (librerías) instaladas y los comandos (scripts) para correr el proyecto.
-
----
-
-## 2. El Misterio de las Variables de Entorno (.env)
-
-En el desarrollo de software, existen datos sensibles que **jamás** deben ser públicos: contraseñas de bases de datos, llaves secretas de APIs o tokens de autenticación.
-
-### ¿Qué es un archivo .env?
-Es un archivo de texto plano que vive en la raíz de tu proyecto y almacena "secretos" en formato `CLAVE=VALOR`. Tu código puede leer estos valores durante la ejecución, pero el archivo en sí nunca se sube a GitHub.
-
-* **.env o .env.local:** Aquí pones tus secretos reales para trabajar en tu computadora. Este archivo **debe** estar ignorado en tu archivo `.gitignore`.
-* **.env.example:** Es una plantilla que sí se sube a GitHub. Contiene los nombres de las claves necesarias, pero con valores vacíos o falsos. Sirve de guía para que otros desarrolladores sepan qué variables necesitan configurar al clonar el proyecto.
-
-### La Regla de Oro en Next.js
-Next.js tiene un sistema estricto de seguridad para las variables de entorno:
-
-* **Variables privadas:** Si creas una variable llamada `DATABASE_URL="postgres://..."`, **solo** el código del servidor (Backend) podrá leerla. Si intentas usarla en un Client Component, Next.js te devolverá `undefined` para evitar que filtres tu contraseña a los navegadores de los usuarios.
-* **Variables públicas:** Si necesitas que una variable esté disponible en el Frontend (por ejemplo, la URL pública de una API externa), **debes** agregarle el prefijo `NEXT_PUBLIC_`. Ejemplo: `NEXT_PUBLIC_API_KEY="12345"`.
-
----
-
-## 3. Despliegue (Deploy) Automático en Vercel
-
-Tener el proyecto en "localhost" es genial, pero el objetivo final es que los usuarios puedan usarlo. Para esto, utilizaremos **Vercel**, la plataforma en la nube creada por los mismos desarrolladores de Next.js.
-
-### Por qué Vercel
-Vercel ofrece un entorno de "Zero Configuration" (Cero Configuración) para Next.js. Entiende automáticamente cómo construir y servir nuestra aplicación en una red global (Edge Network) sin que tengamos que configurar servidores Linux manualmente.
-
-### Pasos para el Deploy Inicial
-1.  **Conexión:** Iniciar sesión en Vercel usando nuestra cuenta de GitHub.
-2.  **Importación:** Seleccionar el repositorio del proyecto "Gestión de Tareas".
-3.  **Configuración de Variables:** Antes de darle a "Deploy", Vercel nos pedirá que ingresemos las variables de entorno de producción (las mismas de nuestro `.env` local, pero para el entorno real).
-4.  **Despliegue:** Al hacer clic en Deploy, Vercel descargará el código, instalará las dependencias (`npm install`), construirá el proyecto (`npm run build`) y nos dará una URL pública viva.
-
----
-
-## 4. Integración Continua (CI) desde el Día 1
-
-Configurar Vercel no es solo para tener un link final; es para establecer un flujo de **Integración Continua (CI)**. 
-
-### ¿Qué significa esto para nuestro equipo?
-A partir de hoy, cada vez que alguien haga un cambio, la nube trabajará por nosotros.
-
-* **Deploy en Producción:** Cualquier código que se apruebe y se una (merge) a la rama `main` en GitHub, Vercel lo detectará automáticamente y actualizará la página web oficial en cuestión de minutos.
-* **Preview Deployments (Entornos de Vista Previa):** Esta es la magia de Vercel. Cuando un desarrollador abra un Pull Request (PR) desde su rama (ej. `feature/modal-login`), Vercel creará una URL temporal y secreta **solo para ese código**. 
-
->[!IMPORTANT] Impacto en el flujo de trabajo: 
->Antes de aprobar el PR de un compañero, el equipo no solo leerá el código, sino que podrá hacer clic en el link de "Preview" que Vercel deja en GitHub y probar la funcionalidad viva en internet. ¡Si funciona bien en el Preview, es seguro unirlo a `main`!
+[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · ← [[Semana1/CLASE 1|Clase 1]] · [[Semana1/CLASE 3|Clase 3]] →

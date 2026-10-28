@@ -1,112 +1,94 @@
-# Backend II - ORMs y Conexión a la Base de Datos
-
+---
+tipo: clase
+clase: 5
+semana: 1
+duracion_minutos: 90
+proyecto: Discoteca
+tags:
+  - curso/fullstack
+  - semana/1
 ---
 
-## 1. ¿Qué es un ORM?
+# Clase 5 — HTTP, REST y primera funcionalidad vertical
 
-Un **ORM (Object-Relational Mapping)** es una herramienta que actúa como un traductor bilingüe entre nuestro código (JavaScript/TypeScript) y nuestra base de datos (SQL).
+[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · ← [[Semana1/CLASE 4|Clase 4]] · [[Semana2/CLASE 6|Clase 6]] →
 
-### El Problema sin ORM (Raw SQL)
-Tradicionalmente, para comunicarnos con la base de datos, debíamos escribir consultas SQL puras dentro de cadenas de texto (strings) en nuestro código.
-* **Desventajas:** No hay autocompletado, es fácil cometer errores de tipeo (ej. escribir `SELET` en vez de `SELECT`), y TypeScript no tiene forma de saber qué datos devuelve esa consulta, perdiendo toda la seguridad de tipos.
+> [!abstract] Objetivo
+> Construir una ruta HTTP pequeña usando arquitectura vertical y validación en ejecución.
 
-### La Solución con ORM
-El ORM nos permite interactuar con las tablas de la base de datos como si fueran simples objetos y métodos de JavaScript. 
+## Antes de empezar
 
-| Acción                        | Usando Raw SQL (Antiguo)                               | Usando un ORM (Moderno)                     |
-| :---------------------------- | :----------------------------------------------------- | :------------------------------------------ |
-| **Buscar todos los usuarios** | `db.query("SELECT * FROM users;")`                     | `db.user.findMany()`                        |
-| **Crear un usuario**          | `db.query("INSERT INTO users (name) VALUES ('Ana');")` | `db.user.create({ data: { name: 'Ana' } })` |
-| **Seguridad**                 | Vulnerable a inyecciones SQL si no se limpia.          | Sanitiza los datos automáticamente.         |
+Repasa [[Semana1/CLASE 4|Clase 4]] y completa su tarea. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
 
->[!IMPORTANT] Decisión del Proyecto:
-> Existen muchos ORMs en el ecosistema Node (TypeORM, Sequelize, Drizzle). Nosotros usaremos **Prisma ORM** porque tiene la mejor experiencia de desarrollador (DX), una documentación impecable y genera tipos de TypeScript automáticamente basándose en nuestra base de datos.
+## Desarrollo de la clase
 
----
+### Contrato HTTP
 
-## 2. Configuración de Prisma ORM
+GET consulta, POST crea, PATCH modifica parcialmente y DELETE elimina según la política acordada. Usamos 200/201 para éxito, 400 para entrada inválida, 401 sin sesión, 403 sin permiso, 404 inexistente y 409 por conflicto. Un JSON mal formado también es 400.
 
-Vamos a integrar Prisma en nuestro proyecto base de Next.js. El proceso se divide en la instalación de las herramientas de desarrollo y la inicialización del esquema.
+En Next.js las rutas viven en `src/app/api`, pero la lógica pertenece a `src/features/<funcionalidad>`. Revisar [[Proyecto/4. Arquitectura vertical y contratos|el árbol y las dependencias]].
 
-### Pasos de Instalación
-1.  **Instalar la CLI de Prisma:** Esta herramienta nos permitirá usar comandos en la terminal para gestionar la base de datos.
-    ```bash
-    npm install prisma --save-dev
-    ```
-2.  **Inicializar Prisma:** Esto creará la carpeta `prisma` y el archivo `.env` (si no existía).
-    ```bash
-    npx prisma init
-    ```
+### Esquema y contrato
 
-### El Archivo schema.prisma
-Al inicializar, se crea un archivo `prisma/schema.prisma`. Este es el corazón de nuestro backend. Aquí definiremos qué base de datos usamos y, más adelante, escribiremos las tablas que diseñamos en el Día 3.
-* Contiene el bloque `generator` (que le dice a Prisma que genere código para un cliente de JavaScript).
-* Contiene el bloque `datasource` (que le dice a Prisma dónde está alojada la base de datos y qué motor usa, en nuestro caso, PostgreSQL).
+Instalar `zod@4`. Crear `src/features/events/shared/event.schema.ts`:
 
----
-
-## 3. Conexión a Base de Datos en la Nube (Neon / Supabase)
-
-Tener una base de datos local instalada en la computadora de cada alumno es un dolor de cabeza (versiones distintas, problemas de puertos, etc.). La solución moderna es usar **Serverless Postgres** en la nube.
-
-### Proveedores Recomendados
-* **Supabase:** Un ecosistema completo (Firebase alternativo) que nos da una base de datos PostgreSQL pura.
-* **Neon:** Una plataforma especializada en Postgres "Serverless" que se enciende y apaga según la demanda, ideal para integrarse con Vercel.
-
-### Flujo de Conexión
-1.  Crear una cuenta gratuita en Neon o Supabase y crear un nuevo proyecto.
-2.  Copiar la **Connection String (Cadena de conexión)**. Se ve algo así:
-    `postgresql://usuario:contraseña@servidor.nube.com:5432/nombre_db`
-3.  Pegar esta cadena en nuestro archivo `.env` local en la variable `DATABASE_URL`.
-4.  *Importante:* Asegurarse de que el archivo `.env` esté en `.gitignore` para no subir nuestra contraseña a GitHub.
-
----
-
-## 4. Primeras Queries con Prisma Client
-
-Una vez conectada la base de datos, necesitamos instalar el "cliente" que se ejecutará en nuestro código de producción para hacer las consultas.
-
-### Instalación del Cliente
-```bash
-npm install @prisma/client
-```
-### El Problema de Next.js en Desarrollo (¡Atención aquí!)
-Next.js, en modo desarrollo (`npm run dev`), recarga los archivos constantemente cada vez que guardamos un cambio (Hot Reloading). Si instanciamos una conexión a la base de datos de forma normal, Next.js abrirá una conexión nueva con cada guardado, agotando el límite de conexiones de nuestra base de datos gratuita en minutos.
-
-### La Solución: El Patrón Singleton
-Para evitar esto, debemos crear un archivo en la raíz de nuestro proyecto (ej. `lib/prisma.ts`) que guarde la conexión de Prisma en el objeto global dinstall cuid pnpme Node. Así, Next.js reciclará la misma conexión en cada recarga.
-
-``` Typescript
-import { PrismaClient } from '@prisma/client'
-
-const prismaClientSingleton = () => {
-  return new PrismaClient()
-}
-
-declare global {
-  var prismaGlobal: undefined | ReturnType<typeof prismaClientSingleton>
-}
-
-const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
-
-export default prisma
-
-if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma
+```ts
+import { z } from "zod";
+export const createEventSchema = z.object({
+  name: z.string().trim().min(3).max(100),
+  startsAt: z.iso.datetime({ offset: true }),
+  capacity: z.number().int().min(1).max(10000),
+}).strict();
+export type CreateEventInput = z.infer<typeof createEventSchema>;
 ```
 
-### Ejecutando la Primera Query
+Nunca aceptar `role`, `totalCents`, contadores o IDs del usuario autenticado porque el cliente los envíe. Cada endpoint define sus campos permitidos.
 
-Ahora, en cualquier parte de nuestro Backend (ej. un archivo Route Handler en `app/api/users/route.ts`), podemos importar esta instancia y hablar con la base de datos:
+### Primera ruta sin base de datos
 
-```Typescript
-import prisma from '@/lib/prisma';
-import { NextResponse } from 'next/server';
-
+```ts
+// src/app/api/health/route.ts
 export async function GET() {
-  // Prisma va a la DB, busca todos los usuarios y los devuelve.
-  const users = await prisma.user.findMany();
-  
-  // Respondemos al cliente con un JSON de los usuarios
-  return NextResponse.json(users);
+  return Response.json({ status: "ok" });
 }
 ```
+
+```bash
+curl -i http://localhost:3000/api/health
+```
+
+La ruta de salud no consulta información del negocio. Las operaciones de escritura se desarrollan y prueban solo localmente hasta integrar los permisos de las clases 8–9.
+
+### Validar antes de persistir
+
+```ts
+const body: unknown = await request.json();
+const input = createEventSchema.parse(body);
+```
+
+El controlador transforma HTTP; el servicio aplica reglas y usa Prisma. El esquema puede compartirse con el frontend; el servicio de base de datos nunca se importa allí.
+
+## Práctica guiada
+
+Añadir /api/health, un contrato de evento y un ejemplo válido e inválido.
+
+## Tarea para casa
+
+Definir rutas y contratos de tu módulo. Probar JSON incorrecto y campos inesperados.
+
+## Criterios de finalización
+
+- [ ] Puedes seguir petición, validación y respuesta.
+- [ ] El contrato rechaza campos extra.
+- [ ] La funcionalidad tiene su propia carpeta.
+
+## Conexiones
+
+[[Proyecto/4. Arquitectura vertical y contratos|Arquitectura y HTTP]] · [[Semana2/CLASE 6|Clase 6]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
+
+> [!tip] Distribución orientativa de los 90 minutos
+> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
+
+---
+
+[[README|Inicio]] · [[Semana1/INDICE|Semana 1]] · ← [[Semana1/CLASE 4|Clase 4]] · [[Semana2/CLASE 6|Clase 6]] →

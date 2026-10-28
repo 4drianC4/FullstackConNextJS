@@ -1,191 +1,102 @@
-# Día 15: Frontend V - Integración (Mutaciones y Flujos)
+---
+tipo: clase
+clase: 15
+semana: 3
+duracion_minutos: 90
+proyecto: Discoteca
+tags:
+  - curso/fullstack
+  - semana/3
+---
 
-## 1. Mutaciones: Enviando Datos al Servidor
+# Clase 15 — Consumo del backend y mutaciones
 
-En el Día 14 usamos `useQuery` de TanStack Query para "preguntar" por los datos. Pero cuando enviamos un formulario, no estamos haciendo una pregunta; estamos dando una **orden** de que algo cambie. Para esto, usamos `useMutation`.
+[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 14|Clase 14]] · [[semana4/CLASE 16|Clase 16]] →
 
-### ¿Por qué no usar fetch puro?
+> [!abstract] Objetivo
+> Leer datos del backend y actualizar la pantalla después de una mutación sin añadir otro gestor de estado.
 
-Si usas un `fetch("api/users", { method: "POST" })` puro dentro del `onSubmit` de tu formulario, tendrás un problema: **la caché de tu aplicación quedará desactualizada**. Acabas de crear un usuario nuevo, pero tu lista de usuarios (que cargaste con `useQuery`) no sabe que ese usuario existe hasta que recargues la página.
+## Antes de empezar
 
-`useMutation` resuelve esto obligando a la caché a actualizarse (invalidando consultas viejas) en cuanto la operación termina.
+Repasa [[Semana3/CLASE 14|Clase 14]] y completa su tarea. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
 
-### Implementación Práctica:
+## Desarrollo de la clase
 
-Vamos a conectar el formulario que hicimos en el Día 13 con nuestro backend.
-```Typescript
+### Elegir una estrategia sencilla
 
+Usaremos fetch, estado local y recarga explícita del listado tras guardar. Los componentes de servidor pueden leer servicios directamente; no mezclaremos dos cachés para el mismo listado. TanStack Query y Zustand quedan como ampliaciones.
+
+### Petición cliente con cancelación
+
+```tsx
 "use client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-
-export default function CrearPostForm() {
-  const queryClient = useQueryClient(); // Nuestro gestor de caché global
-
-  // 1. Definimos la Mutación
-  const mutation = useMutation({
-    mutationFn: async (nuevoPost: { titulo: string; contenido: string }) => {
-      const res = await fetch("/api/posts", {
-        method: "POST",
-        body: JSON.stringify(nuevoPost),
-      });
-      if (!res.ok) throw new Error("Falló la creación del post");
-      return res.json();
-    },
-    // 2. Si todo sale bien, le decimos a TanStack Query: "¡La lista de posts cambió!"
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      // Al invalidar, TanStack Query vuelve a hacer el fetch automáticamente
-      // y la lista en pantalla se actualiza sola.
-    },
-  });
-
-  const { register, handleSubmit } = useForm();
-
-  const onSubmit = (data: any) => {
-    mutation.mutate(data); // Disparamos la mutación
-  };
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <input {...register("titulo")} placeholder="Título" />
-      <textarea {...register("contenido")} placeholder="Contenido" />
-      <button disabled={mutation.isPending}>
-        {mutation.isPending ? "Guardando..." : "Crear Post"}
-      </button>
-      {mutation.isError && <p className="text-red-500">Hubo un error.</p>}
-    </form>
-  );
-}
-```
-
----
-## 2. Optimistic Updates (El Secreto de la Mejor UX)
-
-### La Latencia de Red
-
-Imagina que estás en Twitter/X y le das "Me gusta" a un post.
-
-- **Enfoque Pesimista (Común):** Haces clic -> Sale un spinner de carga -> Esperas 1 segundo a que el servidor de USA responda -> El corazón se pone rojo. Esa espera de 1 segundo hace que la app se sienta lenta y torpe.
-    
-- **Enfoque Optimista (Profesional):** Haces clic -> **El corazón se pone rojo INSTANTÁNEAMENTE en tu pantalla** -> El Frontend envía la petición al servidor en secreto.
-    
-
-¿Qué pasa si el servidor da error (ej. se cayó el internet)? El Frontend se da cuenta, quita el color rojo del corazón y te muestra un mensajito: "Error al dar Me gusta". **Asumimos el éxito por adelantado para que la app se sienta instantánea.**
-
-### Cómo implementarlo en TanStack Query:
-
-Se logra manipulando la caché manualmente antes de que el servidor responda.
-```Typescript
-
-const mutation = useMutation({
-  mutationFn: darMeGustaAPI,
-  // Se ejecuta en el instante en que haces clic, antes de que el fetch termine
-  onMutate: async (postAActualizar) => {
-    // 1. Cancelamos cualquier fetch en curso para que no sobreescriba nuestra acción
-    await queryClient.cancelQueries({ queryKey: ['posts'] });
-
-    // 2. Guardamos el estado anterior por si tenemos que deshacer los cambios (rollback)
-    const estadoAnterior = queryClient.getQueryData(['posts']);
-
-    // 3. Modificamos la caché a la fuerza (esto es lo que pinta el corazón rojo)
-    queryClient.setQueryData(['posts'], (viejosPosts: any) => {
-      return viejosPosts.map((post: any) => 
-        post.id === postAActualizar.id ? { ...post, likes: post.likes + 1 } : post
-      );
-    });
-
-    return { estadoAnterior };
-  },
-  // Si falla el servidor, restauramos el estado guardado
-  onError: (err, variables, contexto) => {
-    queryClient.setQueryData(['posts'], contexto?.estadoAnterior);
-  },
-  // Al final, haya éxito o error, pedimos los datos reales de nuevo para estar seguros
-  onSettled: () => {
-    queryClient.invalidateQueries({ queryKey: ['posts'] });
-  },
-});
-```
-
----
-## 3. Rutas Protegidas en el Frontend
-
-En el Día 10, usamos un `middleware.ts` para que nadie sin iniciar sesión pudiera golpear nuestros endpoints del backend. Sin embargo, ¿qué pasa si un usuario no logueado escribe `misitio.com/dashboard` en el navegador?
-
-El middleware del backend lo botará si intenta pedir datos, pero **el usuario aún verá la UI (el esqueleto del dashboard)** vacía. Esto es un fallo de diseño. Debemos proteger las rutas visuales.
-
-### Protección en Server Components (La forma más segura)
-
-Como los Server Components se ejecutan en el servidor, podemos verificar la sesión de **NextAuth** antes de siquiera enviarle un solo píxel de HTML al usuario. Si no hay sesión, ni siquiera construimos la página.
-```Typescript
-
-// app/dashboard/page.tsx
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Configuración del Día 9
-
-export default async function DashboardPage() {
-  // 1. Revisamos la cookie del servidor
-  const session = await getServerSession(authOptions);
-
-  // 2. Si no hay sesión, forzamos la salida ANTES de renderizar
-  if (!session) {
-    redirect("/login");
-  }
-
-  // 3. Si llega aquí, el usuario es 100% legítimo
-  return (
-    <div>
-      <h1>Bienvenido al Dashboard, {session.user.name}</h1>
-    </div>
-  );
-}
-```
-
-**Ventaja gigante:** El usuario nunca verá un "parpadeo" del dashboard antes de ser pateado al login. Es seguro y profesional.
-
----
-## 4. Redirecciones y Flujos de Navegación
-
-A menudo, las mutaciones vienen acompañadas de un cambio de página. Si te registras con éxito, quieres ir al Home; si borras tu cuenta, quieres ser enviado a la pantalla de despedida.
-
-En Next.js tenemos dos formas de hacer esto dependiendo de dónde estemos:
-
-### A. Desde el Servidor (`redirect`)
-
-Como vimos en el ejemplo de arriba, usamos `import { redirect } from "next/navigation"` dentro de funciones asíncronas de servidor (Server Components o Server Actions). Es una redirección a nivel de protocolo HTTP (Código 307 o 308).
-
-### B. Desde el Cliente (`useRouter`)
-
-Si estás en un Client Component (por ejemplo, dentro del `onSuccess` de una mutación en TanStack Query), usamos el hook `useRouter`.
-```Typescript
-
-"use client";
-import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
-
-export default function BotonEliminarCuenta() {
-  const router = useRouter();
-
-  const mutation = useMutation({
-    mutationFn: eliminarCuentaAPI,
-    onSuccess: () => {
-      alert("Cuenta eliminada correctamente");
-      // Cambiamos la URL visualmente usando JavaScript
-      router.push("/goodbye");
+import { useEffect, useState } from "react";
+import { z } from "zod";
+const eventListSchema = z.array(z.object({
+  id: z.string(), name: z.string(), startsAt: z.string(),
+  capacity: z.number(), status: z.enum(["DRAFT", "OPEN", "CLOSED"]),
+}));
+type EventSummary = z.infer<typeof eventListSchema>[number];
+export function EventList() {
+  const [events, setEvents] = useState<EventSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true); setError("");
+    async function load() {
+      try {
+        const response = await fetch("/api/events", { signal: controller.signal, cache: "no-store" });
+        if (!response.ok) throw new Error(`No se pudo cargar (${response.status})`);
+        const raw: unknown = await response.json();
+        const data = eventListSchema.parse(raw);
+        if (!controller.signal.aborted) setEvents(data);
+      } catch (error: unknown) {
+        if (!controller.signal.aborted) setError(error instanceof Error ? error.message : "Error de conexión");
+      } finally { if (!controller.signal.aborted) setLoading(false); }
     }
-  });
-
-  return <button onClick={() => mutation.mutate()}>Eliminar Mi Cuenta</button>;
+    void load();
+    return () => controller.abort();
+  }, [revision]);
+  return <section>
+    <button onClick={() => setRevision((r) => r + 1)}>Actualizar</button>
+    {loading ? <p role="status">Cargando…</p> : error ? <p role="alert">{error}</p> :
+      events.length === 0 ? <p>No hay eventos.</p> :
+      <ul>{events.map((event) => <li key={event.id}>{event.name}</li>)}</ul>}
+  </section>;
 }
 ```
 
----
-### Resumen del Día 15
+Mover el esquema de respuesta a `features/events/shared` para que sea un contrato común. Las fechas JSON son strings, no objetos `Date`.
 
-¡El círculo se ha completado!
-- Aprendimos a hacer **Mutaciones** con TanStack Query, asegurando que cuando enviamos datos, nuestra interfaz "se entera" y refresca lo que haga falta.
-- Elevamos drásticamente la UX implementando **Optimistic Updates**, engañando al ojo humano para que la app se sienta instantánea aunque dependa de una base de datos lejana.
-- Aseguramos nuestras Vistas con **Rutas Protegidas** en el servidor, combinando NextAuth y redirecciones forzadas.
-- Entendimos la diferencia entre mover al usuario desde el servidor (`redirect`) y desde el cliente (`useRouter`).
+### Conectar mutaciones
+
+Elevar `revision` al componente padre. Pasar `onSaved` al formulario; llamarlo solo después de una respuesta exitosa y aumentar revisión para recargar. Así el usuario ve el dato confirmado por servidor. `router.refresh()` no vuelve a ejecutar por sí mismo un efecto cliente con dependencias sin cambios.
+
+Para entradas y ventas no aplicaremos optimistic UI: primero confirmar la operación. Una reserva rechazada con 409 conserva el formulario y explica que la mesa ya no está disponible. Una sesión expirada conduce al login sin tratar el HTML de redirección como JSON válido.
+
+## Práctica guiada
+
+Integrar formulario y listado, y comprobar que una creación aparece sin recargar el navegador.
+
+## Tarea para casa
+
+Completar un flujo real del módulo usando el backend compartido. Añadir reintento y estado vacío.
+
+## Criterios de finalización
+
+- [ ] Se comprueba response.ok.
+- [ ] Se cancelan peticiones al desmontar.
+- [ ] Una mutación exitosa actualiza el listado.
+
+## Conexiones
+
+[[Semana3/CLASE 14|Clase 14]] · [[semana4/CLASE 16|Clase 16]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
+
+> [!tip] Distribución orientativa de los 90 minutos
+> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
+
+---
+
+[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 14|Clase 14]] · [[semana4/CLASE 16|Clase 16]] →

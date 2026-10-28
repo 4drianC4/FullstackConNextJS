@@ -1,452 +1,131 @@
-gmail<div align="center">
-
-# 🚀 Desarrollo Fullstack con Next.js
-
-### **El Stack Completo del Desarrollo Web Moderno**
-
-![Next.js](https://img.shields.io/badge/Next.js-14+-black?style=for-the-badge&logo=next.js&logoColor=white)
-![React](https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Tailwind](https://img.shields.io/badge/Tailwind-3+-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
-
-**Un curso intensivo de 4 semanas para dominar el desarrollo fullstack moderno**
-
-[🎯 Objetivos](#-objetivos) • [📚 Contenido](#-contenido-del-curso) • [🛠️ Stack](#️-stack-tecnológico) • [🚀 Requisitos](#-requisitos-previos)
-
-</div>
-
+---
+tipo: indice
+aliases:
+  - Inicio del curso
+  - Fullstack con Next.js
+tags:
+  - curso/fullstack
 ---
 
-## 📋 Descripción
-
-Este curso va más allá de la sintaxis básica, enfocándose en **conceptos fundamentales**, **patrones de diseño** y **arquitectura de aplicaciones** del mundo real. Aprenderás a construir aplicaciones web fullstack escalables y performantes utilizando el ecosistema más demandado de la industria.
+# Desarrollo Fullstack con Next.js — Gestión de Discoteca
 
-### 🎯 Objetivos
+Curso práctico de **20 clases de 90 minutos** (30 horas presenciales), con tareas entre sesiones. Construiremos colaborativamente una aplicación pequeña y desplegada: backend primero, frontend después e integración al final, incluyendo Docker y desarrollo asistido por IA con OpenCode y NVIDIA.
 
-Al finalizar este curso serás capaz de:
+> [!tip] Empieza por Obsidian
+> Abre esta carpeta como bóveda y sigue [[Recursos/Obsidian - Guia del curso|la guía de navegación]]. Los índices, backlinks y etiquetas conectan clases, proyecto y recursos sin requerir plugins comunitarios.
 
-- ✅ **Frontend**: Dominar React 18+ con Server y Client Components
-- ✅ **Estilado**: Construir interfaces profesionales con Tailwind CSS y sistemas de diseño
-- ✅ **Backend**: Desarrollar APIs RESTful robustas con Next.js App Router
-- ✅ **Base de Datos**: Diseñar y gestionar bases de datos relacionales con Prisma ORM
-- ✅ **Autenticación**: Implementar sistemas de autenticación seguros con NextAuth.js
-- ✅ **Validación**: Manejar validaciones con Zod en frontend y backend
-- ✅ **Estado**: Gestionar estado global eficientemente con Zustand
-- ✅ **Despliegue**: Deploy automático en producción con CI/CD
-- ✅ **Colaboración**: Trabajar en equipo con Git, GitHub y metodologías ágiles
+## Descripción y objetivos
 
----
+El curso presupone JavaScript, HTML y CSS. React y TypeScript se introducen desde un nivel inicial y se practican sobre el proyecto. El objetivo es comprender y entregar un MVP; no prometer dominio de todo el ecosistema en cuatro semanas.
 
-## 📚 Contenido del Curso
+Al finalizar podrás:
 
-### 📘 Semana 1: Setup, Arquitectura y Fundamentos de Backend
+- Diseñar datos relacionales y aplicar migraciones con Prisma.
+- Construir APIs REST con validación, autenticación y autorización.
+- Organizar código mediante funcionalidades verticales.
+- Crear interfaces React tipadas, formularios y flujos conectados al backend.
+- Usar Docker para el entorno local y ejecutar la aplicación con Compose.
+- Colaborar mediante ramas, PR, pruebas y controles de CI.
+- Desplegar y verificar una aplicación con datos persistentes.
+- Planificar, revisar y depurar cambios con OpenCode sin delegar la comprensión.
 
-Fundamentos del desarrollo fullstack, configuración del entorno y primeros pasos con APIs.
+## Temario — exactamente 20 clases
 
-<details open>
-<summary><b>Ver Días 1-5</b></summary>
+### Semana 1 — Introducción y fundamentos del backend
 
-#### 📌 Día 1: Herramientas y Flujo de Trabajo
-- Arquitectura Fullstack (Cliente-Servidor)
-- Setup de VSCode, Node.js y npm
-- Flujo de Git/GitHub para trabajo colaborativo
-- Ramas, Pull Requests y resolución de Merge Conflicts
-- Presentación del Proyecto Final
-
-#### 📌 Día 2: Entorno Next.js y Deploy
-- Inicialización del template base (Next.js App Router)
-- Configuración de variables de entorno (`.env`)
-- Deploy automático inicial en Vercel
-- Integración Continua (CI) desde el día 1
-
-#### 📌 Día 3: Bases de Datos y Diseño
-- Bases de datos Relacionales vs No Relacionales
-- Diseño de base de datos del proyecto
-- Diagrama Entidad-Relación (ERD)
-- Normalización y buenas prácticas
+[[Semana1/INDICE|Índice y entregable de la semana]]
 
-#### 📌 Día 4: Backend I - APIs RESTful
-- ¿Qué es una API REST?
-- Métodos HTTP (GET, POST, PUT, DELETE)
-- Status Codes y mejores prácticas
-- Testing de endpoints con Postman/Thunder Client
+- [[Semana1/CLASE 1|Clase 1]] — Introducción, entorno y trabajo colaborativo.
+- [[Semana1/CLASE 2|Clase 2]] — TypeScript aplicado al backend.
+- [[Semana1/CLASE 3|Clase 3]] — Docker I - PostgreSQL local.
+- [[Semana1/CLASE 4|Clase 4]] — Modelado, Prisma y datos de prueba.
+- [[Semana1/CLASE 5|Clase 5]] — HTTP, REST y primera funcionalidad vertical.
 
-#### 📌 Día 5: Backend II - ORMs y Conexión
-- ¿Qué es un ORM y por qué usarlo?
-- Configuración de Prisma ORM
-- Conexión a bgmailase de datos en la nube (Supabase/Neon)
-- Primeras queries con Prisma Client
+### Semana 2 — Desarrollo del backend
 
-</details>
+[[Semana2/INDICE|Índice y entregable de la semana]]
 
----
+- [[Semana2/CLASE 6|Clase 6]] — CRUD, servicios y manejo de errores.
+- [[Semana2/CLASE 7|Clase 7]] — Relaciones, reglas de negocio y transacciones.
+- [[Semana2/CLASE 8|Clase 8]] — Autenticación y sesiones.
+- [[Semana2/CLASE 9|Clase 9]] — Autorización y protección de operaciones.
+- [[Semana2/CLASE 10|Clase 10]] — Pruebas e integración del backend.
 
-### 📗 Semana 2: Core Backend, Base de Datos y Autenticación
+### Semana 3 — Desarrollo del frontend
 
-Desarrollo completo del backend con autenticación, seguridad y validaciones.
+[[Semana3/INDICE|Índice y entregable de la semana]]
 
-<details open>
-<summary><b>Ver Días 6-10</b></summary>
-
-#### 📌 Día 6: Backend III - Modelado de Datos
-- Creación del `schema.prisma`
-- Generación de migraciones
-- Seeding: sembrado de datos de prueba
-- Relaciones entre modelos
-
-#### 📌 Día 7: Backend IV - Lógica de Negocio
-- Creación de Route Handlers en Next.js
-- Endpoints GET y POST
-- Separación de responsabilidades (Controladores vs Servicios)
-- Arquitectura limpia
-
-#### 📌 Día 8: Backend V - CRUD Completo
-- Endpoints PUT y DELETE
-- Relaciones entre tablas
-- Operaciones complejas con Prisma
-- Manejo de transacciones
+- [[Semana3/CLASE 11|Clase 11]] — React I - Componentes y props.
+- [[Semana3/CLASE 12|Clase 12]] — React II y rutas de Next.js.
+- [[Semana3/CLASE 13|Clase 13]] — Interfaz, Tailwind y accesibilidad.
+- [[Semana3/CLASE 14|Clase 14]] — Formularios con React Hook Form y Zod.
+- [[Semana3/CLASE 15|Clase 15]] — Consumo del backend y mutaciones.
 
-#### 📌 Día 9: Backend VI - Seguridad y Autenticación
-- Conceptos de JWT, Cookies y Sesiones
-- Integración de NextAuth.js (Auth.js)
-- Proveedores OAuth (Google, GitHub)
-- Autenticación con credenciales
-
-#### 📌 Día 10: Backend VII - Validaciones y Middleware
-- Validación de datos con Zod
-- Middleware de autenticación
-- Manejo global de errores
-- Review del código Backend
-
-</details>
-
----
-
-### 📙 Semana 3: Frontend y Consumo de APIs
-
-Construcción de interfaces modernas y conexión con el backend.
-
-<details open>
-<summary><b>Ver Días 11-15</b></summary>
-
-#### 📌 Día 11: Frontend I - Arquitectura UI
-- Server Components vs Client Components
-- App Router y File-based Routing
-- Layouts compartidos y anidados
-- Navegación y Link components
-
-#### 📌 Día 12: Frontend II - Sistema de Diseño
-- Maquetado profesional con Tailwind CSS
-- Componentes UI reutilizables (shadcn/ui)
-- Temas y modo oscuro
-- Responsive design
-
-#### 📌 Día 13: Frontend III - Estado y Formularios
-- Gestión de estado global con Zustand
-- React Hook Form para formularios eficientes
-- Validación en cliente con Zod
-- Manejo de errores de formularios
-
-#### 📌 Día 14: Frontend IV - Integración (Lectura)
-- Consumo de APIs con Fetch/React Query
-- Estados de carga (Loaders, Skeletons)
-- Manejo de errores
-- Caché y revalidación
-
-#### 📌 Día 15: Frontend V - Integración (Mutaciones)
-- Envío de datos al servidor
-- Optimistic Updates
-- Rutas protegidas
-- Redirecciones y middleware
-
-</details>
-
----
-
-### 📕 Semana 4: Integración Fullstack, Revisiones y Cierre
-
-Testing, optimización y preparación para producción.
-
-<details open>
-<summary><b>Ver Días 16-20</b></summary>
-
-#### 📌 Día 16: Fullstack I - Testing y UX
-- Testing manual end-to-end
-- Optimistic UI para mejor UX
-- Sincronización Frontend/Backend
-- Feedback al usuario
-
-#### 📌 Día 17: Fullstack II - Refactorización
-- Identificación de Code Smells
-- Refactorización de componentes grandes
-- Eliminación de código duplicado
-- Mejores prácticas y patrones
-
-#### 📌 Día 18: Revisiones I - QA Colaborativo
-- Quality Assurance cruzado entre equipos
-- Reporte de bugs usando GitHub Issues
-- Testing de features de otros equipos
-- Documentación de problemas
-
-#### 📌 Día 19: Revisiones II - Optimización
-- Resolución de Issues reportados
-- Auditoría con Lighthouse
-- Optimización de performance
-- Configuración final de producción
-
-#### 📌 Día 20: Presentación Final 🎉
-- Demo del proyecto en producción
-- Presentación de features implementadas
-- Retrospectiva del curso
-- Siguientes pasos y recursos
-
-</details>
----
-
-## 🛠️ Stack Tecnológico
-
-### Frontend
-| Tecnología             | Versión | Descripción                                               |
-| ---------------------- | ------- | --------------------------------------------------------- |
-| ⚛️ **React**           | 22+     | Librería para interfaces de usuario con Server Components |
-| ▲ **Next.js**          | 14+     | Framework React fullstack con App Router                  |
-| 🎨 **Tailwind CSS**    | 3+      | Framework CSS utility-first                               |
-| 🎭 **shadcn/ui**       | Latest  | Componentes UI reutilizables y accesibles                 |
-| 🐻 **Zustand**         | 4+      | Gestión de estado global minimalista                      |
-| 📋 **React Hook Form** | 7+      | Manejo eficiente de formularios                           |
-
-### Backend
-| Tecnología         | Versión | Descripción                      |
-| ------------------ | ------- | -------------------------------- |
-| 🟢 **Node.js**     | 22+     | Runtime de JavaScript            |
-| ▲ **Next.js API**  | 14+     | Route Handlers para APIs RESTful |
-| 🔷 **Prisma ORM**  | Latest  | ORM moderno para bases de datos  |
-| 🐘 **PostgreSQL**  | Latest  | Base de datos relacional         |
-| 🔐 **NextAuth.js** | 5+      | Autenticación completa           |
-| ✅ **Zod**          | 3+      | Validación de schemas TypeScript |
-
-### DevOps & Tools
-| Tecnología        | Versión | Descripción                |
-| ----------------- | ------- | -------------------------- |
-| 🔷 **TypeScript** | 5+      | JavaScript tipado          |
-| 📦 **npm/pnpm**   | Latest  | Gestión de paquetes        |
-| 🔧 **Git**        | Latest  | Control de versiones       |
-| 🐙 **GitHub**     | -       | Repositorio y colaboración |
-| ▲ **Vercel**      | -       | Plataforma de deployment   |
-| 🔨 **Postman**    | Latest  | Testing de APIs            |
-
----
-
-## 📂 Estructura del Repositorio
-
-```
-📦 FullstackConNextJS
-├── 📁 Semana1/          # Setup, Arquitectura y Fundamentos Backend
-├── 📁 Semana2/          # Core Backend, Base de Datos y Autenticación
-├── 📁 Semana3/          # Frontend y Consumo de APIs
-├── 📁 semana4/          # Integración Fullstack y Revisiones
-├── 📁 Recursos/         # Recursos adicionales, cheat sheets y ejemplos
-├── 📁 Images/           # Imágenes, diagramas y assets del curso
-├── 📄 .gitignore        # Archivos ignorados por Git
-└── 📄 README.md         # Documentación principal
-```
-
----
-
-## 🚀 Requisitos Previos
-
-### Conocimientos
-- ✅ Fundamentos de HTML, CSS y JavaScript
-- ✅ Conceptos básicos de programación (variables, funciones, condicionales)
-- ✅ Familiaridad con la terminal/línea de comandos
-
-### Software Necesario
-| Herramienta | Versión Mínima | Link |
-| ----------- | -------------- | ---- |
-| **Node.js** | 18+ | [Descargar](https://nodejs.org/) |
-| **Git** | 2.0+ | [Descargar](https://git-scm.com/) |
-| **VS Code** | Latest | [Descargar](https://code.visualstudio.com/) |
-
-### Cuentas Requeridas
-- 🐙 Cuenta en **GitHub** (para repositorio y colaboración)
-- ▲ Cuenta en **Vercel** (para deployment automático)
-- 🗄️ Cuenta en **Supabase** o **Neon** (base de datos gratuita)
-
-### Extensiones Recomendadas para VS Code
-```
-- ES7+ React/Redux/React-Native snippets
-- Tailwind CSS IntelliSense
-- Prisma
-- ESLint
-- Prettier
-- GitLens
-- Thunder Client (para testing de APIs)
-```
-
----
-
-## 💡 Metodología de Aprendizaje
-
-Este curso sigue un enfoque **práctico y basado en proyectos**:
-
-```mermaid
-graph LR
-    A[📖 Teoría] --> B[💻 Demo en Vivo]
-    B --> C[🔨 Práctica Guiada]
-    C --> D[🚀 Proyecto]
-    D --> E[🔄 Review & Feedback]
-    E --> A
-```
-
-### Principios del Curso
-
-1. **🎯 Conceptos sobre Sintaxis**: Entender el "por qué" antes del "cómo"
-2. **🔨 Learning by Doing**: Código desde el día 1
-3. **🏗️ Proyectos Reales**: Aplicaciones del mundo real, no ejemplos triviales
-4. **👥 Trabajo Colaborativo**: Git workflow profesional y code reviews
-5. **✨ Best Practices**: Patrones de la industria desde el principio
-
----
-
-## 🎯 Proyecto Final
-
-Durante el curso desarrollarás una **aplicación fullstack completa** que incluirá:
-
-- ✅ Frontend moderno con React y Tailwind CSS
-- ✅ Backend RESTful API con Next.js
-- ✅ Base de datos relacional con Prisma
-- ✅ Sistema de autenticación y autorización
-- ✅ CRUD completo con relaciones
-- ✅ Validaciones en cliente y servidor
-- ✅ Deploy automático en producción
-- ✅ Trabajo en equipo con Git/GitHub
-
-**Ejemplos de proyectos**: Sistema de gestión de tareas, Blog con autores, E-commerce básico, Red social simple.
-
----
-
-## 📖 Recursos Adicionales
-
-### Documentación Oficial
-- 📘 [React Documentation](https://react.dev) - La nueva documentación oficial de React
-- 📗 [Next.js Documentation](https://nextjs.org/docs) - Guías completas de Next.js 14+
-- 📙 [Tailwind CSS Docs](https://tailwindcss.com/docs) - Referencia de utilidades
-- 📕 [Prisma Docs](https://www.prisma.io/docs) - Guía completa de Prisma ORM
-- 🔐 [NextAuth.js Guide](https://next-auth.js.org/) - Autenticación en Next.js
-- ✅ [Zod Documentation](https://zod.dev/) - Validación de schemas
-
-### Herramientas y Recursos
-- 🎨 [shadcn/ui](https://ui.shadcn.com/) - Componentes UI para copiar y pegar
-- 🎭 [Tailwind UI](https://tailwindui.com/) - Componentes premium de Tailwind
-- 🐻 [Zustand](https://github.com/pmndrs/zustand) - State management simple
-- 📋 [React Hook Form](https://react-hook-form.com/) - Formularios performantes
-- 🗄️ [Supabase](https://supabase.com/) - Backend as a Service
-- 🐘 [Neon](https://neon.tech/) - Postgres serverless
+### Semana 4 — Integración, Docker, IA y cierre
 
-### Lecturas Recomendadas
-- 📚 [MDN Web Docs](https://developer.mozilla.org) - Referencia web completa
-- 📚 [Patterns.dev](https://www.patterns.dev/) - Patrones de diseño modernos
-- 📚 [JavaScript.info](https://javascript.info/) - Tutorial moderno de JS
-- 📚 [web.dev](https://web.dev/) - Mejores prácticas por Google
+[[semana4/INDICE|Índice y entregable de la semana]]
 
----
+- [[semana4/CLASE 16|Clase 16]] — Integración fullstack y pruebas de flujos.
+- [[semana4/CLASE 17|Clase 17]] — Docker II, CI y despliegue.
+- [[semana4/CLASE 18|Clase 18]] — IA I - Desarrollo con OpenCode y NVIDIA.
+- [[semana4/CLASE 19|Clase 19]] — IA II - Depuración y revisión con OpenCode.
+- [[semana4/CLASE 20|Clase 20]] — Presentación, evaluación y retrospectiva.
 
-## 🤝 Contribuir
+## Tecnologías
 
-¿Encontraste un error o tienes una sugerencia? ¡Las contribuciones son bienvenidas!
+| Área | Elección del curso |
+| --- | --- |
+| Lenguaje y runtime | TypeScript 5, Node.js 22 (22.18 o superior dentro de esa línea) y npm |
+| Aplicación | Next.js 16, App Router y React 19 |
+| Interfaz | Tailwind CSS 4, componentes seleccionados de shadcn/ui |
+| Formularios | React Hook Form 7, Zod 4 y resolvers compatibles |
+| Datos | PostgreSQL 16, Prisma 7 y adaptador pg |
+| Identidad | Auth.js / NextAuth 5 beta, credenciales del personal y bcryptjs |
+| Calidad | ESLint, Vitest, un flujo con Playwright y GitHub Actions |
+| Infraestructura | Docker Compose v2, Vercel y PostgreSQL alojado |
+| IA | OpenCode 1 como agente; proveedor NVIDIA según acceso y cuota disponible |
 
-### Cómo Contribuir
+[[Recursos/Stack y entorno|Instalación, scripts, versiones exactas y checklist del instructor]]. Las familias anteriores son una decisión docente; la aplicación debe fijar las versiones exactas y su lockfile. Auth.js 5 está tratado explícitamente como prerelease; no mezclar ejemplos v4/v5. Este repositorio es de apuntes: todavía no contiene una aplicación ejecutable ni su lockfile.
 
-1. 🍴 Haz fork del repositorio
-2. 🌿 Crea una rama con tu feature
-   ```bash
-   git checkout -b feature/mi-mejora
-   ```
-3. ✍️ Commit tus cambios
-   ```bash
-   git commit -m 'Añade: descripción de la mejora'
-   ```
-4. 📤 Push a la rama
-   ```bash
-   git push origin feature/mi-mejora
-   ```
-5. 🔀 Abre un Pull Request
+Zustand, TanStack Query, optimistic UI, modo oscuro y caché avanzada son ampliaciones, no requisitos de aprobación.
 
-### Tipos de Contribuciones
+## Proyecto y arquitectura
 
-- 🐛 Corrección de errores en el código o documentación
-- 📝 Mejoras en la documentación
-- ✨ Nuevos ejemplos o ejercicios
-- 💡 Sugerencias de contenido adicional
+[[Proyecto/1. Sistema de Gestion de Discoteca|Sistema de gestión de discoteca]]: usuarios y acceso, eventos, entradas e ingreso, catálogo de bebidas, ventas de barra y reservas de mesas. [[Proyecto/2. Tareas por funcionalidad|Tareas y equipos]] · [[Proyecto/6. Modelo de datos|Modelo de datos]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical y contratos]].
 
----
+Cada alumno desarrolla una tarea de extremo a extremo dentro de su funcionalidad. La secuencia de enseñanza separa backend y frontend, pero la estructura del proyecto los reúne por dominio. No se asigna a una persona únicamente la base de datos y a otra únicamente la interfaz.
 
-## 📊 Roadmap del Curso
+Fuera del MVP: pagos reales, facturación fiscal, inventario de ingredientes, QR, tiempo real y reportes avanzados. Los datos serán sintéticos.
 
-```
-Semana 1 ████████████░░░░░░░░ 25% - Backend Foundations
-Semana 2 ░░░░░░░░░░░░████████░░ 50% - Backend Advanced
-Semana 3 ░░░░░░░░░░░░░░░░░░████ 75% - Frontend & Integration
-Semana 4 ░░░░░░░░░░░░░░░░░░░░██ 100% - Polish & Deploy
-```
+## Requisitos y preparación
 
----
+- JavaScript: funciones, arrays, objetos, módulos, promesas y async/await. HTML y CSS. Estos contenidos no se vuelven a enseñar.
+- Terminal básica, Git, Node.js, editor, Docker y Obsidian.
+- Cuentas de GitHub y del hosting/base elegidos; para IA, acceso a un proveedor NVIDIA disponible sin pago para la práctica.
+- Trabajo fuera de clase: referencia de 45–60 minutos entre sesiones y más si la tarea lo requiere. Registrar bloqueos antes de la siguiente clase.
 
-## ❓ FAQ
+Hasta 18 alumnos; propuesta inicial de seis equipos de hasta tres, ajustable a inscritos. El instructor prepara el repositorio de aplicación, contratos y coordinación de migraciones. Los alumnos lo construyen durante el curso.
 
-<details>
-<summary><b>¿Necesito saber TypeScript?</b></summary>
+## Metodología y evaluación
 
-No es estrictamente necesario, pero es recomendable. TypeScript será introducido gradualmente durante el curso.
+Explicación breve, práctica guiada, tarea del módulo y PR revisado. La integración se revisa continuamente, con hitos al cerrar backend, frontend y despliegue. [[Proyecto/3. Guía de Contribución y Estándares del Proyecto|Guía de contribución]] · [[Proyecto/5. Evaluacion y entregables|Rúbrica y entregables]].
 
-</details>
+La clase 1 introduce Obsidian. Las dos clases de IA enseñan a programar y revisar con OpenCode; no exigen añadir una API de IA al producto ni contratar un plan. Si falta cuota, hay una práctica equivalente de revisión sin inferencia.
 
-<details>
-<summary><b>¿El curso es gratuito?</b></summary>
+## Mapa de recursos
 
-Este repositorio contiene material educativo abierto. Consulta con el instructor sobre modalidades del curso.
+- [[Recursos/Obsidian - Guia del curso|Obsidian: enlaces, propiedades y grafo local]].
+- [[Recursos/Stack y entorno|Stack y entorno de la aplicación]].
+- [[Recursos/Conceptos y conexiones|Mapa de conceptos y dependencias]].
+- [[Recursos/Docker/Docker|Docker: clases y referencia]].
+- [[Recursos/Fullstack con IA/Programemos como si estuviéramos en la matrix... o quizá si estamos|OpenCode y NVIDIA: clases y referencia]].
+- [[Recursos/Creación local de proyectos/0. División para la creación del todo|Recetas de creación local]].
 
-</details>
+Los dibujos existentes se conservan como material visual complementario; pueden contener ejemplos de proyectos anteriores. El esquema y las notas actuales de Discoteca son la referencia del curso.
 
-<details>
-<summary><b>¿Puedo usar este material para enseñar?</b></summary>
+## Documentación oficial
 
-Sí, el material está bajo licencia MIT. Puedes usarlo, modificarlo y compartirlo libremente dando crédito.
+[Next.js](https://nextjs.org/docs) · [React](https://react.dev/learn) · [TypeScript](https://www.typescriptlang.org/docs/) · [Prisma 7](https://www.prisma.io/docs/orm/v7) · [Auth.js](https://authjs.dev/) · [Tailwind](https://tailwindcss.com/docs) · [Zod](https://zod.dev/) · [Docker](https://docs.docker.com/) · [OpenCode](https://opencode.ai/docs/) · [NVIDIA](https://build.nvidia.com/) · [Obsidian](https://help.obsidian.md/).
 
-</details>
-
-<details>
-<summary><b>¿Qué pasa si me retraso?</b></summary>
-
-El repositorio estará disponible permanentemente. Puedes seguir el curso a tu propio ritmo.
-
-</details>
-
----
-
-## 📧 Contacto y Soporte
-
-¿Tienes preguntas o necesitas ayuda?
-
-- 💬 Abre un [Issue](../../issues) en este repositorio
-- 🐛 Reporta bugs usando la [plantilla de issues](../../issues/new)
-- 💡 Sugiere mejoras o nuevo contenido
-- ⭐ Dale una estrella al repo si te resultó útil
-
----
-
-<div align="center">
-
-### **¡Feliz Aprendizaje! 🚀**
-
-**De cero a fullstack developer en 4 semanas**
-
-![Line](https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif)
-
-*Hecho con ❤️ para la comunidad de desarrolladores*
-
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](../../)
-[![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com)
-
-</div>
+> [!info] Alcance del repositorio
+> Aquí están las clases, ejemplos y contratos para enseñar. El código, los secretos, los workflows y el despliegue del producto se crean en un repositorio de aplicación separado. Las recetas requieren probarse allí antes de cada edición.

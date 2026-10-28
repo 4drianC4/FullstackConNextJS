@@ -1,236 +1,122 @@
-# Día 8: Backend V - CRUD Completo y Operaciones Complejas
+---
+tipo: clase
+clase: 8
+semana: 2
+duracion_minutos: 90
+proyecto: Discoteca
+tags:
+  - curso/fullstack
+  - semana/2
+---
 
-Ayer sentamos las bases de nuestra arquitectura modular construyendo los métodos para leer (GET) y crear (POST) registros. Hoy vamos a completar nuestro CRUD y a enfrentarnos al mundo real: paginación, relaciones y transacciones seguras.
+# Clase 8 — Autenticación y sesiones
 
-## 1. Completando el CRUD: Endpoints PUT y DELETE
+[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 7|Clase 7]] · [[Semana2/CLASE 9|Clase 9]] →
 
-Para actualizar y eliminar un recurso específico, necesitamos saber su `id`. En Next.js (App Router), esto se logra mediante **Rutas Dinámicas**. En lugar de crear un archivo `route.ts` normal, lo colocamos dentro de una carpeta con corchetes: `app/api/users/[id]/route.ts`.
+> [!abstract] Objetivo
+> Autenticar al personal sin persistir ni devolver contraseñas en texto plano.
 
-Siguiendo la estructura de la carpeta `features/users` que vimos en el Día 7, vamos a implementar la actualización y eliminación de un usuario paso a paso.
+## Antes de empezar
 
-### Paso 1: Schemas y DTOs
+Repasa [[Semana2/CLASE 7|Clase 7]] y completa su tarea. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
 
-Para actualizar, no siempre recibimos todos los campos, por lo que creamos un schema donde los campos son opcionales. Además, necesitamos validar que el `id` que viaja en la URL sea un identificador válido (por ejemplo, un UUID o un CUID).
+## Desarrollo de la clase
 
-**`src/features/users/shared/schemas/user.schema.ts`**
-```Typescript
+### Decisión del curso
+
+No habrá registro público: el administrador crea cuentas del personal. Usamos credenciales, JWT gestionado por Auth.js y cookies de sesión; no implementamos nuestro propio JWT ni lo guardamos en localStorage.
+
+Los apuntes usan la API de **Auth.js / NextAuth 5 beta**, no los ejemplos `withAuth` de v4. Ver [[Recursos/Stack y entorno|la advertencia de versión y el lockfile]]. Instalar una beta concreta revisada por el instructor y guardarla exacta; no cambiarla durante la edición.
+
+```bash
+npm install --save-exact next-auth@beta bcryptjs
+npx auth secret
+```
+
+### Usuarios y contraseñas
+
+El campo se llama siempre `passwordHash`. Al crear una cuenta autorizada, validar contraseña (8–72 bytes UTF-8 para este ejemplo bcrypt), aplicar `bcrypt.hash(password, 12)` y usar un `select` público en Prisma. El cliente nunca elige un rol de administrador mediante un registro abierto.
+
+El seed inicial crea una cuenta administrativa con una contraseña leída de una variable local. No hay contraseñas por defecto en el código. Consultar [[Proyecto/6. Modelo de datos|seed del proyecto]].
+
+### Configuración en src/auth.ts
+
+```ts
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
-
-// Schema para actualizar (todos los campos opcionales)
-export const updateUserSchema = z.object({
-  name: z.string().min(2).optional(),
-  email: z.string().email().optional(),
-  role: z.string().optional(),
-});
-
-// Schema para validar el ID de la URL
-export const userIdSchema = z.object({
-  id: z.string().uuid("Formato de ID inválido"),
-});
-```
-**`src/features/users/backend/dto/put-user.dto.ts` y `user-id.dto.ts`**
-```Typescript
-import type { z } from "zod";
-import { updateUserSchema, userIdSchema } from "@/features/users/shared/schemas/user.schema";
-
-export type PutUserDto = z.infer<typeof updateUserSchema>;
-export type UserIdDto = z.infer<typeof userIdSchema>;
-```
-### Paso 2: Los Servicios
-
-Añadimos las funciones a nuestra "cocina". Estos servicios solo reciben datos limpios y se comunican con Prisma.
-
-**`src/features/users/backend/services/put.ts`**
-
-```TypeScript
 import { prisma } from "@/shared/lib/prisma";
-import type { PutUserDto } from "../dto/put-user.dto";
-import { toUserDto } from "./shared";
-
-export const updateUserService = async (id: string, data: PutUserDto) => {
-  // Prisma actualizará solo los campos que vengan definidos en 'data'
-  const updatedUser = await prisma.user.update({
-    where: { id },
-    data,
-  });
-  return toUserDto(updatedUser);
-};
-```
-**`src/features/users/backend/services/delete.ts`**
-```Typescript
-import { prisma } from "@/shared/lib/prisma";
-
-export const deleteUserService = async (id: string) => {
-  await prisma.user.delete({
-    where: { id },
-  });
-  return true; 
-};
-```
-### Paso 3: Los Controladores
-
-Creamos los manejadores. Observa cómo validamos no solo el `body` (para el PUT), sino también el parámetro `id` de la URL antes de tocar el servicio.
-
-**`src/features/users/backend/controllers/put.ts`**
-```Typescript
-
-import { updateUserSchema, userIdSchema } from "@/features/users/shared/schemas/user.schema";
-import { updateUserService } from "../services/put";
-import { handleUsersControllerError } from "./shared";
-import { ok } from "@/shared/lib/api-response";
-
-export async function putUserController(request: Request, params: { id: string }) {
-  try {
-    const { id } = userIdSchema.parse(params); // Validamos el ID
-    const body = await request.json();
-    const payload = updateUserSchema.parse(body); // Validamos el Body
-
-    const updatedUser = await updateUserService(id, payload);
-    return ok(updatedUser, 200);
-  } catch (error) {
-    return handleUsersControllerError(error);
-  }
-}
-```
-
-**`src/features/users/backend/controllers/delete.ts`**
-```Typescript
-
-// Importaciones similares...
-export async function deleteUserController(request: Request, params: { id: string }) {
-  try {
-    const { id } = userIdSchema.parse(params);
-    await deleteUserService(id);
-    return ok({ message: 'Usuario eliminado' }, 200);
-  } catch (error) {
-    return handleUsersControllerError(error);
-  }
-}
-```
-
-### Paso 4: El Route Handler
-
-Conectamos la ruta dinámica a nuestros controladores. La limpieza de este archivo demuestra el poder de esta arquitectura.
-
-**`src/app/api/users/[id]/route.ts`**
-```Typescript
-
-import { putUserController, deleteUserController } from '@/features/users';
-
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-  return putUserController(request, params);
-}
-
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  return deleteUserController(request, params);
-}
-```
-
-## 2. Operaciones Complejas: Filtrado, Paginación y Relaciones
-
-El mundo real requiere consultas más sofisticadas que simplemente traer todos los registros. Prisma hace que operaciones complejas de SQL se sientan como manipular objetos en JavaScript.
-
-### Paginación y Filtrado (Ejemplo: Módulo 4 - Catálogo Público)
-
-Si tuviéramos diez mil productos, un `findMany()` colapsaría nuestro servidor y el navegador del cliente. Así es como implementamos paginación y ordenamiento en un servicio de Productos:
-
-**`src/features/catalog/backend/services/get-public-products.ts`**
-```Typescript
-
-export const getActiveProductsService = async (page: number = 1, limit: number = 10) => {
-  const skip = (page - 1) * limit;
-
-  const products = await prisma.product.findMany({
-    where: { isActive: true, stock: { gt: 0 } }, // Filtrado: Solo activos y con stock > 0
-    orderBy: { createdAt: 'desc' },              // Ordenamiento: Novedades primero
-    skip: skip,                                  // Paginación: Cuántos saltar
-    take: limit,                                 // Paginación: Cuántos tomar
-    include: {                                   // JOIN: Traer datos de tablas relacionadas
-      category: {
-        select: { name: true }                   // Solo queremos el nombre de la categoría
-      }
-    }
-  });
-
-  return products;
-};
-```
-
-### Escrituras Anidadas (Nested Writes)
-
-Prisma te permite insertar datos en múltiples tablas relacionadas con una sola consulta. Por ejemplo, si un administrador crea un Producto y, al mismo tiempo, quiere registrar la entrada inicial de inventario (Módulo 2 y 3):
-```Typescript
-
-const newProductWithStock = await prisma.product.create({
-  data: {
-    name: 'Laptop Gamer',
-    price: 1500,
-    sku: 'LAP-123',
-    inventoryLogs: {
-      create: { // Prisma detecta la relación e inserta en la tabla InventoryLog automáticamente
-        quantity: 50,
-        type: 'ENTRADA_INICIAL',
-      }
-    }
-  }
+const loginSchema = z.object({
+  email: z.email(),
+  password: z.string().min(8).refine((s) => new TextEncoder().encode(s).length <= 72),
+});
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
+  providers: [Credentials({
+    credentials: { email: {}, password: {} },
+    async authorize(raw) {
+      const parsed = loginSchema.safeParse(raw);
+      if (!parsed.success) return null;
+      const user = await prisma.user.findUnique({ where: { email: parsed.data.email.toLowerCase() } });
+      if (!user || !user.active) return null;
+      if (!await bcrypt.compare(parsed.data.password, user.passwordHash)) return null;
+      return { id: user.id, name: user.name, email: user.email };
+    },
+  })],
+  callbacks: {
+    jwt({ token, user }) { if (user) token.sub = user.id; return token; },
+    session({ session, token }) {
+      if (token.sub) session.user.id = token.sub;
+      return session;
+    },
+  },
 });
 ```
 
-## 3. Manejo de Transacciones (Transactions)
+Crear `src/types/next-auth.d.ts` para el campo adicional:
 
-¿Qué pasa si tienes una operación crítica que requiere alterar dos tablas? Por ejemplo (Módulo 6), marcar una Orden de Compra como "PAGADA" y descontar las unidades del Inventario.
-
-Si el Paso 1 tiene éxito, pero el Paso 2 falla (por error de red o porque alguien más compró la última unidad un segundo antes), tus datos quedarán inconsistentes: cobraste un producto que ya no tienes.
-
-Una **Transacción** asegura que un grupo de operaciones se ejecuten como una sola unidad: O todas tienen éxito (_Commit_), o todas fallan y la base de datos vuelve a su estado original (_Rollback_).
-
-### Implementando Transacciones con Prisma
-
-Prisma usa el método `$transaction`. Veamos cómo se implementa en un servicio de Órdenes:
-
-**`src/features/orders/backend/services/confirm-order.ts`**
-```Typescript
-
-export const confirmOrderPaymentService = async (orderId: string, productId: string, quantityToDeduct: number) => {
-  try {
-    // Envolvemos las operaciones en un array dentro de $transaction
-    const result = await prisma.$transaction([
-      
-      // Operación 1: Cambiar el estado de la orden
-      prisma.order.update({
-        where: { id: orderId },
-        data: { status: 'PAGADO' }
-      }),
-      
-      // Operación 2: Descontar el stock real del producto
-      prisma.product.update({
-        where: { id: productId },
-        data: { 
-          stock: { decrement: quantityToDeduct } 
-        }
-      })
-      
-    ]);
-
-    // Si ambas tienen éxito, result contiene los datos actualizados
-    return result;
-    
-  } catch (error) {
-    // Si *CUALQUIERA* de las dos falla, Prisma hace un rollback automático.
-    // Nada se guarda en la base de datos y lanzamos el error al controlador.
-    throw new Error("Transacción fallida: No se pudo procesar la orden y el stock.");
+```ts
+import type { DefaultSession } from "next-auth";
+declare module "next-auth" {
+  interface Session {
+    user: { id: string } & DefaultSession["user"];
   }
-};
+}
 ```
 
-> **Nota de Arquitectura:** Las transacciones son el ejemplo perfecto de por qué usamos Servicios. El controlador no sabe nada sobre "commits" o "rollbacks", solo llama a `confirmOrderPaymentService()` y espera un resultado o atrapa un error.
+Y `src/app/api/auth/[...nextauth]/route.ts`:
 
-## Resumen del Día 8
+```ts
+import { handlers } from "@/auth";
+export const { GET, POST } = handlers;
+```
 
-¡Felicidades! Ahora tienes las herramientas para construir un Backend robusto de grado de producción.
+`AUTH_SECRET` permanece privado. Mantener los defaults seguros de cookies de la librería y HTTPS en producción. Hashing no es cifrado reversible. HttpOnly dificulta robar la cookie desde JS, pero no elimina XSS ni sustituye protección CSRF.
 
-1. Hemos dominado los métodos HTTP (GET, POST, PUT, DELETE) gestionando parámetros dinámicos y validándolos con Zod.
-    
-2. Integramos la lógica de Prisma para hacer JOINs (con `include`), paginación eficiente, e inserts complejos (_Nested Writes_).
-    
-3. Aprendimos a blindar la integridad del E-commerce utilizando Transacciones para flujos críticos como el cobro y manejo de stock.
+Antes de publicar: añadir limitación de intentos usando almacenamiento compartido o controles del proveedor de hosting, probar el bloqueo y no registrar credenciales. No basta un contador en memoria en un despliegue con varias instancias.
+
+## Práctica guiada
+
+Crear usuarios de prueba mediante seed y verificar credenciales con una prueba local del flujo de Auth.js. El formulario se construye en frontend.
+
+## Tarea para casa
+
+Integrar configuración y documentar sesión expirada, contraseña incorrecta y cuenta inactiva. Coordinar con los demás equipos el contrato de sesión.
+
+## Criterios de finalización
+
+- [ ] Solo se persiste el hash.
+- [ ] La sesión no contiene passwordHash.
+- [ ] No hay registro público ni secretos versionados.
+
+## Conexiones
+
+[[Semana2/CLASE 9|Clase 9]] · [[Proyecto/6. Modelo de datos|Usuarios de prueba]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
+
+> [!tip] Distribución orientativa de los 90 minutos
+> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
+
+---
+
+[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 7|Clase 7]] · [[Semana2/CLASE 9|Clase 9]] →

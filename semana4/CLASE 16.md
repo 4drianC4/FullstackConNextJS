@@ -1,126 +1,93 @@
-# Día 16: Fullstack I - Testing End-to-End, Sincronización y UX
-
-## 1. Testing Manual End-to-End (E2E)
-
-### La Pirámide del Testing
-
-Normalmente, los desarrolladores prueban su código revisando funciones individuales (Unit Testing) o viendo si un componente se renderiza bien (Integration Testing). Sin embargo, en el mundo real, los usuarios no usan "funciones", usan "flujos".
-
-El **Testing End-to-End (E2E o De extremo a extremo)** consiste en simular el comportamiento de un usuario real, desde que entra a la página web, hace clics, llena formularios y espera que la base de datos se actualice correctamente.
-
-### ¿Cómo hacer Testing Manual E2E efectivo?
-Antes de usar herramientas automatizadas complejas como _Cypress_ o _Playwright_, todo equipo debe saber hacer testing manual riguroso. Para esto, no probamos a lo loco, creamos **Casos de Uso (Test Cases)**.
-
-Debes poner a prueba dos caminos principales:
-
-1. **El "Happy Path" (El Camino Feliz):** El usuario hace exactamente lo que esperas. Entra al login, pone credenciales correctas y entra al Dashboard. Todo sale bien.
-    
-2. **Los "Edge Cases" (Casos Extremos / Camino Triste):** Aquí es donde el software suele romperse.
-    - ¿Qué pasa si el usuario intenta enviar el formulario de registro con el internet apagado?
-    - ¿Qué pasa si hace doble clic rapidísimo en el botón de "Pagar"?
-    - ¿Qué pasa si pone un emoji en el campo de "Edad"?
-
-**Regla de oro del Testing Fullstack:** Nunca asumas que el Frontend va a detener un error. Si un usuario salta tu validación de Zod en el navegador y manda datos corruptos, tu API Backend **debe** rechazar esa petición y no dejar que la base de datos se corrompa.
-
+---
+tipo: clase
+clase: 16
+semana: 4
+duracion_minutos: 90
+proyecto: Discoteca
+tags:
+  - curso/fullstack
+  - semana/4
 ---
 
-## 2. Sincronización Frontend/Backend (El problema de la verdad)
+# Clase 16 — Integración fullstack y pruebas de flujos
 
-Cuando tienes una aplicación Fullstack, tienes un problema fundamental: **¿Dónde está la verdad?** 
-* La verdad "absoluta" vive en tu base de datos (Backend).
-- La verdad "temporal" vive en la pantalla del usuario (Frontend / Caché).
-### La Desincronización
+[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[Semana3/CLASE 15|Clase 15]] · [[semana4/CLASE 17|Clase 17]] →
 
-Imagina que dos usuarios (Ana y Carlos) están viendo la misma lista de tareas en sus respectivas computadoras. Ana borra la "Tarea 1". El servidor elimina la Tarea 1. Pero la pantalla de Carlos sigue mostrando la Tarea 1 porque su Frontend no se ha enterado del cambio. Si Carlos intenta editar la Tarea 1, el servidor le lanzará un error 500 porque ese registro ya no existe.
+> [!abstract] Objetivo
+> Verificar flujos completos y resolver fallos antes de preparar producción.
 
-### Soluciones Prácticas con TanStack Query
+## Antes de empezar
 
-En el Día 14 usamos TanStack Query. Esta librería tiene configuraciones nativas para mantener sincronizado el Frontend con el Backend sin escribir código extra:
+Repasa [[Semana3/CLASE 15|Clase 15]] y completa su tarea. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
 
-- **`refetchOnWindowFocus`:** Si Carlos minimiza el navegador y luego vuelve a abrir la pestaña de tu app, TanStack Query automáticamente hace un `fetch` silencioso de fondo para actualizar los datos.
-    
-- **`refetchOnReconnect`:** Si Carlos pierde la conexión a internet (entra a un túnel) y la recupera, la app pide los datos más frescos automáticamente.
-    
-- **Polling:** Para datos muy críticos (ej. precio del Bitcoin), puedes decirle a TanStack Query que pregunte al servidor cada 5 segundos: `useQuery({ refetchInterval: 5000 })`.
-    
+## Desarrollo de la clase
 
----
+### Proteger la vista y la operación
 
-## 3. Llevando la Optimistic UI al Límite (Rollbacks)
+Un layout puede redirigir al login para mejorar la experiencia, pero cada API y cada lectura privada de servidor vuelve a verificar permisos. No confiar exclusivamente en el layout: las navegaciones y cachés pueden reutilizarlo.
 
-En el Día 15 vimos cómo la **Optimistic UI** (engañar al usuario asumiendo que el servidor dirá que "sí" a una mutación) hace que la app se sienta rapidísima.
-Pero en una revisión Fullstack real, tenemos que planear el **Rollback** (dar marcha atrás).
-**El Flujo Completo de la Experiencia de Usuario (UX):**
-1. **Acción:** El usuario le da "Like" a un Post.
-2. **Optimismo:** El corazón se pone rojo en el Frontend al instante.
-3. **Desastre:** El servidor responde con Error 500 (La base de datos se cayó).
-4. **Rollback:** El Frontend le quita el color rojo al corazón silenciosamente.
-5. **¡Feedback!:** Aquí fallan muchos desarrolladores. Si le quitas el color rojo y no dices nada, el usuario pensará que no hizo clic bien y volverá a hacer clic. Debes informarle.
+En una página de servidor leer sesión con `auth()` y usar `redirect("/login")` si falta. Antes de recuperar datos privados invocar el guard de la clase 9. Ocultar acciones administrativas según rol es UX, no una autorización adicional suficiente.
 
----
+### Escenarios E2E
 
-## 4. Feedback al Usuario: Toasts y Snackbars
-Para darle feedback al usuario sin arruinar su experiencia, no uses el viejo y molesto `alert("Error")` que bloquea toda la pantalla. La industria usa **Toasts** (notificaciones no bloqueantes que aparecen en una esquina y desaparecen solas).
+| Flujo | Resultado esperado |
+| --- | --- |
+| ADMIN crea evento y lo abre | STAFF puede consultarlo |
+| STAFF intenta editar capacidad | Backend rechaza 403 |
+| Personal emite entrada e ingresa dos veces | Segundo ingreso rechazado |
+| Dos personas reservan la misma mesa/evento | Una reserva y un conflicto |
+| Personal vende bebidas | Total del servidor y precios históricos |
+| Cuenta desactivada mantiene cookie antigua | Próxima operación rechazada |
+| API desconectada | Mensaje y opción de reintento |
 
-En Next.js y `shadcn/ui`, el estándar actual es usar una librería llamada **Sonner**.
-### Implementación de Feedback Fullstack
+El equipo de ventas debe probar la misma clave de petición dos veces; ni un doble clic ni un reintento deben duplicar la venta.
 
-1. Primero, agregas el componente base en tu `layout.tsx` para que esté disponible en toda la app:
-```Typescript
+### Un flujo automatizado con Playwright
 
-import { Toaster } from "@/components/ui/sonner"
+Instalar `@playwright/test`, instalar el navegador de pruebas y configurar `webServer` o una `baseURL` local. Usar base de prueba y credenciales locales de test, nunca producción.
 
-export default function RootLayout({ children }) {
-  return (
-    <html>
-      <body>
-        {children}
-        <Toaster /> {/* Aquí vivirán todas las notificaciones */}
-      </body>
-    </html>
-  )
-}
-```
-2. Luego, lo conectas a tus peticiones reales (ej. en el rollback de tu mutación):
-```Typescript
-
-"use client";
-import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
-
-export function BotonLike({ postId }) {
-  const mutation = useMutation({
-    mutationFn: () => fetch(`/api/posts/${postId}/like`, { method: "POST" }),
-    onMutate: () => {
-      // 1. (Optimistic UI) Ponemos el corazón rojo aquí...
-    },
-    onError: () => {
-      // 2. (Rollback) Quitamos el corazón rojo porque falló...
-      
-      // 3. (Feedback) Le explicamos al usuario qué pasó, con estilo.
-      toast.error("No se pudo guardar tu Me gusta", {
-        description: "Revisa tu conexión a internet e intenta de nuevo.",
-        action: {
-          label: "Reintentar",
-          onClick: () => mutation.mutate(), // Damos una solución fácil
-        },
-      });
-    },
-    onSuccess: () => {
-      // Opcional: Feedback positivo para acciones grandes (ej. Crear cuenta)
-      toast.success("¡Like guardado correctamente!");
-    }
-  });
-
-  return <button onClick={() => mutation.mutate()}>Dar Like</button>;
-}
+```ts
+// tests/login.spec.ts
+import { test, expect } from "@playwright/test";
+test("el personal inicia sesión", async ({ page }) => {
+  const email = process.env.TEST_EMAIL;
+  const password = process.env.TEST_PASSWORD;
+  if (!email || !password) throw new Error("Faltan credenciales de prueba");
+  await page.goto("/login");
+  await page.getByLabel("Correo").fill(email);
+  await page.getByLabel("Contraseña").fill(password);
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await expect(page).toHaveURL(/\/dashboard/);
+});
 ```
 
+Acordar esos labels en el formulario real. Una prueba que solo abre login no verifica permisos: mantener además la matriz de peticiones directas del backend. Ampliar el flujo a crear y consultar un evento con fixtures aislados.
+
+### Refactorizar con evidencia
+
+Resolver errores primero, extraer lógica repetida cuando tenga el mismo significado y volver a ejecutar pruebas. No separar en diez archivos una función de cinco líneas sin necesidad. Abrir Issues con pasos, esperado, obtenido y evidencia sin datos privados.
+
+## Práctica guiada
+
+Intercambiar módulos entre equipos y registrar bugs reproducibles. Automatizar el login y un flujo del proyecto.
+
+## Tarea para casa
+
+Corregir bloqueantes, revisar responsive y preparar instrucciones de ejecución desde un clon limpio.
+
+## Criterios de finalización
+
+- [ ] Los escenarios críticos están probados.
+- [ ] Un compañero puede ejecutar el módulo.
+- [ ] No hay bloqueantes conocidos sin registrar.
+
+## Conexiones
+
+[[Semana2/CLASE 10|Clase 10]] · [[Proyecto/5. Evaluacion y entregables|Hito fullstack]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
+
+> [!tip] Distribución orientativa de los 90 minutos
+> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
+
 ---
-### Resumen del Día 16
 
-El Frontend y el Backend ya no son entes separados, hoy aprendimos a tratarlos como **un solo ecosistema**:
-
-- Comprendimos que el **Testing E2E** va más allá de ver si el código compila; es garantizar que los flujos (el Camino Feliz y los Casos Extremos) funcionen para el usuario.
-- Entendimos la importancia de la **Sincronización**, dejando que herramientas como TanStack Query refresquen los datos cuando la pestaña recupera el foco.
-- Unimos la **Optimistic UI con el Feedback**, garantizando que si nuestro "engaño visual" falla por culpa del servidor, hacemos un rollback limpio y avisamos al usuario mediante **Toasts** elegantes, ofreciendo siempre una forma de recuperarse del error.
+[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[Semana3/CLASE 15|Clase 15]] · [[semana4/CLASE 17|Clase 17]] →

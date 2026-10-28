@@ -1,152 +1,102 @@
-# Día 14: Frontend IV - Integración (Lectura de Datos)
-
-## 1. El Dilema: ¿Dónde pedir los datos? (Server vs. Client Fetching)
-
-En Next.js App Router, tenemos dos estrategias principales para obtener información. Entender la diferencia es la clave para una aplicación de alto rendimiento.
-
-### A. Fetching en Server Components (La opción recomendada)
-
-Los Server Components pueden hablar directamente con la base de datos o con tu API sin pasar por el navegador.
-
-- **Cómo se hace:** Simplemente defines tu componente como `async` y usas `await fetch()` o incluso llamadas directas a **Prisma**.
-    
-- **A tomar en cuenta:** Al hacer el fetch en el servidor, el usuario recibe el HTML ya con los datos. Esto es excelente para el SEO y elimina los "parpadeos" de carga. Además, las credenciales (como tokens de API) nunca viajan al navegador, lo que es mucho más seguro.
-    
-
-### B. Fetching en Client Components (TanStack Query)
-
-A veces necesitas interactividad: buscadores en tiempo real, filtros dinámicos o datos que se actualizan cada 30 segundos sin recargar la página. Aquí es donde entra **TanStack Query** (antes conocido como React Query).
-
-**¿Por qué no usar un simple `useEffect`?** Hacer un `fetch` dentro de un `useEffect` tiene muchos problemas:
-
-1. **No hay Caché:** Si el usuario sale de la página y vuelve, tiene que esperar a que los datos se carguen de nuevo.
-    
-2. **"Race Conditions":** Si el usuario hace clic rápido en varios filtros, las respuestas de red pueden llegar en desorden y mostrar datos incorrectos.
-    
-3. **Manejo de estados manual:** Tienes que crear manualmente estados para `loading`, `error` y `data` cada vez.
-
+---
+tipo: clase
+clase: 14
+semana: 3
+duracion_minutos: 90
+proyecto: Discoteca
+tags:
+  - curso/fullstack
+  - semana/3
 ---
 
-## 2. TanStack Query: El Gestor de "Estado de Servidor"
+# Clase 14 — Formularios con React Hook Form y Zod
 
-TanStack Query no es solo para pedir datos, es una herramienta de **gestión de caché**. Su trabajo es recordar lo que el servidor respondió para no volver a preguntarle innecesariamente.
+[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 13|Clase 13]] · [[Semana3/CLASE 15|Clase 15]] →
 
-**Ejemplo de implementación en un componente de lista de usuarios:**
-```Typescript
+> [!abstract] Objetivo
+> Conectar formularios tipados y mostrar errores del cliente y del servidor.
 
+## Antes de empezar
+
+Repasa [[Semana3/CLASE 13|Clase 13]] y completa su tarea. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
+
+## Desarrollo de la clase
+
+### Un esquema, dos validaciones
+
+Instalar `react-hook-form@7`, `@hookform/resolvers` y `zod@4`. El frontend reutiliza el esquema de eventos de la clase 5, pero el servidor vuelve a validar cada petición.
+
+El contrato exige fecha ISO con zona. Un input `datetime-local` no incluye zona: convertirlo desde la hora local con `new Date(value).toISOString()` antes de validar/enviar. Documentar la zona del equipo y mostrar fechas en `America/La_Paz`.
+
+### Formulario mínimo
+
+```tsx
 "use client";
-import { useQuery } from "@tanstack/react-query";
-
-// 1. Definimos la función que hace el fetch puro
-const fetchUsers = async () => {
-  const response = await fetch("/api/users");
-  if (!response.ok) throw new Error("Error al obtener usuarios");
-  return response.json();
-};
-
-export default function ListaUsuarios() {
-  // 2. Usamos el Hook de TanStack Query
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["users"], // Identificador único para el caché
-    queryFunc: fetchUsers,
-    staleTime: 1000 * 60 * 5, // Los datos se consideran "frescos" por 5 minutos
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createEventSchema, type CreateEventInput } from "../shared/event.schema";
+export function EventForm() {
+  const [message, setMessage] = useState("");
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<CreateEventInput>({
+    resolver: zodResolver(createEventSchema),
   });
-
-  if (isLoading) return <p>Cargando...</p>;
-  if (isError) return <p>Error: {error.message}</p>;
-
-  return (
-    <ul>
-      {data.map((user) => (
-        <li key={user.id}>{user.name}</li>
-      ))}
-    </ul>
-  );
+  const submit = handleSubmit(async (input) => {
+    setMessage("");
+    try {
+      const response = await fetch("/api/events", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
+      });
+      if (!response.ok) { setMessage(`No se guardó el evento (${response.status}).`); return; }
+      reset();
+      setMessage("Evento guardado");
+    } catch { setMessage("No se pudo conectar con el servidor"); }
+  });
+  return <form onSubmit={submit}>
+    <label htmlFor="event-name">Nombre</label>
+    <input id="event-name" {...register("name")} aria-invalid={!!errors.name} aria-describedby="event-name-error" />
+    <p id="event-name-error">{errors.name?.message}</p>
+    <label htmlFor="event-date">Fecha ISO con zona</label>
+    <input id="event-date" placeholder="2026-12-05T22:00:00-04:00" {...register("startsAt")} />
+    <p>{errors.startsAt?.message}</p>
+    <label htmlFor="event-capacity">Capacidad</label>
+    <input id="event-capacity" type="number" {...register("capacity", { valueAsNumber: true })} />
+    <p>{errors.capacity?.message}</p>
+    <button disabled={isSubmitting} type="submit">{isSubmitting ? "Guardando…" : "Guardar"}</button>
+    <p role="status">{message}</p>
+  </form>;
 }
 ```
 
----
-## 3. Estados de Carga: Loaders y Skeletons
+El primer ejemplo usa texto ISO para que la conversión sea explícita. En la práctica añadir el input local y un adaptador de formulario, sin cambiar el contrato de la API.
 
-El **Layout Shift** (salto de diseño) ocurre cuando una página está vacía y, de repente, aparecen los datos y "empujan" todo el contenido hacia abajo. Esto es molesto y se siente poco profesional.
+### Login del personal
 
-### A. Archivo `loading.tsx` (Estrategia de Next.js)
+Crear `/login` como Client Component con `signIn` de `next-auth/react`. Enviar `signIn("credentials", { email, password, redirect: false })`, mostrar un error genérico ante fallo y navegar al panel en éxito. Para salir usar `signOut`. No persistir la contraseña ni imprimirla en consola. El instructor guía esta integración con el equipo de usuarios.
 
-Next.js nos permite crear un archivo especial llamado `loading.tsx` en cualquier carpeta de ruta. Next.js lo mostrará automáticamente mientras el Server Component termina de obtener los datos.
+Un botón deshabilitado reduce envíos repetidos en la interfaz, pero no reemplaza la idempotencia del backend de ventas.
 
-### B. Skeletons (Shadcn/ui)
+## Práctica guiada
 
-Para una experiencia más "premium", usamos **Skeletons**. Son siluetas grises que imitan la forma de los datos que van a llegar.
+Crear un evento y probar errores de campo, sesión expirada y desconexión.
 
-**Ejemplo de un Skeleton para una tarjeta de usuario:**
-```Typescript
+## Tarea para casa
 
-import { Skeleton } from "@/components/ui/skeleton"
+Completar los formularios del módulo y el login compartido. Conservar los valores si falla el servidor y documentar la conversión de fechas.
 
-export function UserSkeleton() {
-  return (
-    <div className="flex items-center space-x-4 p-4 border rounded-lg">
-      <Skeleton className="h-12 w-12 rounded-full" /> {/* Silueta de la foto */}
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-[250px]" /> {/* Silueta del nombre */}
-        <Skeleton className="h-4 w-[200px]" /> {/* Silueta del email */}
-      </div>
-    </div>
-  )
-}
-```
+## Criterios de finalización
 
-## 4. Caché y Revalidación
+- [ ] Se valida en ambos extremos.
+- [ ] Los fallos no se muestran como éxitos.
+- [ ] Se evita el doble clic mientras se envía.
 
-Cuando pedimos datos, Next.js y TanStack Query los guardan en una "mochila" (Caché). Pero, **¿cómo sabe la app que los datos en la base de datos cambiaron?**
+## Conexiones
 
-### Revalidación en el Servidor
+[[Semana1/CLASE 5|Clase 5]] · [[Semana2/CLASE 8|Clase 8]] · [[Semana3/CLASE 15|Clase 15]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
 
-En Next.js, puedes configurar cuánto tiempo debe durar el caché de una petición:
-```Typescript
-
-// Forzar a que esta petición se actualice cada 1 hora (3600 seg)
-const res = await fetch('https://api.ejemplo.com/data', { next: { revalidate: 3600 } });
-```
-### Revalidación On-Demand (Bajo demanda)
-
-Esto es lo más potente. Imagina que un usuario crea un post nuevo. No quieres esperar 1 hora para que aparezca en la lista. Usamos `revalidatePath` en nuestras **Server Actions** :
-```Typescript
-
-// Esto le dice a Next.js: "Borra el caché de la página de inicio porque hay datos nuevos"
-revalidatePath('/');
-```
+> [!tip] Distribución orientativa de los 90 minutos
+> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
 
 ---
-## 5. Manejo de Errores (Error Boundaries)
 
-¿Qué pasa si la base de datos se cae o la API falla? No queremos que toda la aplicación se rompa y muestre una pantalla blanca.
-
-Next.js usa archivos `error.tsx`. Si algo falla dentro de una carpeta de ruta, Next.js "atrapa" el error y muestra este archivo en su lugar, permitiendo que el resto de la aplicación (como el menú de navegación) siga funcionando.
-```Typescript
-
-"use client"; // Los archivos de error deben ser Client Components
-
-export default function ErrorPage({ error, reset }: { error: Error, reset: () => void }) {
-  return (
-    <div className="p-10 text-center">
-      <h2 className="text-2xl font-bold">¡Vaya! Algo salió mal.</h2>
-      <p className="text-red-500">{error.message}</p>
-      <button 
-        onClick={() => reset()} // Intenta cargar la página de nuevo
-        className="mt-4 bg-blue-500 text-white p-2 rounded"
-      >
-        Reintentar
-      </button>
-    </div>
-  );
-}
-```
-
----
-### Resumen del Día 14
-
-- Aprendimos que los **Server Components** son la forma más rápida y segura de obtener datos iniciales.
-- Introdujimos **TanStack Query** para manejar el "Estado del Servidor" en el cliente, dándonos caché y sincronización automática.
-- Mejoramos la UX usando **Skeletons** para evitar saltos bruscos en la interfaz.
-- Entendimos que el **Caché** es vital para la velocidad, pero que necesitamos estrategias de **Revalidación** para mantener los datos frescos.
+[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 13|Clase 13]] · [[Semana3/CLASE 15|Clase 15]] →
