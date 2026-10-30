@@ -11,7 +11,7 @@ tags:
 
 # Clase 20 — Presentación, evaluación y retrospectiva
 
-[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[semana4/CLASE 19|Clase 19]]
+[[README|Inicio]] · [[semana4/0 INDICE|Semana 4]] · ← [[semana4/CLASE 19|Clase 19]]
 
 > [!abstract] Objetivo
 > Demostrar el proyecto y explicar el aporte individual con sus límites.
@@ -79,4 +79,4 @@ Escribir una retrospectiva individual breve y dejar instrucciones reproducibles 
 
 ---
 
-[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[semana4/CLASE 19|Clase 19]]
+[[README|Inicio]] · [[semana4/0 INDICE|Semana 4]] · ← [[semana4/CLASE 19|Clase 19]]

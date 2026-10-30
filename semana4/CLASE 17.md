@@ -11,7 +11,7 @@ tags:
 
 # Clase 17 — Docker II, CI y despliegue
 
-[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[semana4/CLASE 16|Clase 16]] · [[semana4/CLASE 18|Clase 18]] →
+[[README|Inicio]] · [[semana4/0 INDICE|Semana 4]] · ← [[semana4/CLASE 16|Clase 16]] · [[semana4/CLASE 18|Clase 18]] →
 
 > [!abstract] Objetivo
 > Ejecutar la aplicación en contenedores y preparar CI y un despliegue verificable.
@@ -155,4 +155,4 @@ Desplegar, comprobar los flujos críticos y documentar variables, migraciones y 
 
 ---
 
-[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[semana4/CLASE 16|Clase 16]] · [[semana4/CLASE 18|Clase 18]] →
+[[README|Inicio]] · [[semana4/0 INDICE|Semana 4]] · ← [[semana4/CLASE 16|Clase 16]] · [[semana4/CLASE 18|Clase 18]] →

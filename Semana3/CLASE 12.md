@@ -11,7 +11,7 @@ tags:
 
 # Clase 12 — React II y rutas de Next.js
 
-[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 11|Clase 11]] · [[Semana3/CLASE 13|Clase 13]] →
+[[README|Inicio]] · [[Semana3/0 INDICE|Semana 3]] · ← [[Semana3/CLASE 11|Clase 11]] · [[Semana3/CLASE 13|Clase 13]] →
 
 > [!abstract] Objetivo
 > Manejar interactividad y ubicar las pantallas en App Router sin mezclar código privado.
@@ -86,4 +86,4 @@ Construir las rutas de listado y creación de tu funcionalidad, todavía con dat
 
 ---
 
-[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 11|Clase 11]] · [[Semana3/CLASE 13|Clase 13]] →
+[[README|Inicio]] · [[Semana3/0 INDICE|Semana 3]] · ← [[Semana3/CLASE 11|Clase 11]] · [[Semana3/CLASE 13|Clase 13]] →

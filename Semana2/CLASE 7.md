@@ -11,7 +11,7 @@ tags:
 
 # Clase 7 — Relaciones, reglas de negocio y transacciones
 
-[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 6|Clase 6]] · [[Semana2/CLASE 8|Clase 8]] →
+[[README|Inicio]] · [[Semana2/0 INDICE|Semana 2]] · ← [[Semana2/CLASE 6|Clase 6]] · [[Semana2/CLASE 8|Clase 8]] →
 
 > [!abstract] Objetivo
 > Hacer cumplir reglas de negocio incluso ante peticiones concurrentes.
@@ -95,4 +95,4 @@ Implementar una regla crítica de tu módulo y documentar sus casos de concurren
 
 ---
 
-[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 6|Clase 6]] · [[Semana2/CLASE 8|Clase 8]] →
+[[README|Inicio]] · [[Semana2/0 INDICE|Semana 2]] · ← [[Semana2/CLASE 6|Clase 6]] · [[Semana2/CLASE 8|Clase 8]] →

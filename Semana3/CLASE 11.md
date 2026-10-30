@@ -11,7 +11,7 @@ tags:
 
 # Clase 11 — React I - Componentes y props
 
-[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana2/CLASE 10|Clase 10]] · [[Semana3/CLASE 12|Clase 12]] →
+[[README|Inicio]] · [[Semana3/0 INDICE|Semana 3]] · ← [[Semana2/CLASE 10|Clase 10]] · [[Semana3/CLASE 12|Clase 12]] →
 
 > [!abstract] Objetivo
 > Construir componentes React tipados para mostrar información del proyecto.
@@ -89,4 +89,4 @@ Crear dos componentes de tu funcionalidad con props tipadas y datos del contrato
 
 ---
 
-[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana2/CLASE 10|Clase 10]] · [[Semana3/CLASE 12|Clase 12]] →
+[[README|Inicio]] · [[Semana3/0 INDICE|Semana 3]] · ← [[Semana2/CLASE 10|Clase 10]] · [[Semana3/CLASE 12|Clase 12]] →

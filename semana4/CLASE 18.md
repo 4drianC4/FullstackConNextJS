@@ -11,7 +11,7 @@ tags:
 
 # Clase 18 — IA I - Desarrollo con OpenCode y NVIDIA
 
-[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[semana4/CLASE 17|Clase 17]] · [[semana4/CLASE 19|Clase 19]] →
+[[README|Inicio]] · [[semana4/0 INDICE|Semana 4]] · ← [[semana4/CLASE 17|Clase 17]] · [[semana4/CLASE 19|Clase 19]] →
 
 > [!abstract] Objetivo
 > Usar OpenCode con un proveedor NVIDIA disponible sin depender de una suscripción de pago.
@@ -94,4 +94,4 @@ Implementar la mejora en rama propia. Documentar modelo, archivos cambiados, pru
 
 ---
 
-[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[semana4/CLASE 17|Clase 17]] · [[semana4/CLASE 19|Clase 19]] →
+[[README|Inicio]] · [[semana4/0 INDICE|Semana 4]] · ← [[semana4/CLASE 17|Clase 17]] · [[semana4/CLASE 19|Clase 19]] →

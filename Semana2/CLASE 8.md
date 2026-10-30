@@ -11,7 +11,7 @@ tags:
 
 # Clase 8 — Autenticación y sesiones
 
-[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 7|Clase 7]] · [[Semana2/CLASE 9|Clase 9]] →
+[[README|Inicio]] · [[Semana2/0 INDICE|Semana 2]] · ← [[Semana2/CLASE 7|Clase 7]] · [[Semana2/CLASE 9|Clase 9]] →
 
 > [!abstract] Objetivo
 > Autenticar al personal sin persistir ni devolver contraseñas en texto plano.
@@ -119,4 +119,4 @@ Integrar configuración y documentar sesión expirada, contraseña incorrecta y 
 
 ---
 
-[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 7|Clase 7]] · [[Semana2/CLASE 9|Clase 9]] →
+[[README|Inicio]] · [[Semana2/0 INDICE|Semana 2]] · ← [[Semana2/CLASE 7|Clase 7]] · [[Semana2/CLASE 9|Clase 9]] →

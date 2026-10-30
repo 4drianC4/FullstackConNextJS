@@ -11,7 +11,7 @@ tags:
 
 # Clase 16 — Integración fullstack y pruebas de flujos
 
-[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[Semana3/CLASE 15|Clase 15]] · [[semana4/CLASE 17|Clase 17]] →
+[[README|Inicio]] · [[semana4/0 INDICE|Semana 4]] · ← [[Semana3/CLASE 15|Clase 15]] · [[semana4/CLASE 17|Clase 17]] →
 
 > [!abstract] Objetivo
 > Verificar flujos completos y resolver fallos antes de preparar producción.
@@ -90,4 +90,4 @@ Corregir bloqueantes, revisar responsive y preparar instrucciones de ejecución 
 
 ---
 
-[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[Semana3/CLASE 15|Clase 15]] · [[semana4/CLASE 17|Clase 17]] →
+[[README|Inicio]] · [[semana4/0 INDICE|Semana 4]] · ← [[Semana3/CLASE 15|Clase 15]] · [[semana4/CLASE 17|Clase 17]] →

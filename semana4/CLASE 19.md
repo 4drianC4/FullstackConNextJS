@@ -11,7 +11,7 @@ tags:
 
 # Clase 19 — IA II - Depuración y revisión con OpenCode
 
-[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[semana4/CLASE 18|Clase 18]] · [[semana4/CLASE 20|Clase 20]] →
+[[README|Inicio]] · [[semana4/0 INDICE|Semana 4]] · ← [[semana4/CLASE 18|Clase 18]] · [[semana4/CLASE 20|Clase 20]] →
 
 > [!abstract] Objetivo
 > Depurar con evidencia y evaluar código generado sin delegar el criterio técnico.
@@ -95,4 +95,4 @@ Preparar demo y evidencia de pruebas. Adjuntar al PR un resumen breve del uso de
 
 ---
 
-[[README|Inicio]] · [[semana4/INDICE|Semana 4]] · ← [[semana4/CLASE 18|Clase 18]] · [[semana4/CLASE 20|Clase 20]] →
+[[README|Inicio]] · [[semana4/0 INDICE|Semana 4]] · ← [[semana4/CLASE 18|Clase 18]] · [[semana4/CLASE 20|Clase 20]] →

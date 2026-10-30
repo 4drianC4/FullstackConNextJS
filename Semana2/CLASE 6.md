@@ -11,7 +11,7 @@ tags:
 
 # Clase 6 — CRUD, servicios y manejo de errores
 
-[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana1/CLASE 5|Clase 5]] · [[Semana2/CLASE 7|Clase 7]] →
+[[README|Inicio]] · [[Semana2/0 INDICE|Semana 2]] · ← [[Semana1/CLASE 5|Clase 5]] · [[Semana2/CLASE 7|Clase 7]] →
 
 > [!abstract] Objetivo
 > Implementar CRUD con capas pequeñas y respuestas de error predecibles.
@@ -131,4 +131,4 @@ Implementar lectura, edición y política de borrado/desactivación del módulo.
 
 ---
 
-[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana1/CLASE 5|Clase 5]] · [[Semana2/CLASE 7|Clase 7]] →
+[[README|Inicio]] · [[Semana2/0 INDICE|Semana 2]] · ← [[Semana1/CLASE 5|Clase 5]] · [[Semana2/CLASE 7|Clase 7]] →

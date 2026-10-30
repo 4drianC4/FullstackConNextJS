@@ -3,9 +3,11 @@ tipo: mapa
 tags:
   - curso/conceptos
 ---
-# Conceptos y conexiones
+# Conceptos y conexiones: el mapa antes de preguntar «¿dónde vimos eso?»
 
 [[README|Inicio]] · [[Recursos/Obsidian - Guia del curso|Obsidian]]
+
+Este mapa conecta las piezas del curso. No es un árbol de habilidades: leer tres notas de Docker no desbloquea automáticamente el nivel «DevOps legendario», pero ayuda a encontrar la explicación que necesitas.
 
 | Concepto | Se introduce | Se aplica después |
 | --- | --- | --- |
@@ -20,4 +22,9 @@ tags:
 | Pruebas | [[Semana2/CLASE 10\|Clase 10]] | [[semana4/CLASE 16\|Clase 16]], [[semana4/CLASE 17\|Clase 17]], [[semana4/CLASE 19\|Clase 19]] |
 | Desarrollo con IA | [[semana4/CLASE 18\|Clase 18]] | [[semana4/CLASE 19\|Clase 19]], [[semana4/CLASE 20\|Clase 20]] |
 
-No es necesario leer el curso en orden de grafo. El calendario es secuencial; los enlaces sirven para recuperar conceptos cuando aparece una duda. Cada nota tiene conexiones de regreso a clases y proyecto.
+No es necesario recorrer todas las líneas del grafo como si estuvieras investigando una conspiración. Sigue el calendario y usa los enlaces cuando aparezca la duda: «¿esto era un tipo, una validación o una decisión que tomé con sueño?».
+
+Cada concepto vuelve a sus clases y al proyecto. Si autenticación y permisos todavía te parecen lo mismo, visita sus notas: reconocer al portero no significa que puedas entrar a la oficina del administrador.
+
+> [!tip] Perderse, pero con enlaces
+> Vuelve a este mapa cuando una clase use un concepto anterior. Releer una explicación no reinicia tu progreso; fingir que la recuerdas suele reiniciar tu tarde.

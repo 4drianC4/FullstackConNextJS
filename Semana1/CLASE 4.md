@@ -11,7 +11,7 @@ tags:
 
 # Clase 4 — Modelado, Prisma y datos de prueba
 
-[[README|Inicio]] · [[0 INDICE|Semana 1]] · ← [[Semana1/CLASE 3|Clase 3]] · [[Semana1/CLASE 5|Clase 5]] →
+[[README|Inicio]] · [[Semana1/0 INDICE|Semana 1]] · ← [[Semana1/CLASE 3|Clase 3]] · [[Semana1/CLASE 5|Clase 5]] →
 
 > [!abstract] Objetivo
 > Definir el modelo común y consultar PostgreSQL mediante Prisma 7.
@@ -113,4 +113,4 @@ Crear fixtures de tu funcionalidad, con IDs conocidos y relaciones válidas. Rev
 
 ---
 
-[[README|Inicio]] · [[0 INDICE|Semana 1]] · ← [[Semana1/CLASE 3|Clase 3]] · [[Semana1/CLASE 5|Clase 5]] →
+[[README|Inicio]] · [[Semana1/0 INDICE|Semana 1]] · ← [[Semana1/CLASE 3|Clase 3]] · [[Semana1/CLASE 5|Clase 5]] →

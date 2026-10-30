@@ -11,7 +11,7 @@ tags:
 
 # Clase 15 — Consumo del backend y mutaciones
 
-[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 14|Clase 14]] · [[semana4/CLASE 16|Clase 16]] →
+[[README|Inicio]] · [[Semana3/0 INDICE|Semana 3]] · ← [[Semana3/CLASE 14|Clase 14]] · [[semana4/CLASE 16|Clase 16]] →
 
 > [!abstract] Objetivo
 > Leer datos del backend y actualizar la pantalla después de una mutación sin añadir otro gestor de estado.
@@ -99,4 +99,4 @@ Completar un flujo real del módulo usando el backend compartido. Añadir reinte
 
 ---
 
-[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 14|Clase 14]] · [[semana4/CLASE 16|Clase 16]] →
+[[README|Inicio]] · [[Semana3/0 INDICE|Semana 3]] · ← [[Semana3/CLASE 14|Clase 14]] · [[semana4/CLASE 16|Clase 16]] →

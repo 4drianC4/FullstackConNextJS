@@ -11,7 +11,7 @@ tags:
 
 # Clase 9 — Autorización y protección de operaciones
 
-[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 8|Clase 8]] · [[Semana2/CLASE 10|Clase 10]] →
+[[README|Inicio]] · [[Semana2/0 INDICE|Semana 2]] · ← [[Semana2/CLASE 8|Clase 8]] · [[Semana2/CLASE 10|Clase 10]] →
 
 > [!abstract] Objetivo
 > Verificar identidad y permisos en cada operación del backend.
@@ -103,4 +103,4 @@ Aplicar guards y origen a todas las operaciones de tu módulo. Revisar el PR de 
 
 ---
 
-[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 8|Clase 8]] · [[Semana2/CLASE 10|Clase 10]] →
+[[README|Inicio]] · [[Semana2/0 INDICE|Semana 2]] · ← [[Semana2/CLASE 8|Clase 8]] · [[Semana2/CLASE 10|Clase 10]] →

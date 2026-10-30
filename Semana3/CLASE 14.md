@@ -11,7 +11,7 @@ tags:
 
 # Clase 14 — Formularios con React Hook Form y Zod
 
-[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 13|Clase 13]] · [[Semana3/CLASE 15|Clase 15]] →
+[[README|Inicio]] · [[Semana3/0 INDICE|Semana 3]] · ← [[Semana3/CLASE 13|Clase 13]] · [[Semana3/CLASE 15|Clase 15]] →
 
 > [!abstract] Objetivo
 > Conectar formularios tipados y mostrar errores del cliente y del servidor.
@@ -99,4 +99,4 @@ Completar los formularios del módulo y el login compartido. Conservar los valor
 
 ---
 
-[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 13|Clase 13]] · [[Semana3/CLASE 15|Clase 15]] →
+[[README|Inicio]] · [[Semana3/0 INDICE|Semana 3]] · ← [[Semana3/CLASE 13|Clase 13]] · [[Semana3/CLASE 15|Clase 15]] →

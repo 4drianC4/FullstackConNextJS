@@ -11,7 +11,7 @@ tags:
 
 # Clase 10 — Pruebas e integración del backend
 
-[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 9|Clase 9]] · [[Semana3/CLASE 11|Clase 11]] →
+[[README|Inicio]] · [[Semana2/0 INDICE|Semana 2]] · ← [[Semana2/CLASE 9|Clase 9]] · [[Semana3/CLASE 11|Clase 11]] →
 
 > [!abstract] Objetivo
 > Comprobar el backend antes de empezar la interfaz y acordar contratos estables.
@@ -98,4 +98,4 @@ Completar el backend de la funcionalidad y abrir PR con evidencia. Resolver disc
 
 ---
 
-[[README|Inicio]] · [[Semana2/INDICE|Semana 2]] · ← [[Semana2/CLASE 9|Clase 9]] · [[Semana3/CLASE 11|Clase 11]] →
+[[README|Inicio]] · [[Semana2/0 INDICE|Semana 2]] · ← [[Semana2/CLASE 9|Clase 9]] · [[Semana3/CLASE 11|Clase 11]] →

@@ -11,7 +11,7 @@ tags:
 
 # Clase 5 — HTTP, REST y primera funcionalidad vertical
 
-[[README|Inicio]] · [[0 INDICE|Semana 1]] · ← [[Semana1/CLASE 4|Clase 4]] · [[Semana2/CLASE 6|Clase 6]] →
+[[README|Inicio]] · [[Semana1/0 INDICE|Semana 1]] · ← [[Semana1/CLASE 4|Clase 4]] · [[Semana2/CLASE 6|Clase 6]] →
 
 > [!abstract] Objetivo
 > Construir una ruta HTTP pequeña usando arquitectura vertical y validación en ejecución.
@@ -91,4 +91,4 @@ Definir rutas y contratos de tu módulo. Probar JSON incorrecto y campos inesper
 
 ---
 
-[[README|Inicio]] · [[0 INDICE|Semana 1]] · ← [[Semana1/CLASE 4|Clase 4]] · [[Semana2/CLASE 6|Clase 6]] →
+[[README|Inicio]] · [[Semana1/0 INDICE|Semana 1]] · ← [[Semana1/CLASE 4|Clase 4]] · [[Semana2/CLASE 6|Clase 6]] →

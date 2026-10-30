@@ -11,7 +11,7 @@ tags:
 
 # Clase 13 — Interfaz, Tailwind y accesibilidad
 
-[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 12|Clase 12]] · [[Semana3/CLASE 14|Clase 14]] →
+[[README|Inicio]] · [[Semana3/0 INDICE|Semana 3]] · ← [[Semana3/CLASE 12|Clase 12]] · [[Semana3/CLASE 14|Clase 14]] →
 
 > [!abstract] Objetivo
 > Construir una interfaz consistente y usable sin dedicar el curso a un sistema de diseño complejo.
@@ -81,4 +81,4 @@ Unificar la navegación y reutilizar los componentes acordados. Adjuntar captura
 
 ---
 
-[[README|Inicio]] · [[Semana3/INDICE|Semana 3]] · ← [[Semana3/CLASE 12|Clase 12]] · [[Semana3/CLASE 14|Clase 14]] →
+[[README|Inicio]] · [[Semana3/0 INDICE|Semana 3]] · ← [[Semana3/CLASE 12|Clase 12]] · [[Semana3/CLASE 14|Clase 14]] →

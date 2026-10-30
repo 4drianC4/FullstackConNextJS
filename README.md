@@ -33,7 +33,7 @@ Al finalizar podrás:
 
 ### Semana 1 — Introducción y fundamentos del backend
 
-[[0 INDICE|Índice y entregable de la semana]]
+[[Semana1/0 INDICE|Índice y entregable de la semana]]
 
 - [[Semana1/CLASE 1|Clase 1]] — Introducción, entorno y trabajo colaborativo.
 - [[Semana1/CLASE 2|Clase 2]] — TypeScript aplicado al backend.
@@ -43,7 +43,7 @@ Al finalizar podrás:
 
 ### Semana 2 — Desarrollo del backend
 
-[[Semana2/INDICE|Índice y entregable de la semana]]
+[[Semana2/0 INDICE|Índice y entregable de la semana]]
 
 - [[Semana2/CLASE 6|Clase 6]] — CRUD, servicios y manejo de errores.
 - [[Semana2/CLASE 7|Clase 7]] — Relaciones, reglas de negocio y transacciones.
@@ -53,7 +53,7 @@ Al finalizar podrás:
 
 ### Semana 3 — Desarrollo del frontend
 
-[[Semana3/INDICE|Índice y entregable de la semana]]
+[[Semana3/0 INDICE|Índice y entregable de la semana]]
 
 - [[Semana3/CLASE 11|Clase 11]] — React I - Componentes y props.
 - [[Semana3/CLASE 12|Clase 12]] — React II y rutas de Next.js.
@@ -63,7 +63,7 @@ Al finalizar podrás:
 
 ### Semana 4 — Integración, Docker, IA y cierre
 
-[[semana4/INDICE|Índice y entregable de la semana]]
+[[semana4/0 INDICE|Índice y entregable de la semana]]
 
 - [[semana4/CLASE 16|Clase 16]] — Integración fullstack y pruebas de flujos.
 - [[semana4/CLASE 17|Clase 17]] — Docker II, CI y despliegue.
