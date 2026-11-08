@@ -14,7 +14,7 @@ Las dos clases contienen instalación, conexión, prompts, prácticas y evaluaci
 
 OpenCode es la herramienta; NVIDIA es el proveedor de inferencia. Uno organiza el trabajo con el repositorio y el otro proporciona acceso al modelo. No hace falta invitar a OpenAI a esta fiesta.
 
-El curso usa el acceso sin pago disponible para la práctica; el instructor comprueba cuotas y modelo antes de impartirla. «Gratis» no significa «pregúntale por cada punto y coma hasta el amanecer»: no se garantiza inferencia ilimitada ni se exige tarjeta.
+Para la práctica, comprueba el acceso sin pago disponible en tu cuenta y elige un modelo listado por el proveedor. «Gratis» no significa «pregúntale por cada punto y coma hasta el amanecer»: no se garantiza inferencia ilimitada ni se exige tarjeta.
 
 Si no hay acceso, usamos la revisión en parejas de la clase 19. El compañero no necesita una API key, aunque sí agradece que expliques el problema antes de entregarle 600 líneas.
 
@@ -30,4 +30,4 @@ Antes de pedir «hazme todo el sistema», pasa por estas notas. Un buen contexto
 - [[Semana2/CLASE 10|Pruebas de referencia]].
 - [[Recursos/Stack y entorno|Versión de OpenCode elegida]].
 
-[OpenCode 1](https://opencode.ai/docs/) · [Proveedores y NVIDIA](https://opencode.ai/docs/providers/#nvidia) · [Catálogo NVIDIA](https://build.nvidia.com/).
+[OpenCode 1](https://docs.opencode.ai/docs/) · [Proveedores y NVIDIA](https://docs.opencode.ai/docs/providers/#nvidia) · [Catálogo NVIDIA](https://build.nvidia.com/).

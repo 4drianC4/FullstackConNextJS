@@ -22,6 +22,30 @@ Repasa [[Semana3/CLASE 11|Clase 11]] y completa su tarea. Consulta [[Recursos/St
 
 ## Desarrollo de la clase
 
+### Por qué una variable no basta para recordar una interacción
+
+Un componente se ejecuta para calcular una representación. Una variable local creada dentro de la función se reinicia con cada ejecución y cambiarla no comunica a React que debe actualizar la interfaz. El estado conserva información entre renders de una instancia y proporciona una función para solicitar una actualización.
+
+`useState` devuelve el valor del render actual y su setter. Llamar al setter programa otro render; no modifica la variable que ya estás leyendo en la función que está terminando. Por eso un log inmediatamente después de `setQuantity` puede mostrar el valor anterior sin que React esté roto.
+
+### Actualizar a partir del valor previo
+
+Cuando el próximo estado depende del anterior, la forma funcional `setQuantity(current => current + 1)` expresa la relación. Si se encadenan varias actualizaciones, React puede procesarlas con el valor pendiente correcto. Dos llamadas basadas en una misma captura de `quantity` podrían expresar dos veces el mismo valor.
+
+El setter de objetos no fusiona automáticamente propiedades. Crea el siguiente objeto sin mutar el anterior. En listas, usa copias y transformaciones para que el cambio de referencia represente el estado nuevo. No almacenes a la vez cantidad, precio y total si el total se deriva de los dos primeros: son fuentes duplicadas que pueden desincronizarse.
+
+### Reglas de hooks y propiedad del estado
+
+Los hooks ordinarios como useState y useEffect se llaman al nivel superior del componente o de un hook propio. No se colocan detrás de un if o dentro de un bucle; React debe poder asociarlos de forma consistente entre renders.
+
+Dos contadores renderizados son dos instancias con memoria propia. Si varias piezas deben mostrar la misma cantidad, eleva el estado al ancestro común y pasa valores y callbacks. Esto es suficiente para muchas pantallas del MVP sin introducir un almacén global.
+
+### Eventos y efectos cumplen funciones diferentes
+
+Un evento responde a una interacción concreta. Un efecto sincroniza con algo externo después de renderizar, como una petición o una suscripción. No pongas una venta dentro de un efecto dependiente de una cantidad: cambiar el input podría registrar ventas sin confirmación explícita.
+
+El render tampoco debe producir efectos de negocio. Calcula la vista; deja el envío a un handler. En la clase 15 veremos peticiones de lectura con cancelación y actualización explícita del listado.
+
 ### Estado y eventos
 
 ```tsx
@@ -63,6 +87,47 @@ No importar Prisma ni servicios backend desde un componente cliente. Pasar datos
 
 No añadir `useEffect` para calcular datos derivados. Lo utilizaremos cuando exista una sincronización externa concreta, como una petición en la clase 15.
 
+### App Router: la carpeta como mapa de direcciones
+
+`app` sigue convenciones de Next.js. `page.tsx` crea una pantalla; `layout.tsx` envuelve contenido compartido; `route.ts` atiende HTTP. Una carpeta `(grupo)` organiza sin añadir segmento visible; una carpeta `[id]` captura un segmento dinámico.
+
+No confundas `/api/events` con `/dashboard/events`: la primera entrega datos según un contrato HTTP; la segunda representa una pantalla. Pueden compartir servicios del dominio desde el servidor, pero no son el mismo punto de entrada.
+
+En una página dinámica de servidor, params es una promesa en la versión del curso:
+
+```tsx
+export default async function EventPage({
+  params,
+}: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <h1>Evento {id}</h1>;
+}
+```
+
+Este ejemplo solo presenta el parámetro; todavía falta validar el UUID, autorizar y consultar el detalle. No supone que recibir un ID convierte a una pantalla en privada.
+
+### Server Components y la frontera cliente
+
+Los componentes de servidor pueden ejecutar lecturas privadas sin enviar el código de consulta al navegador. No tienen acceso a eventos del DOM ni al almacenamiento del navegador. Los componentes cliente necesitan JavaScript para interactividad y pueden manejar estado y handlers.
+
+La directiva `"use client"` marca un punto de entrada para el conjunto de módulos cliente. No es una instrucción para ponerla en todos los archivos ni una promesa de que ese componente nunca participa en el HTML inicial del servidor. La carga inicial puede incluir HTML de presentación y después conectar interactividad en el navegador.
+
+Esa conexión se llama hidratación. Si el servidor describe una pantalla y el cliente intenta hidratar otra distinta, aparecen advertencias y reconstrucciones. No uses valores aleatorios o lecturas de localStorage para producir una salida inicial incompatible sin gestionar esa diferencia.
+
+### Props que cruzan la frontera
+
+Al pasar datos desde servidor hacia cliente, utiliza contratos serializables y públicos. No pases una instancia Prisma, conexiones o funciones arbitrarias de servidor como si fueran props normales. Los callbacks locales entre componentes cliente sí son un patrón habitual.
+
+Importar un esquema Zod puro o un tipo compartido no equivale a importar el servicio que usa la base. `server-only` ayuda a detectar una importación indebida, pero conviene entender la separación en vez de depender de que el build nos detenga.
+
+### Navegación y reutilización
+
+`Link` facilita navegación dentro de la aplicación. Los layouts pueden conservarse entre transiciones, por lo que no son un lugar suficiente para confiar toda la autorización. Cada lectura privada y endpoint sensible revisa permisos con la identidad vigente.
+
+El estado local vive asociado a posiciones y claves de componentes. Cambiar de página, desmontar o alterar una key puede reiniciarlo. Si necesitas conservar un borrador, decide dónde vive y durante cuánto tiempo; no agregues persistencia de contraseñas como solución genérica.
+
+La nota [[Recursos/Conceptos/Renderizado estado e hidratacion|Renderizado, estado e hidratación]] conecta estos términos con el recorrido de carga de una página.
+
 ## Práctica guiada
 
 Crear el layout del panel y navegar hacia el listado del módulo. Añadir un control de cantidad.
@@ -77,12 +142,37 @@ Construir las rutas de listado y creación de tu funcionalidad, todavía con dat
 - [ ] Los componentes cliente no importan servicios backend.
 - [ ] La navegación y el estado funcionan.
 
+## Preguntas resueltas
+
+**¿El setter cambia inmediatamente la variable actual?**
+
+Solicita una actualización; el render que ya se está ejecutando conserva su snapshot.
+
+**¿Use client implica no generar HTML inicial?**
+
+No. Distingue la frontera de código cliente y sus capacidades; puede participar en la presentación inicial.
+
+**¿Todo estado necesita Zustand?**
+
+No. Empieza con estado local o elevado a un ancestro común y amplía cuando exista una necesidad concreta.
+
+## Para profundizar
+
+[React: estado](https://react.dev/learn/state-a-components-memory) · [Next.js: Server y Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components).
+
+## Conceptos clave de esta clase
+
+- **Hook:** Función de React que conecta un componente con capacidades como estado o efectos.
+- **Snapshot:** Valores que un render concreto observa.
+- **Hidratación:** Conexión de interactividad cliente al HTML inicial compatible.
+- **Layout:** Componente que envuelve pantallas y organiza estructura compartida.
+- **Segmento dinámico:** Parte de ruta capturada, como [id].
+- **Estado derivado:** Valor que se puede calcular a partir de otros datos sin almacenarlo aparte.
+
 ## Conexiones
 
 [[Semana3/CLASE 11|Clase 11]] · [[Proyecto/4. Arquitectura vertical y contratos|Fronteras de la funcionalidad]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
 
-> [!tip] Distribución orientativa de los 90 minutos
-> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
 
 ---
 

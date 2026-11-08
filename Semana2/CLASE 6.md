@@ -22,6 +22,30 @@ Repasa [[Semana1/CLASE 5|Clase 5]] y completa su tarea. Consulta [[Recursos/Stac
 
 ## Desarrollo de la clase
 
+### De una ruta que responde a una funcionalidad mantenible
+
+CRUD significa crear, consultar, actualizar y eliminar. No define por sí solo las reglas del recurso. Crear un evento debe producir datos coherentes; editarlo puede estar restringido por su estado; borrarlo puede romper referencias de entradas. Antes de programar cuatro funciones idénticas, escribe qué comportamientos permite el producto.
+
+La arquitectura vertical conserva esas decisiones dentro de eventos. El controlador conoce HTTP; el servicio conoce el comportamiento; el contrato define los datos. Prisma conoce persistencia, pero no puede decidir por nosotros si es razonable cerrar un evento o cambiar su capacidad.
+
+### La entrada y la salida son contratos diferentes
+
+Al crear recibimos nombre, fecha y capacidad. El servidor añade identidad, timestamps, estado inicial y contador. No aceptar un objeto completo del modelo como entrada reduce la superficie que alguien puede modificar.
+
+Al responder seleccionamos datos públicos. Un listado de eventos no necesita mostrar todos sus campos internos ni todas las entradas. Un `select` explícito facilita revisar lo que sale. El cliente TypeScript puede inferir esa selección, pero el contrato HTTP sigue representando fechas como strings.
+
+### Consultar varios o un solo registro
+
+`findMany` devuelve una lista, incluso vacía. `findUnique` busca por una identidad o clave única y puede devolver null. Son resultados diferentes: no tener eventos en un listado no es lo mismo que pedir un ID que no existe.
+
+Para un detalle, responde 404 cuando falte el recurso. Para un listado sin resultados, responde 200 con `[]`. Establece un orden determinista antes de limitar; si dos eventos comparten fecha, el ID como segundo criterio evita un orden indefinido.
+
+### Edición parcial sin aceptar cualquier cosa
+
+Un esquema de actualización puede reutilizar campos y volverlos opcionales, pero tiene que impedir un objeto vacío. Además debe distinguir omitir un campo de enviarlo como null. En nuestro evento, el nombre no puede vaciarse ni la capacidad pasar a negativa.
+
+Las reglas que dependen del estado actual se verifican en el servicio. Validar `capacity: 100` no permite asumir que el evento todavía está en DRAFT. La próxima clase explica cómo evitar una carrera entre comprobar el estado y escribir el cambio.
+
 ### Servicio de eventos
 
 ```ts
@@ -108,6 +132,60 @@ Para `/api/events/[id]`, Next.js 16 entrega `params` asíncronos: `const { id } 
 
 No borrar ventas ni entradas consumidas: conservar el historial. Una bebida en uso se desactiva con `available: false`; borrar un evento con dependencias devuelve 409.
 
+### Completar una edición sobre el mismo contrato
+
+Este ejemplo modifica eventos únicamente en DRAFT. Añade al archivo de esquemas:
+
+```ts
+export const updateEventSchema = createEventSchema.partial().refine(
+  (value) => Object.keys(value).length > 0,
+  { message: "Debes enviar al menos un campo" },
+);
+export type UpdateEventInput = z.infer<typeof updateEventSchema>;
+```
+
+Al servicio de eventos añade los imports de `ApiError` y `UpdateEventInput`, y esta función:
+
+```ts
+export async function updateDraftEvent(id: string, input: UpdateEventInput) {
+  return prisma.$transaction(async (tx) => {
+    const changed = await tx.event.updateMany({
+      where: { id, status: "DRAFT" },
+      data: {
+        ...(input.name !== undefined ? { name: input.name } : {}),
+        ...(input.capacity !== undefined ? { capacity: input.capacity } : {}),
+        ...(input.startsAt !== undefined ? { startsAt: new Date(input.startsAt) } : {}),
+      },
+    });
+    if (changed.count !== 1) throw new ApiError(409, "Evento inexistente o fuera de edición");
+    return tx.event.findUniqueOrThrow({
+      where: { id },
+      select: { id: true, name: true, startsAt: true, capacity: true, status: true },
+    });
+  });
+}
+```
+
+La condición forma parte de la escritura, no de una consulta anterior. La transacción mantiene la edición y la lectura del resultado en la misma operación. `count` indica si una fila cumplió el filtro. En este contrato el fallo combina inexistencia y estado no editable como conflicto; si necesitas distinguir 404, documenta cómo lo harás sin perder la condición al escribir.
+
+Conecta el servicio desde un controlador que espere params, valide `id` con `z.uuid()`, valide body y transforme errores con `apiError`. Desde la clase 9 añade permisos y comprobación de origen antes de leer el cuerpo. No publiques la versión de desarrollo sin esos controles.
+
+### Borrar no siempre significa DELETE físico
+
+Eliminar una categoría usada puede dejar bebidas sin relación. Una FK con Restrict impide ese resultado. Puedes devolver 409 y explicar que hay recursos asociados. Una bebida vendida se desactiva; sus líneas históricas siguen apuntando a ella.
+
+No uses un borrado lógico por costumbre sin definir qué consultas deben excluir los registros desactivados. Si `available` es false, el catálogo administrativo puede mostrar la bebida, pero el servicio de ventas debe rechazarla para nuevas ventas.
+
+### Tratar errores como parte de la API
+
+Los errores de validación son esperables; un nombre duplicado también puede serlo. Un error inesperado requiere diagnóstico del servidor, pero no debe enviar SQL, stack ni secretos al navegador. Traducir todos los fallos a «datos inválidos» es tan confuso como responder siempre 500.
+
+La utilidad compartida transforma errores conocidos en HTTP. El mensaje al usuario y el registro técnico tienen propósitos distintos. Registra una operación o identificador de correlación útil sin imprimir bodies completos o credenciales. El cliente puede mostrar un mensaje breve y ofrecer reintento solo cuando tenga sentido.
+
+### Recorrido para comprobar el CRUD
+
+Crea un DRAFT, lista, consulta su detalle, edita su nombre y verifica el resultado. Envía un PATCH vacío y espera 400. Cambia el evento a OPEN con la acción autorizada y comprueba que la edición ya no modifica filas. Finalmente intenta borrar un recurso referenciado y observa el conflicto. Este recorrido descubre reglas que cuatro llamadas exitosas no demuestran.
+
 ## Práctica guiada
 
 Completar GET/POST de eventos y probar 201, 400 y 500 controlado sin filtrar detalles.
@@ -122,12 +200,37 @@ Implementar lectura, edición y política de borrado/desactivación del módulo.
 - [ ] Los errores tienen códigos coherentes.
 - [ ] Las respuestas seleccionan campos explícitos.
 
+## Preguntas resueltas
+
+**¿Un listado vacío es 404?**
+
+Normalmente responde 200 con lista vacía; 404 corresponde al recurso individual no encontrado.
+
+**¿Partial evita un PATCH vacío?**
+
+No. Hace falta una comprobación adicional que exija algún campo.
+
+**¿Por qué no devolver directamente el error de Prisma?**
+
+Sus detalles internos no son el contrato público y pueden filtrar información innecesaria.
+
+## Para profundizar
+
+[Prisma 7: CRUD](https://www.prisma.io/docs/orm/v7/prisma-client/queries/crud) · [Route Handlers](https://nextjs.org/docs/app/getting-started/route-handlers).
+
+## Conceptos clave de esta clase
+
+- **CRUD:** Operaciones básicas sobre recursos, sujetas a reglas del negocio.
+- **Select:** Selección explícita de campos de salida de una consulta.
+- **PATCH:** Petición para cambios parciales según un contrato.
+- **Restrict:** Política referencial que impide borrar una fila con dependencias.
+- **Error esperado:** Fallo contemplado por el contrato, como validación o conflicto.
+- **Correlación:** Identificador que permite relacionar una petición con su diagnóstico.
+
 ## Conexiones
 
 [[Semana2/CLASE 9|Clase 9]] · [[Proyecto/3. Guía de Contribución y Estándares del Proyecto|Convenciones]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
 
-> [!tip] Distribución orientativa de los 90 minutos
-> 10 min de repaso, 20 de explicación, 50 de práctica y 10 de cierre. El trabajo del módulo continúa en casa.
 
 ---
 

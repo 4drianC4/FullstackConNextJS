@@ -28,3 +28,15 @@ Cada concepto vuelve a sus clases y al proyecto. Si autenticación y permisos to
 
 > [!tip] Perderse, pero con enlaces
 > Vuelve a este mapa cuando una clase use un concepto anterior. Releer una explicación no reinicia tu progreso; fingir que la recuerdas suele reiniciar tu tarde.
+
+## Notas para conceptos extensos
+
+Cuando una duda atraviese varias clases, usa estas explicaciones como referencia y vuelve al ejemplo del proyecto:
+
+- [[Recursos/Conceptos/Idempotencia y concurrencia|Idempotencia, carreras y transacciones]].
+- [[Recursos/Conceptos/Sesiones cookies y seguridad web|Sesiones, cookies, XSS y CSRF]].
+- [[Recursos/Conceptos/Renderizado estado e hidratacion|Renderizado, estado e hidratación]].
+- [[Recursos/Conceptos/Cache y sincronizacion|Caché y sincronización de datos]].
+- [[Recursos/Conceptos/Fechas dinero y contratos|Fechas, dinero y representación de contratos]].
+- [[Recursos/Conceptos/Pruebas CI y evidencias|Pruebas, CI y alcance de la evidencia]].
+- [[Recursos/Conceptos/Contexto tokens y agentes|Contexto, tokens y agentes de programación]].

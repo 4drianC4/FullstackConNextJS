@@ -29,6 +29,12 @@ Al finalizar podrás:
 - Desplegar y verificar una aplicación con datos persistentes.
 - Planificar, revisar y depurar cambios con OpenCode sin delegar la comprensión.
 
+## Cómo usar estos apuntes
+
+Lee los fundamentos antes de copiar el ejemplo y sigue el recorrido de datos que se explica después del código. Cambia una condición, predice el resultado y compruébalo en la práctica. Las preguntas resueltas ayudan a revisar tu razonamiento; los criterios finales muestran qué deberías poder demostrar.
+
+Los conceptos extensos tienen secciones desarrolladas o notas propias en [[Recursos/Conceptos y conexiones|el mapa de conceptos]]. Al final de cada clase hay definiciones breves para el vocabulario que aparece en los ejemplos. Usa los enlaces y backlinks de Obsidian para volver al punto donde una idea se introduce.
+
 ## Temario — exactamente 20 clases
 
 ### Semana 1 — Introducción y fundamentos del backend
@@ -85,7 +91,7 @@ Al finalizar podrás:
 | Infraestructura | Docker Compose v2, Vercel y PostgreSQL alojado |
 | IA | OpenCode 1 como agente; proveedor NVIDIA según acceso y cuota disponible |
 
-[[Recursos/Stack y entorno|Instalación, scripts, versiones exactas y checklist del instructor]]. Las familias anteriores son una decisión docente; la aplicación debe fijar las versiones exactas y su lockfile. Auth.js 5 está tratado explícitamente como prerelease; no mezclar ejemplos v4/v5. Este repositorio es de apuntes: todavía no contiene una aplicación ejecutable ni su lockfile.
+[[Recursos/Stack y entorno|Instalación, scripts y compatibilidad de versiones]]. El proyecto utiliza las familias indicadas; conserva las versiones exactas acordadas en package.json y su lockfile. Auth.js 5 está tratado explícitamente como prerelease; no mezclar ejemplos v4/v5. Este repositorio es de apuntes: todavía no contiene una aplicación ejecutable ni su lockfile.
 
 Zustand, TanStack Query, optimistic UI, modo oscuro y caché avanzada son ampliaciones, no requisitos de aprobación.
 
@@ -104,11 +110,11 @@ Fuera del MVP: pagos reales, facturación fiscal, inventario de ingredientes, QR
 - Cuentas de GitHub y del hosting/base elegidos; para IA, acceso a un proveedor NVIDIA disponible sin pago para la práctica.
 - Trabajo fuera de clase: referencia de 45–60 minutos entre sesiones y más si la tarea lo requiere. Registrar bloqueos antes de la siguiente clase.
 
-Hasta 18 alumnos; propuesta inicial de seis equipos de hasta tres, ajustable a inscritos. El instructor prepara el repositorio de aplicación, contratos y coordinación de migraciones. Los alumnos lo construyen durante el curso.
+Trabajarás en una funcionalidad con tu equipo. Consulta las tareas asignadas, acuerda contratos con los otros módulos y construye cada recorrido de backend a frontend. Las migraciones del modelo común se integran coordinadamente para que todas las copias conserven el mismo historial.
 
 ## Metodología y evaluación
 
-Explicación breve, práctica guiada, tarea del módulo y PR revisado. La integración se revisa continuamente, con hitos al cerrar backend, frontend y despliegue. [[Proyecto/3. Guía de Contribución y Estándares del Proyecto|Guía de contribución]] · [[Proyecto/5. Evaluacion y entregables|Rúbrica y entregables]].
+Cada clase incluye fundamentos desarrollados, ejemplos comentados, análisis de errores, práctica guiada, tarea y preguntas resueltas. Al final encontrarás conceptos clave y enlaces para profundizar. La integración se revisa continuamente, con hitos al cerrar backend, frontend y despliegue. [[Proyecto/3. Guía de Contribución y Estándares del Proyecto|Guía de contribución]] · [[Proyecto/5. Evaluacion y entregables|Rúbrica y entregables]].
 
 La clase 1 introduce Obsidian. Las dos clases de IA enseñan a programar y revisar con OpenCode; no exigen añadir una API de IA al producto ni contratar un plan. Si falta cuota, hay una práctica equivalente de revisión sin inferencia.
 
@@ -128,4 +134,4 @@ Los dibujos existentes se conservan como material visual complementario; pueden 
 [Next.js](https://nextjs.org/docs) · [React](https://react.dev/learn) · [TypeScript](https://www.typescriptlang.org/docs/) · [Prisma 7](https://www.prisma.io/docs/orm/v7) · [Auth.js](https://authjs.dev/) · [Tailwind](https://tailwindcss.com/docs) · [Zod](https://zod.dev/) · [Docker](https://docs.docker.com/) · [OpenCode](https://opencode.ai/docs/) · [NVIDIA](https://build.nvidia.com/) · [Obsidian](https://help.obsidian.md/).
 
 > [!info] Alcance del repositorio
-> Aquí están las clases, ejemplos y contratos para enseñar. El código, los secretos, los workflows y el despliegue del producto se crean en un repositorio de aplicación separado. Las recetas requieren probarse allí antes de cada edición.
+> Aquí puedes estudiar clases, ejemplos y contratos del proyecto. Los comandos y archivos de aplicación se trabajan en un repositorio separado de esta bóveda. Sigue los pasos, adapta la configuración local y verifica los resultados indicados en cada práctica.
