@@ -21,3 +21,8 @@ tags:
 Aplicación desplegada, PR asistido revisado y presentación individual.
 
 Cada clase enlaza a la anterior, la siguiente y sus conceptos relacionados. Usa backlinks para volver desde un concepto a las clases que lo practican. Anota dudas con un enlace a la clase correspondiente y acuerda con tu equipo el PR que cierra el hito.
+
+## Conceptos para consultar durante la semana
+
+- [[Recursos/Conceptos/Pruebas CI y evidencias|Pruebas CI y evidencias]].
+- [[Recursos/Conceptos/Contexto tokens y agentes|Contexto tokens y agentes]].

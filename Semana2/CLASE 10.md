@@ -131,6 +131,18 @@ En el PR incluye comandos ejecutados, estado del entorno, resultado y límites. 
 
 La nota [[Recursos/Conceptos/Pruebas CI y evidencias|Pruebas, CI y evidencias]] explica cómo combinar estas verificaciones al integrar y desplegar.
 
+### Caso desarrollado: una prueba pasa y el endpoint sigue abierto
+
+La suite comprueba que canAccess devuelve false para STAFF cuando se exige ADMIN. El resultado es verde. Sin embargo, postEvent no llama al guard y una petición sin sesión crea un evento. La función aislada es correcta; la conexión con el endpoint no existe.
+
+Añade una integración que envíe el request real sin sesión y espere 401. Además comprueba que no haya una nueva fila. Si solo verificas el mensaje del controlador simulado, podrías estar probando un sustituto que ya hace lo esperado y nunca llega al código productivo.
+
+Después añade el caso con STAFF y uno válido con ADMIN. Así distingues «nadie puede crear» de «solo la identidad autorizada puede crear». Un test que rechaza todo no demuestra que el recurso sea usable.
+
+Mantén también el unitario: sigue siendo rápido y útil para explicar la regla. Los niveles no se eliminan entre sí; se combinan porque tienen alcances diferentes. Cuando un caso falle, su nombre y preparación deben permitir ubicar si el problema está en regla, integración o entorno.
+
+En el PR escribe qué niveles ejecutaste y con qué datos. Si no pudiste ejecutar integración porque faltaba PostgreSQL de test, decláralo. Una limitación explícita permite completarla antes de integrar; una afirmación genérica de «tests OK» puede ocultarla.
+
 ## Práctica guiada
 
 Ejecutar pruebas de validación/permisos y una prueba de integración de un equipo vecino.

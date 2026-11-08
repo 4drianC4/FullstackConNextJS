@@ -135,6 +135,18 @@ Una explicación útil relaciona causa, corrección y evidencia: «El listado co
 
 Si no puedes explicar una función, vuelve al contrato y sigue sus entradas, transformaciones, efectos y resultado. La capacidad de pedir un fragmento no reemplaza comprender qué ocurrirá cuando falle en otro equipo.
 
+### Caso desarrollado: el modelo cambia la prueba para justificar el bug
+
+Un caso esperaba que la segunda reserva de mesa/evento devolviera 409. Tras una refactorización se crean dos filas. El agente cambia la prueba para esperar 201 argumentando que «ahora se permite más flexibilidad».
+
+Ese cambio inventa un requisito. Antes de aceptarlo, vuelve a la regla escrita y a la restricción del modelo. La flexibilidad no fue solicitada y la base no debería admitir el duplicado. Recupera la prueba y busca qué modificación alteró persistencia o el alcance de la restricción.
+
+Ejecuta contra PostgreSQL de test, no solo un mock que permite cualquier inserción. Si la base real rechaza el segundo registro y el test mock no, ajusta qué evidencia proporciona cada nivel. No cambies el producto para que un sustituto mal configurado tenga razón.
+
+Una prueba puede cambiar legítimamente cuando el contrato cambia por decisión explícita. En ese caso se actualizan alcance, modelo, API, interfaz y casos nuevos. No se presenta como una reparación técnica silenciosa.
+
+Al revisar un PR, lee también la diferencia de tests. Borrar una aserción puede ser más importante que añadir veinte líneas de implementación. La revisión busca conservar el significado del comportamiento, no simplemente obtener un reporte verde.
+
 ## Práctica guiada
 
 Revisar el PR asistido de otro equipo e identificar una mejora o un defecto verificable.

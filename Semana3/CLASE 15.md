@@ -125,6 +125,10 @@ Esta estrategia tiene coste de red y muestra carga; es razonable para el alcance
 
 `router.refresh()` actualiza el árbol de componentes de servidor, pero no es una señal universal para volver a ejecutar cualquier efecto cliente. Si tu efecto depende de revision, cambia esa dependencia explícitamente. Si la pantalla usa datos del servidor, define su estrategia de revalidación.
 
+### Una analogía para ubicar cada copia
+
+Abre [[ComoOptimizoMemoria.excalidraw|el dibujo de casa, tienda y supermercado]] y consulta [[Recursos/Conceptos/Cache y sincronizacion#Apoyo visual: casa, tienda y supermercado|su explicación aplicada a las copias de datos]]. Identifica qué dato conserva el navegador, cuál confirma la base y qué condición te haría volver a consultar. La cercanía de una copia no garantiza que esté actualizada.
+
 ### Cachés diferentes, problemas diferentes
 
 Puede haber caché del navegador, de una petición del servidor, de datos de un componente o de una librería. «Borrar la caché» es demasiado ambiguo sin identificar qué dato y qué capa conservan el valor. La nota [[Recursos/Conceptos/Cache y sincronizacion|Caché y sincronización]] organiza esas diferencias.
@@ -140,6 +144,24 @@ Si la API responde 401, el problema es la sesión. Si el JSON no pasa el contrat
 ### Comprobaciones para cerrar integración
 
 Con red lenta, observa estado de carga. Navega antes de terminar y comprueba que no aparece contenido de otra selección. Crea un evento y confirma que el listado vuelve a leer. Fuerza error de API y prueba reintento. Finalmente inicia sesión con STAFF y comprueba que el recorrido no necesita un endpoint administrativo al que no tiene permiso.
+
+### Caso desarrollado: llega primero la respuesta de la selección nueva
+
+Abres Evento A y empieza una lectura lenta. Cambias a Evento B, cuya lectura responde rápido. La pantalla muestra B; luego termina A y, sin una comprobación, sobrescribe el estado con datos de A. La API pudo responder correctamente en ambas peticiones y la interfaz seguir siendo incorrecta.
+
+Cada efecto crea su controlador y limpia el anterior al cambiar dependencia. Al abortar o invalidar la lectura vieja, no publica su resultado ni muestra un error como si la conexión actual fallara. El identificador de la selección forma parte de las dependencias que activan la consulta.
+
+No uses una variable global de datos para saltarte ese ciclo de vida. Tampoco agregues una espera fija para intentar que A siempre llegue antes: el orden real de red no está bajo ese control. La solución debe reconocer qué respuesta corresponde a la intención vigente.
+
+Después de guardar un cambio en B, dispara una lectura de B con la señal acordada. Si la pantalla usa useEffect con revision, aumenta revision; si usa un árbol de servidor, aplica su estrategia correspondiente. No mezcles ambos sin identificar la fuente del listado.
+
+Para probarlo, usa red lenta o una demora controlada en un entorno de prueba y cambia rápidamente de selección. El resultado final debe mostrar el recurso seleccionado, incluso cuando las respuestas llegan en orden inverso.
+
+### Complemento: actualizaciones en tiempo real
+
+Además de consultar cuando lo necesitas, una aplicación puede mantener una conexión para intercambiar mensajes con el servidor, como ocurre con WebSockets. Esa ampliación exigiría diseñar autenticación, reconexión y sincronización; no sustituye las reglas de aforo ni los permisos de cada operación.
+
+[[WebSockets.excalidraw|El lienzo de WebSockets]] está reservado para ilustrar esa conversación, pero actualmente está vacío. Por ahora, el flujo de este curso usa peticiones HTTP y actualización explícita del listado. Consulta [[Recursos/Mapa de dibujos Excalidraw#WebSockets: lienzo pendiente|su estado en el índice visual]].
 
 ## Práctica guiada
 

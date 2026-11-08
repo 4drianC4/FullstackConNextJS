@@ -46,6 +46,10 @@ Un esquema de actualización puede reutilizar campos y volverlos opcionales, per
 
 Las reglas que dependen del estado actual se verifican en el servicio. Validar `capacity: 100` no permite asumir que el evento todavía está en DRAFT. La próxima clase explica cómo evitar una carrera entre comprobar el estado y escribir el cambio.
 
+### El dibujo como mapa del CRUD
+
+Consulta [[pasosPeticion.excalidraw|el recorrido dibujado de una petición]]. Al leer el código de abajo, identifica qué función corresponde a ruta, controlador, DTO/contrato, servicio y ORM. La respuesta atraviesa esas responsabilidades de regreso; devolver el body sin confirmar la escritura no completa el recorrido.
+
 ### Servicio de eventos
 
 ```ts
@@ -170,6 +174,46 @@ La condición forma parte de la escritura, no de una consulta anterior. La trans
 
 Conecta el servicio desde un controlador que espere params, valide `id` con `z.uuid()`, valide body y transforme errores con `apiError`. Desde la clase 9 añade permisos y comprobación de origen antes de leer el cuerpo. No publiques la versión de desarrollo sin esos controles.
 
+### Conectar PATCH sin perder la organización vertical
+
+Esta es la versión integrada del controlador, que utiliza los guards desarrollados en la clase 9. Mientras estudias esta clase, identifica el recorrido y vuelve a conectar esas protecciones cuando llegues a autenticación; las escrituras sin permiso solo se prueban localmente.
+
+Integra estos imports con los existentes en `src/features/events/backend/event.controller.ts`; no dupliques los que ya tiene el archivo:
+
+```ts
+import { z } from "zod";
+import { updateEventSchema } from "../shared/event.schema";
+import { updateDraftEvent } from "./event.service";
+import { requireRoles } from "@/shared/lib/access";
+import { requireSameOrigin } from "@/shared/lib/origin";
+// apiError ya está importado en el controlador inicial.
+
+export async function patchEvent(
+  request: Request,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    await requireRoles(["ADMIN"]);
+    requireSameOrigin(request);
+    const { id } = await context.params;
+    const eventId = z.uuid().parse(id);
+    const input = updateEventSchema.parse(await request.json());
+    return Response.json(await updateDraftEvent(eventId, input));
+  } catch (error: unknown) { return apiError(error); }
+}
+```
+
+La ruta dinámica queda pequeña, como el punto de entrada de GET/POST:
+
+```ts
+// src/app/api/events/[id]/route.ts
+export { patchEvent as PATCH } from "@/features/events/backend/event.controller";
+```
+
+Observa tres validaciones distintas: el ID identifica el recurso con formato UUID, el body expresa los campos editables y el servicio exige estado DRAFT. Si el ID tiene forma válida pero no hay un evento editable, el servicio devuelve el conflicto acordado. Un ID válido no demuestra existencia ni autorización.
+
+La respuesta contiene el registro seleccionado por el servicio, no el body original. Esta diferencia importa cuando el servidor recorta textos, convierte fechas o fija valores: el cliente debe representar lo confirmado y no asumir que todo se guardó exactamente como lo envió.
+
 ### Borrar no siempre significa DELETE físico
 
 Eliminar una categoría usada puede dejar bebidas sin relación. Una FK con Restrict impide ese resultado. Puedes devolver 409 y explicar que hay recursos asociados. Una bebida vendida se desactiva; sus líneas históricas siguen apuntando a ella.
@@ -185,6 +229,18 @@ La utilidad compartida transforma errores conocidos en HTTP. El mensaje al usuar
 ### Recorrido para comprobar el CRUD
 
 Crea un DRAFT, lista, consulta su detalle, edita su nombre y verifica el resultado. Envía un PATCH vacío y espera 400. Cambia el evento a OPEN con la acción autorizada y comprueba que la edición ya no modifica filas. Finalmente intenta borrar un recurso referenciado y observa el conflicto. Este recorrido descubre reglas que cuatro llamadas exitosas no demuestran.
+
+### Caso desarrollado: editar sin borrar valores que no enviaste
+
+El evento tiene nombre, fecha y capacidad. Quieres cambiar únicamente el nombre con `PATCH {"name":"Noche Retro"}`. Los campos omitidos deben conservarse. Si reconstruyes data con valores por defecto como capacity cero, estarías alterando hechos que la persona no pidió cambiar.
+
+El schema partial acepta ausencia, pero rechaza un nombre vacío. La comprobación de al menos una propiedad rechaza `{}`. En el servicio, solo asignas campos presentes y conviertes startsAt si se envió. No asumas que null significa omitir: si un campo no permite null, se rechaza.
+
+La condición `status: DRAFT` en la escritura impide modificar un evento ya abierto. Si otra petición lo abre mientras intentas editar, la condición se evalúa al escribir. Una consulta anterior seguida de una actualización por ID sin condición dejaría esa carrera abierta.
+
+Al volver a leer dentro de la transacción, respondes con el registro confirmado por ese cambio. Después el controlador serializa la respuesta y la interfaz puede actualizar su copia. El servicio no necesita saber si ese nombre se escribió desde un modal o desde una página completa.
+
+Comprueba edición de un solo campo, PATCH vacío, nombre inválido y evento OPEN. Observa campos persistidos además de los estados. El test debe demostrar que los omitidos no se borraron y que el conflicto no produjo una modificación parcial.
 
 ## Práctica guiada
 

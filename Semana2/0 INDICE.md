@@ -21,3 +21,9 @@ tags:
 Backend integrado, permisos comprobados y evidencia de pruebas.
 
 Cada clase enlaza a la anterior, la siguiente y sus conceptos relacionados. Usa backlinks para volver desde un concepto a las clases que lo practican. Anota dudas con un enlace a la clase correspondiente y acuerda con tu equipo el PR que cierra el hito.
+
+## Conceptos para consultar durante la semana
+
+- [[Recursos/Conceptos/Idempotencia y concurrencia|Idempotencia y concurrencia]].
+- [[Recursos/Conceptos/Sesiones cookies y seguridad web|Sesiones cookies y seguridad web]].
+- [[Recursos/Conceptos/Pruebas CI y evidencias|Pruebas CI y evidencias]].

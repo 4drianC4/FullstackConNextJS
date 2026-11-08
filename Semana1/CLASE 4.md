@@ -42,6 +42,18 @@ Guardar el nombre de la categoría en cada bebida provocaría actualizaciones re
 
 La normalización reduce duplicaciones inconsistentes; no prohíbe guardar instantáneas con significado histórico. La pregunta útil es «¿este dato debe seguir al valor actual o recordar lo que ocurrió?». En una venta, el precio histórico debe permanecer.
 
+### Apoyo visual: tablas y relaciones
+
+![[SQL VS NOSQL.excalidraw]]
+
+[[SQL VS NOSQL.excalidraw|Abrir el dibujo SQL/NoSQL]] · [[Recursos/Mapa de dibujos Excalidraw|Ver todos los dibujos]].
+
+El ejemplo utiliza estudiantes y cursos. Reconoce las entidades, la clave que identifica un curso y la referencia que conserva cada estudiante. La relación 1:N significa que un curso puede tener varios estudiantes y cada estudiante del ejemplo referencia un curso. Para la discoteca, traslada esa idea a un evento con varias entradas.
+
+Aunque el archivo se llama SQL VS NOSQL, el contenido actual ilustra principalmente tablas y una relación. Una base relacional organiza filas con un esquema y permite restricciones entre entidades; NoSQL agrupa modelos distintos, como documentos, clave-valor o grafos. No significa «sin estructura» ni «sin reglas», y no convierte automáticamente una opción en más rápida para todo.
+
+Elegimos PostgreSQL porque necesitamos relaciones e integridad entre eventos, entradas, ventas y reservas. El dibujo de estudiantes ayuda a entender el concepto; los nombres y campos vigentes del proyecto siguen estando en [[Proyecto/6. Modelo de datos|Modelo de datos]].
+
 ### Qué aporta un ORM y qué sigue siendo SQL
 
 Un ORM mapea modelos y operaciones de código a la base. Prisma genera un cliente que conoce los campos y relaciones del esquema. Eso permite detectar errores de nombres y construir consultas sin escribir SQL en cada servicio. No convierte automáticamente cualquier acceso en seguro: aún necesitas permisos, transacciones y validación.
@@ -152,6 +164,18 @@ Un seed prepara ejemplos: una cuenta, un evento, una bebida y una mesa que otros
 El seed utiliza IDs o claves conocidas para no duplicar registros al ejecutarlo otra vez. `upsert` busca por clave única y decide entre crear o actualizar. El ejemplo conserva contraseñas existentes: repetirlo no debe cambiar de forma silenciosa el acceso de alguien.
 
 Antes de integrar una migración, comprueba que un compañero puede reconstruir la base con el historial. No arregles tu entorno editando a mano tablas que luego nadie sabrá reproducir. Si cambias una migración ya aplicada, las copias del equipo dejan de compartir la misma historia.
+
+### Caso desarrollado: una categoría cambia de nombre
+
+La categoría «Bebidas sin alcohol» tiene diez bebidas. Si guardaste el nombre de categoría como texto repetido en cada fila, renombrarla exige cambiar diez datos y evitar que alguno quede distinto. Si guardaste categoryId, cambias una fila de Category y las bebidas siguen referenciando la misma identidad.
+
+Ahora imagina que vendiste un agua por 1000 centavos y después subiste el precio a 1200. En este caso no quieres que la venta histórica cambie. Por eso BarSaleItem conserva unitPriceCents: es una copia intencional del hecho de venta, no un descuido de normalización.
+
+La diferencia se decide por significado. El nombre actual de categoría es una referencia viva; el precio aplicado pertenece a un momento. Un modelo bien razonado no sigue una regla ciega de «nunca duplicar» ni «copiar siempre para no hacer joins».
+
+Comprueba las dos situaciones: renombra una categoría y observa el catálogo; después cambia un precio y observa una venta anterior. Cada resultado esperado define qué dato debe consultarse y cuál debe conservarse.
+
+Antes de modificar el esquema, identifica qué consulta o recorrido lo necesita. Añadir campos porque «tal vez sirvan» aumenta migraciones y contratos sin una función demostrable. El modelo común puede ampliarse, pero cada cambio debe explicar qué regla o comportamiento nuevo sostiene.
 
 ## Práctica guiada
 

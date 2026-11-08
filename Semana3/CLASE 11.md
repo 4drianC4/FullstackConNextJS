@@ -128,6 +128,18 @@ Renderiza una bebida disponible, otra no disponible y una lista vacía. Cambia e
 
 Conservar los datos de prueba en una nota o módulo claramente identificado permite reemplazarlos después por la API sin cambiar la responsabilidad de presentación. No presentes un mock como si fuera información confirmada por el servidor.
 
+### Caso desarrollado: una lista se reordena y un input cambia de bebida
+
+Tienes tres tarjetas con un control local de cantidad. La primera muestra agua y cantidad dos. Al ordenar por precio, otra bebida ocupa la primera posición. Si utilizaste el índice como key, React puede asociar la memoria de esa posición al nuevo registro.
+
+El resultado visible parece una cantidad movida de bebida. No es un error de multiplicación ni una escritura de base: es identidad de instancia en la representación. Usa drink.id como key para que la tarjeta siga al mismo registro al reordenarse.
+
+No generes una key aleatoria en cada render para «asegurar unicidad». Eso cambia identidad cada vez y puede reiniciar todos los controles, perder foco y rehacer trabajo. Estable y única dentro de la lista son las propiedades que necesitas.
+
+Después decide dónde debería vivir cantidad. Si prepara una venta con varias filas y un total común, probablemente debe estar en el padre que coordina ese borrador, no aislada sin comunicación en cada tarjeta. La key resuelve identidad; no define por sí sola la fuente del estado compartido.
+
+Prueba agregar, quitar y reordenar registros. Comprueba que valores y foco conservan la relación esperada. Este ejemplo muestra que los fundamentos de React afectan la precisión del negocio incluso antes de conectar una API.
+
 ## Práctica guiada
 
 Mostrar un listado de bebidas de prueba y un estado vacío.

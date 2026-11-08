@@ -163,6 +163,18 @@ Expirar una sesión no equivale a desactivar una cuenta y cerrar sesión no es l
 
 Consulta [[Recursos/Conceptos/Sesiones cookies y seguridad web|Sesiones, cookies y seguridad web]] para distinguir estas protecciones y sus límites. Al probar login verifica éxito, contraseña incorrecta, cuenta inactiva y posterior acceso a un recurso protegido.
 
+### Caso desarrollado: una cuenta desactivada conserva su cookie
+
+Una persona inicia sesión a las 15:00 y recibe una sesión con duración de ocho horas. A las 16:00 se desactiva su cuenta. La cookie puede seguir existiendo en su navegador: el almacenamiento del cliente no se borra automáticamente porque cambie una fila de la base.
+
+Si el servidor solo verifica que el token sea válido y utiliza un rol antiguo guardado en él, podría seguir aceptando acciones. Nuestro guard consulta la cuenta vigente por ID y revisa active. La próxima operación se rechaza aunque la cookie no haya expirado.
+
+No necesitas enviar passwordHash al cliente para hacer esa consulta. La sesión conserva identidad; la base resuelve estado y permiso actuales. El componente cliente no toma esa decisión con un boolean que recibió hace una hora.
+
+Al probarlo, inicia sesión, ejecuta una lectura válida, desactiva la cuenta con otra identidad autorizada y repite la misma lectura. Comprueba la respuesta y que una mutación posterior tampoco altera datos. Volver a cargar un menú vacío sin probar la API no es suficiente.
+
+Este diseño tiene un coste de consulta y un beneficio de control vigente. Si más adelante introduces caché de cuentas o roles, deberás decidir cuánto retraso aceptas y cómo invalidarlo. No añadas esa optimización sin reconocer qué garantía temporal cambia.
+
 ## Práctica guiada
 
 Crear usuarios de prueba mediante seed y verificar credenciales con una prueba local del flujo de Auth.js. El formulario se construye en frontend.

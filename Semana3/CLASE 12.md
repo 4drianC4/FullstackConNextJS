@@ -40,6 +40,18 @@ Los hooks ordinarios como useState y useEffect se llaman al nivel superior del c
 
 Dos contadores renderizados son dos instancias con memoria propia. Si varias piezas deben mostrar la misma cantidad, eleva el estado al ancestro común y pasa valores y callbacks. Esto es suficiente para muchas pantallas del MVP sin introducir un almacén global.
 
+### Apoyo visual: prop drilling y estado compartido
+
+![[propDrilling.excalidraw]]
+
+[[propDrilling.excalidraw|Abrir el dibujo de props y estado compartido]] · [[Recursos/Mapa de dibujos Excalidraw|Ver todos los dibujos]].
+
+Observa los componentes e inputs y sigue por dónde viaja la información que escribe el usuario. Pasar props a través de varios niveles que solo las transportan se conoce como prop drilling. No es un error por sí mismo: en árboles pequeños puede ser una dependencia explícita y fácil de seguir.
+
+El bloque `store.ts` representa una alternativa de estado compartido. No significa que cada input necesite un store ni que debamos introducir Zustand para completar el proyecto. Primero decide quién necesita el dato y sitúalo en el ancestro común. Un borrador de venta puede coordinarse desde su pantalla; la venta confirmada sigue teniendo su autoridad en el servidor.
+
+Usa el dibujo para comparar las dos rutas y preguntar qué componentes leen, modifican o simplemente transmiten el valor. Cambiar dónde vive el estado no elimina la necesidad de contratos claros.
+
 ### Eventos y efectos cumplen funciones diferentes
 
 Un evento responde a una interacción concreta. Un efecto sincroniza con algo externo después de renderizar, como una petición o una suscripción. No pongas una venta dentro de un efecto dependiente de una cantidad: cambiar el input podría registrar ventas sin confirmación explícita.
@@ -127,6 +139,18 @@ Importar un esquema Zod puro o un tipo compartido no equivale a importar el serv
 El estado local vive asociado a posiciones y claves de componentes. Cambiar de página, desmontar o alterar una key puede reiniciarlo. Si necesitas conservar un borrador, decide dónde vive y durante cuánto tiempo; no agregues persistencia de contraseñas como solución genérica.
 
 La nota [[Recursos/Conceptos/Renderizado estado e hidratacion|Renderizado, estado e hidratación]] conecta estos términos con el recorrido de carga de una página.
+
+### Caso desarrollado: dos incrementos producen solo uno
+
+Dentro de un handler escribes dos veces `setQuantity(quantity + 1)`. Si quantity vale uno en ese render, ambas llamadas proponen el valor dos. No expresan necesariamente «incrementar dos veces»: repiten un siguiente valor calculado desde la misma captura.
+
+La forma `setQuantity(current => current + 1)` describe una transformación del valor pendiente. Dos actualizaciones funcionales se aplican una tras otra y expresan el aumento acumulado. La diferencia es importante cuando varios eventos o actualizaciones se agrupan.
+
+No intentes observar el valor nuevo leyendo inmediatamente la variable quantity del mismo handler. Esa variable pertenece al render que creó la función. Observa la pantalla del siguiente render o analiza el estado con herramientas y logs ubicados correctamente.
+
+Ahora calcula un total con `quantity * priceCents` durante render. No necesitas otro estado total ni un efecto para sincronizarlo. Si almacenas ambos, tendrás que mantener una relación que ya puede obtenerse directamente y abrirás otra posibilidad de desajuste.
+
+El total mostrado sigue siendo una estimación del borrador; el servidor confirma precios al registrar la venta. Este caso conecta dos niveles: React debe conservar una interacción consistente y el backend debe sostener la autoridad del dato confirmado.
 
 ## Práctica guiada
 

@@ -21,3 +21,9 @@ tags:
 Interfaz del módulo conectada al backend con formularios y estados.
 
 Cada clase enlaza a la anterior, la siguiente y sus conceptos relacionados. Usa backlinks para volver desde un concepto a las clases que lo practican. Anota dudas con un enlace a la clase correspondiente y acuerda con tu equipo el PR que cierra el hito.
+
+## Conceptos para consultar durante la semana
+
+- [[Recursos/Conceptos/Renderizado estado e hidratacion|Renderizado estado e hidratacion]].
+- [[Recursos/Conceptos/Cache y sincronizacion|Cache y sincronizacion]].
+- [[Recursos/Conceptos/Fechas dinero y contratos|Fechas dinero y contratos]].

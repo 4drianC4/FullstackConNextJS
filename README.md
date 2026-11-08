@@ -120,6 +120,8 @@ La clase 1 introduce Obsidian. Las dos clases de IA enseñan a programar y revis
 
 ## Mapa de recursos
 
+- [[Recursos/Mapa de dibujos Excalidraw|Dibujos Excalidraw: índice visual y clases relacionadas]].
+
 - [[Recursos/Obsidian - Guia del curso|Obsidian: enlaces, propiedades y grafo local]].
 - [[Recursos/Stack y entorno|Stack y entorno de la aplicación]].
 - [[Recursos/Conceptos y conexiones|Mapa de conceptos y dependencias]].
@@ -127,7 +129,7 @@ La clase 1 introduce Obsidian. Las dos clases de IA enseñan a programar y revis
 - [[Recursos/Fullstack con IA/Programemos como si estuviéramos en la matrix... o quizá si estamos|OpenCode y NVIDIA: clases y referencia]].
 - [[Recursos/Creación local de proyectos/0. División para la creación del todo|Recetas de creación local]].
 
-Los dibujos existentes se conservan como material visual complementario; pueden contener ejemplos de proyectos anteriores. El esquema y las notas actuales de Discoteca son la referencia del curso.
+Los dibujos están enlazados desde sus clases y reunidos en el índice visual. Algunos utilizan otros dominios para explicar conceptos; el esquema y las notas de Discoteca siguen siendo la referencia del proyecto. El lienzo de WebSockets está identificado como pendiente.
 
 ## Documentación oficial
 

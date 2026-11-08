@@ -14,6 +14,18 @@ Entre la base y la pantalla puede haber varias copias: respuesta HTTP conservada
 
 En el curso empezamos con una estrategia explícita por listado. El cliente consulta con fetch, valida la respuesta y almacena datos locales; una mutación exitosa dispara una nueva lectura. La fuente de verdad del negocio sigue siendo el servidor.
 
+## Apoyo visual: casa, tienda y supermercado
+
+![[ComoOptimizoMemoria.excalidraw]]
+
+[[ComoOptimizoMemoria.excalidraw|Abrir la analogía de almacenamiento y caché]] · [[Recursos/Mapa de dibujos Excalidraw|Ver todos los dibujos]].
+
+El dibujo compara la casa y su despensa, una tienda cercana y un supermercado con lugares donde puede conservarse información. La pregunta útil es qué dato puedes recuperar cerca y cuándo necesitas acudir a su fuente. Tener una copia puede reducir viajes, pero hay que decidir cómo reconocer que quedó antigua.
+
+Local storage vive en el navegador; Redis es un servicio de almacenamiento en memoria que puede emplearse como caché; PostgreSQL conserva los registros relacionales del proyecto. No son niveles obligatorios de una misma jerarquía ni almacenan por defecto lo mismo. Local storage también puede persistir al cerrar el navegador y no es la RAM del componente React.
+
+El nombre del archivo habla de memoria, pero aquí usamos su analogía para explicar almacenamiento, proximidad y vigencia de copias. Redis es complementario y no se instala en el MVP. Las sesiones siguen el mecanismo de cookies del curso; el dibujo no propone guardar tokens privados en local storage.
+
 ## Identificar la copia
 
 | Dónde está el dato | Señal de que podría estar desactualizado | Qué revisar |

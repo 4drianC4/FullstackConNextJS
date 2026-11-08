@@ -149,6 +149,18 @@ Si aparece «Type string is not assignable to type number», busca el campo y la
 
 Ejecuta el script de tipos desde la aplicación. `--noEmit` comprueba sin generar archivos JavaScript nuevos. Esta comprobación debe pasar en un clon limpio, no solamente después de reiniciar el editor.
 
+### Caso desarrollado: la capacidad llega como texto
+
+Tienes un formulario cuyo input muestra `100`. La función del backend declara `capacity: number`, pero en la red observas `"capacity": "100"`. La pantalla y el JSON se parecen visualmente; el contrato es distinto.
+
+La solución no es escribir `body as CreateEventInput`. Esa aserción permite al compilador confiar sin cambiar el valor. Debes decidir la frontera de conversión. En nuestro contrato HTTP, capacity es un número: el formulario convierte su valor y el backend exige número entero dentro de rango. Un cliente que envíe texto recibe 400.
+
+También sería posible diseñar una API que acepte texto y lo convierta explícitamente. Eso requeriría documentarlo y tratar cadenas vacías, decimales, espacios y valores no numéricos. No mezcles ambas políticas sin darte cuenta: un contrato claro reduce dudas entre frontend y backend.
+
+Después de convertir, todavía no has demostrado positividad ni rango. `-10` es number y JSON válido. Ahí entra la validación de ejecución. Finalmente, aun un 100 válido puede incumplir una regla del evento si intentas editarlo cuando ya está abierto.
+
+El ejemplo muestra tres preguntas diferentes: representación, validez de entrada y permiso/regla de negocio. TypeScript ayuda en la representación del código; Zod comprueba la frontera; el servicio y base conservan las reglas. Una sola palabra como «validado» no debe ocultar qué se comprobó realmente.
+
 ## Práctica guiada
 
 Definir contratos para evento y bebida. Introducir un error de tipo y explicar el diagnóstico del compilador.

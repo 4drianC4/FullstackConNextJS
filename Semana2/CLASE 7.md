@@ -137,6 +137,18 @@ Prepara un evento con una plaza restante en una base de prueba. Lanza dos emisio
 
 Repite con ingreso único y reserva duplicada. En idempotencia, envía dos veces la misma clave y contenido; después cambia el contenido manteniendo clave. Registra qué garantía comprueba cada caso. La nota [[Recursos/Conceptos/Idempotencia y concurrencia|Idempotencia y concurrencia]] amplía el análisis de reintentos y carreras.
 
+### Caso desarrollado: commit sin respuesta al navegador
+
+El servidor calcula una venta, crea cabecera y líneas y hace commit. Antes de que llegue el JSON, se corta la conexión. El personal ve un error y decide reintentar. En la base ya existe una venta completa; rollback no puede deshacer una transacción que terminó solo porque el cliente no recibió confirmación.
+
+Si el reintento trae una nueva requestKey, la base puede registrar otra venta válida. Si conserva la misma clave y el mismo contenido, el servicio reconoce la intención y devuelve la venta existente. Si hay otra solicitud concurrente, la restricción única en requestKey impide dos cabeceras.
+
+Cuando detectes el conflicto de clave, vuelve a leer y compara actor y hash canónico. No devuelvas la venta a cualquier usuario que adivine o copie una clave. Tampoco aceptes cambiar las cantidades con la misma clave para modificar una venta ya confirmada.
+
+En la interfaz distingue «respuesta desconocida» de «operación rechazada». La primera necesita consultar o reintentar la misma intención. La segunda puede permitir corregir un campo o elegir otro recurso según el estado recibido.
+
+Esta situación muestra por qué los errores de red no deben tratarse como confirmación de que nada ocurrió. Las garantías del backend y el manejo del borrador se diseñan juntos para que recuperar una conexión no duplique datos.
+
 ## Práctica guiada
 
 Probar dos intentos de ingreso para una entrada y dos reservas para la misma mesa/evento.

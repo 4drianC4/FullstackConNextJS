@@ -40,3 +40,7 @@ Cuando una duda atraviese varias clases, usa estas explicaciones como referencia
 - [[Recursos/Conceptos/Fechas dinero y contratos|Fechas, dinero y representación de contratos]].
 - [[Recursos/Conceptos/Pruebas CI y evidencias|Pruebas, CI y alcance de la evidencia]].
 - [[Recursos/Conceptos/Contexto tokens y agentes|Contexto, tokens y agentes de programación]].
+
+## Tecnologías explicadas con dibujos
+
+Consulta [[Recursos/Mapa de dibujos Excalidraw|el índice visual de Excalidraw]] para pasar de una tecnología a su dibujo y volver a las clases que lo desarrollan. Los enlaces conectan los seis archivos al grafo, incluido el lienzo pendiente de WebSockets.

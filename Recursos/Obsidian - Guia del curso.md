@@ -59,4 +59,14 @@ Puedes copiar esta plantilla sin instalar nada más. Guarda tus notas en tu copi
 
 ## Material visual anterior
 
+Los lienzos están reunidos en [[Recursos/Mapa de dibujos Excalidraw|el índice de dibujos]] y conectados con sus explicaciones. Puedes abrirlos desde las clases o volver a ellas mediante backlinks. Para ver los incrustados como dibujos necesitas tener habilitado el plugin Excalidraw de Obsidian.
+
 Los diagramas de petición, prop drilling y SQL/NoSQL sirven como apoyo conceptual. Los modelos actuales están en [[Proyecto/6. Modelo de datos|Modelo Discoteca]]. Si un dibujo antiguo cuenta otra historia, no hemos abierto un multiverso: el contrato vigente manda.
+
+## Leer diagramas y conceptos ampliados
+
+Los bloques Mermaid representan recorridos y decisiones, no capturas de una aplicación. En Obsidian, usa vista de lectura o Live Preview para verlos dibujados. No necesitas instalar un plugin comunitario para esos diagramas. Si editas su código, conserva el tipo de diagrama y comprueba el resultado antes de compartirlo.
+
+Empieza por el título y sigue las flechas: cada nodo representa una responsabilidad o estado; cada flecha muestra una relación o paso. En un diagrama de secuencia, lee de arriba hacia abajo para seguir el tiempo. No interpretes dos ramas alternativas como acciones que siempre ocurren juntas.
+
+Las clases desarrollan los fundamentos y explican los ejemplos. Usa [[Recursos/Conceptos y conexiones|el mapa de conceptos]] para profundizar en temas que reaparecen: sesiones, concurrencia, caché, fechas y trabajo con agentes. Las preguntas resueltas te permiten contrastar tu explicación antes de marcar los criterios finales.

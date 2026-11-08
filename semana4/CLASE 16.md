@@ -137,6 +137,18 @@ Usa pruebas y recorrido manual relevante como referencia. Si cambias contrato o 
 
 Reproduce el fallo anterior, ejecuta el caso con la corrección y revisa una regresión vecina. Por ejemplo, arreglar ingreso duplicado no debe impedir un primer ingreso válido. Añade al Issue el resultado y enlaza el PR. No cierres un error porque dejó de aparecer una vez después de reiniciar.
 
+### Caso desarrollado: el test solo falla cuando corre con los demás
+
+La prueba de reserva pasa sola y falla en suite porque otro caso ya reservó mesa 1 para el mismo evento. El código podría estar respetando la restricción; lo que no está controlado es el estado inicial del test.
+
+Asigna fixtures propios o prepara y limpia las filas que necesita cada caso con cuidado. No borres toda la base compartida mientras otra prueba la usa. Define si la suite corre en paralelo y qué recursos pueden compartir sus casos.
+
+Comprueba que la URL apunta a la base de test antes de ejecutar limpieza. Reutilizar un servidor existente puede hacer que la suite se conecte a tu aplicación de desarrollo y produzca un estado distinto. La configuración propuesta evita esa reutilización por defecto.
+
+Si la prueba usa la hora actual para permitir una reserva, sus fixtures también pueden vencer con el calendario. Prepara fechas relativas o un reloj controlado según el nivel y documenta la zona. No mantengas un evento pasado en un fixture que exige disponibilidad futura.
+
+Un test intermitente consume confianza: no se resuelve repitiendo hasta que salga verde. Determina si el problema es una carrera del producto o aislamiento del entorno. Ambos son importantes, pero necesitan cambios diferentes y una evidencia que distinga la causa.
+
 ## Práctica guiada
 
 Intercambiar módulos entre equipos y registrar bugs reproducibles. Automatizar el login y un flujo del proyecto.

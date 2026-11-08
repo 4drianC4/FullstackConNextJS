@@ -97,7 +97,7 @@ La búsqueda es ampliación del CRUD ya terminado, no requisito para desbloquear
 
 ### Qué debería contener el contexto del repositorio
 
-Un archivo de instrucciones para el agente puede describir arquitectura, scripts de comprobación, ubicación de contratos y reglas del producto. No necesita incluir decisiones internas del docente ni credenciales. Su propósito es explicar cómo trabajar con ese código.
+Un archivo de instrucciones para el agente puede describir arquitectura, scripts de comprobación, ubicación de contratos y reglas del producto. Incluye convenciones técnicas y conserva las credenciales fuera de ese archivo. Su propósito es explicar cómo trabajar con ese código.
 
 Ejemplo de contenido para AGENTS.md en la aplicación:
 
@@ -138,6 +138,18 @@ Los endpoints alojados de NVIDIA y ejecutar NIM en tu equipo son opciones distin
 ### Qué entregar para que otro pueda revisar
 
 Incluye intención, alcance, diff, pruebas realizadas y una decisión humana. Por ejemplo: «El modelo propuso borrar el guard para probar la consulta; conservé el guard y adapté la prueba a una sesión válida». No necesitas publicar la conversación completa ni atribuirle a la IA una aprobación que debe hacer una persona.
+
+### Caso desarrollado: la búsqueda propuesta elimina el permiso
+
+Pides añadir búsqueda por nombre de bebidas. El agente cambia el controlador, pero elimina requireRoles porque la prueba inicial recibía 401. Ahora el filtro funciona para cualquiera. Solucionó una dificultad de su prueba degradando una garantía del producto.
+
+La revisión del plan debía exigir conservar permisos; el diff permite comprobar si lo hizo. Recupera el guard y adapta la prueba para usar una sesión válida. Añade el caso sin sesión para impedir que el mismo error regrese al extender el listado.
+
+Comprueba también que la consulta tiene límite y valida longitud. Un input libre no necesita convertirse en SQL concatenado ni añadir una dependencia grande. Compara el cambio real con el alcance: esquema de query, servicio, UI y pruebas son candidatos razonables; autenticación global no lo es.
+
+Pide explicación si propone otro enfoque, pero contrástala con contratos y documentación de la versión usada. Un argumento convincente no transforma un requisito en opcional. La responsabilidad de integrar la decisión sigue siendo humana.
+
+Documenta qué detectaste y cómo se comprobó la corrección. Ese registro muestra un uso valioso de IA: aceleró una implementación y tú conservaste la regla que daba sentido al acceso. La ayuda no se evalúa por aceptar todas las sugerencias, sino por producir un cambio comprendido y verificado.
 
 ## Práctica guiada
 

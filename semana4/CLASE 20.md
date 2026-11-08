@@ -113,6 +113,18 @@ QR, pagos, reportes o funciones de IA dentro del producto añaden nuevas entrada
 
 Al cerrar el curso conserva instrucciones reproducibles y una lista honesta de pendientes. La demo termina en una fecha; la capacidad de comprender y mejorar el proyecto continúa cuando otra persona puede recorrerlo contigo o a partir de tus apuntes.
 
+### Caso desarrollado: explicar tu venta en una defensa técnica
+
+Comienza por la intención: el personal registra bebidas y cantidades. Explica el contrato de entrada sin total ni actor confiables. Sigue al guard que obtiene identidad, al esquema que limita líneas y al servicio que consulta precios, crea líneas históricas y calcula el total.
+
+Después muestra el caso de reintento. La clave de intención evita duplicar la venta si no llegó la primera respuesta. Señala la restricción y la comparación de actor/contenido, y enseña una evidencia con una sola cabecera persistida.
+
+Conecta la interfaz: el borrador mantiene valores mientras hay un fallo incierto, el botón representa envío pendiente y el listado se actualiza solo al confirmar. No afirmes que deshabilitar el botón sea la garantía principal contra duplicados.
+
+Finalmente declara el alcance: registra una venta interna, no un pago bancario ni una factura fiscal. Si todavía no existe una ampliación, nómbrala como trabajo futuro. La presentación permite comprender qué resolviste y dónde empieza un nuevo problema.
+
+Puedes adaptar este guion a entradas, eventos o reservas: intención, contrato, identidad, regla, persistencia, respuesta y evidencia. Si entiendes esa cadena, podrás responder una variación sin recitar archivos de memoria. Practica con un compañero que pregunte qué ocurre si falla cada frontera.
+
 ## Práctica guiada
 
 Presentar y responder preguntas del flujo, permisos y datos.

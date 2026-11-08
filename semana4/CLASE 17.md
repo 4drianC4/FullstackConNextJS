@@ -200,6 +200,18 @@ Después de desplegar, comprueba salud, login, permisos, una escritura y su lect
 
 Si una versión falla, volver al artefacto anterior no deshace automáticamente una migración de base. Prefiere cambios compatibles por etapas y copias de datos cuando correspondan. No improvises un reset productivo para restaurar una pantalla. La nota [[Recursos/Conceptos/Pruebas CI y evidencias|CI y evidencias]] desarrolla esos límites.
 
+### Caso desarrollado: preview funciona y producción rechaza el login
+
+El build terminó y puedes abrir la página. El login o una mutación falla solo con el dominio público. Revisa configuración de origen y cookies antes de reescribir el formulario: APP_ORIGIN podría seguir siendo localhost o la URL de preview.
+
+Comprueba el esquema HTTPS, host real, configuración de Auth.js y ruta de callbacks. Observa estado HTTP sin publicar la cookie. Si una mutación devuelve 403 por origen, el mismo body no cambiará ese resultado. Configura el entorno con el origen permitido correcto.
+
+Después verifica DATABASE_URL de ese entorno. Una preview apuntada a producción puede hacer que pruebas de revisión escriban donde no deberían. Que ambos despliegues lean los mismos registros no demuestra una buena integración; puede revelar una separación de entornos ausente.
+
+Confirma una escritura y lectura posteriores con datos sintéticos y permisos correctos. Si falla, conserva el estado y diagnostica. No ejecutes seed completo ni migrate reset sobre la base pública como primer intento de reparación.
+
+El caso enseña por qué la entrega incluye algo más que generar archivos. Código, esquema, secretos y dominio deben combinarse de forma coherente. La evidencia de build y la del recorrido productivo responden preguntas diferentes.
+
 ## Práctica guiada
 
 Arrancar la aplicación mediante Compose y ejecutar controles desde un clon limpio.

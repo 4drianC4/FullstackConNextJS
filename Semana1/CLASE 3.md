@@ -145,6 +145,18 @@ Cambiar `POSTGRES_PASSWORD` en un archivo no cambia la contraseña de una base y
 
 Versionamos Compose y `.env.example`, porque describen el entorno. El `.env` real y los archivos internos del volumen quedan locales. No hay que subir una base binaria a Git para que un compañero tenga datos: posteriormente usaremos migraciones y seed para reconstruir una base de prueba.
 
+### Caso desarrollado: funciona en el host y falla dentro de Docker
+
+La aplicación del host usa `postgresql://...@localhost:5432/discoteca` y conecta. Al moverla a Compose, la misma URL devuelve conexión rechazada. PostgreSQL sigue healthy y el puerto parece correcto. La diferencia está en quién interpreta localhost.
+
+Dentro de web, localhost es web, no db ni tu computadora. Cambia únicamente la URL de ese servicio a `db:5432`, conservando usuario, contraseña y nombre de base correctos. La URL del host puede seguir usando localhost. No cambies el puerto interno a 5433 solo porque publicaste 5433 para acceder desde tu equipo.
+
+Antes de cambiar código de Prisma, confirma el servicio de destino y revisa logs. Si después del cambio aparece authentication failed en lugar de connection refused, has avanzado: ahora alcanzas un servidor que rechaza la credencial. No son dos mensajes para la misma causa.
+
+Si cambiaste la contraseña en `.env` y usas un volumen anterior, recuerda que la base ya fue inicializada con otra. No reinicialices por accidente para que coincida el ejemplo. Identifica el entorno, corrige la credencial de conexión o realiza un cambio controlado de contraseña.
+
+Documenta por separado las URLs del host y de Compose. El nombre DATABASE_URL_DOCKER del curso hace visible esa diferencia, pero quien ejecuta Prisma en el host debe seguir usando la URL accesible desde allí.
+
 ## Práctica guiada
 
 Crear la base, insertar un dato con SQL y comprobar que sigue después de down/up.

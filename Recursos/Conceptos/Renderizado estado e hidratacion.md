@@ -20,6 +20,10 @@ Dos QuantityControl son dos instancias aunque usan la misma función. React rela
 
 Si dos componentes deben compartir un valor, colócalo en su ancestro común y transmite entradas y callbacks. El estado global es una herramienta para necesidades reales de alcance; no es el destino obligatorio de cada input.
 
+## Relación con el dibujo de componentes
+
+[[propDrilling.excalidraw|El dibujo de prop drilling y store]] muestra cómo se comunica un valor entre piezas de interfaz. Úsalo junto a [[Semana3/CLASE 12|la clase de estado]] para distinguir identidad de instancia, propietario del estado y alcance compartido. El dibujo explica circulación de datos, no el proceso de hidratación del servidor.
+
 ## Carga inicial en Next.js
 
 El servidor produce la representación inicial de una ruta con componentes de servidor y, cuando corresponde, HTML de componentes cliente. El navegador recibe recursos para mostrar la página y conectar los comportamientos interactivos.

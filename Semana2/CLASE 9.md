@@ -149,6 +149,18 @@ Repite la misma operación sin cookie, con STAFF, con ADMIN, con cuenta desactiv
 
 Si un test solo confirma que el menú no muestra «Administración», todavía no verificó el backend. Debe existir una petición directa que obtenga 403 y una comprobación de base que confirme que el recurso no cambió.
 
+### Caso desarrollado: el cliente intenta vender a nombre de otra persona
+
+STAFF envía una venta con sus productos, pero agrega `createdById` de ADMIN. Una interfaz normal nunca mostraría ese campo, pero una petición manual puede incluirlo. La seguridad no puede depender de que el formulario sea amable.
+
+El esquema de entrada acepta solo requestKey e items. Si es strict, rechaza el campo extra. En todos los casos, el servicio recibe el actor obtenido por requireRoles y utiliza actor.id para persistir. La identidad del body no debe competir con la de sesión.
+
+La petición también debe pasar el origen exigido para ese cliente web, pero eso no convierte el campo actor en confiable. Un cliente no navegador puede escribir Origin: la sesión y el permiso siguen siendo necesarios. Cada defensa resuelve un problema distinto.
+
+Prueba con un body malicioso y comprueba rechazo o exclusión según el contrato; luego envía uno válido y verifica que la fila tiene el empleado autenticado. No basta observar que totalCents es correcto: también debe ser correcta la atribución.
+
+El mismo criterio se aplica a roles, fechas internas y contadores. Cuando un campo responde a una decisión del sistema, no lo aceptes como autoridad del cliente solo porque coincide con el tipo declarado en TypeScript.
+
 ## Práctica guiada
 
 Intentar crear un evento sin sesión, con STAFF y con ADMIN. Verificar 401, 403 y 201.

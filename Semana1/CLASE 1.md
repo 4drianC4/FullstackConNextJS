@@ -130,6 +130,18 @@ Antes de copiar código, identifica el archivo, su responsabilidad y la entrada 
 
 En Obsidian enlaza la duda a su clase y registra cómo la resolviste. El objetivo de un apunte personal no es repetir cada párrafo, sino conservar ejemplos, decisiones y errores que quieras reconocer la próxima vez. Revisa los criterios al terminar y usa el índice para volver a los conceptos relacionados.
 
+### Caso desarrollado: «el botón dice éxito, pero no hay entrada»
+
+El personal completa titular y evento y pulsa emitir. La pantalla muestra una tarjeta verde, pero el listado sigue vacío. Para investigar, separa la intención en fronteras: ¿se ejecutó el handler del botón?, ¿salió una petición?, ¿qué respondió la API?, ¿el servidor escribió?, ¿la interfaz interpretó la respuesta correcta?
+
+En la pestaña Network, una petición ausente apunta primero a la interacción. Una respuesta 400 indica que la API recibió algo y rechazó sus datos. Una respuesta 201 con una entrada persistida, pero listado antiguo, apunta a sincronización de interfaz. Estos resultados no son intercambiables y requieren correcciones diferentes.
+
+No empieces cambiando tres carpetas a la vez. Elige una observación que reduzca posibilidades. Por ejemplo, anota método, ruta y estado sin publicar cookies. Si la base confirmó la entrada, no vuelvas a pulsar emitir para «ver si aparece»: podrías crear otra operación. Primero consulta lo ya confirmado.
+
+Esta forma de seguir fronteras es parte del trabajo fullstack. Conocer todo el stack no significa memorizar cada función, sino comprender dónde se toma una decisión y qué evidencia puedes obtener de ella. Guarda en Obsidian el recorrido y enlázalo a la clase de consumo de API cuando llegues allí.
+
+Para tu primer PR, documenta un recorrido esperado de tu funcionalidad con actor, datos de entrada, resultado y un rechazo. Aunque todavía no exista código, ese contrato permite que el equipo discuta el mismo comportamiento.
+
 ## Práctica guiada
 
 Abrir la bóveda; localizar proyecto, tareas e índice. Crear el repositorio de aplicación y el primer PR de documentación.

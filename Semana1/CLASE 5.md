@@ -104,6 +104,16 @@ const input = createEventSchema.parse(body);
 
 El controlador transforma HTTP; el servicio aplica reglas y usa Prisma. El esquema puede compartirse con el frontend; el servicio de base de datos nunca se importa allí.
 
+### Apoyo visual: el viaje de una petición
+
+![[pasosPeticion.excalidraw]]
+
+[[pasosPeticion.excalidraw|Abrir el dibujo del recorrido de una petición]] · [[Recursos/Mapa de dibujos Excalidraw|Ver todos los dibujos]].
+
+Sigue las flechas desde el cliente: el JSON llega a una ruta y su handler/controlador, pasa por el contrato de datos y alcanza el servicio. El servicio utiliza Prisma para comunicarse con la base relacional; el resultado vuelve hasta la respuesta que recibe el cliente.
+
+El dibujo separa responsabilidades; no exige crear un archivo independiente por cada caja. En nuestra arquitectura, la ruta está en `app/api` y los contratos, controladores y servicios se agrupan dentro de su funcionalidad. Localiza dónde rechazarías un dato mal formado, un permiso insuficiente y una reserva duplicada: no son la misma comprobación.
+
 ### Un recorrido verificable con curl
 
 Con el servidor de desarrollo ejecutándose, consulta la ruta de salud. `-i` muestra cabeceras y estado. Después de construir el controlador en la siguiente clase, la petición de creación tendrá esta forma:
@@ -143,6 +153,22 @@ No hace falta crear una capa para cada línea. La separación es útil cuando pe
 ### Límites de la ruta de salud
 
 Una respuesta `/api/health` con status ok prueba que esa ruta responde. No demuestra que todos los servicios estén sanos ni que la base acepte consultas. Evita publicar detalles internos, versiones privadas o variables. Si añades comprobación de base, decide qué información se expone y cuánto trabajo puede provocar cada consulta de monitoreo.
+
+### Caso desarrollado: un 400 que permite corregir la petición
+
+Envías `{"name":"","capacity":0,"startsAt":"mañana"}`. El JSON está bien formado, así que el parser lo convierte en objeto. El esquema rechaza longitud de nombre, rango de capacidad y formato de fecha. Una respuesta 400 con issues permite relacionar cada error con su campo.
+
+Después envías un cuerpo con una coma final inválida. Esta vez falla el análisis JSON antes de que exista un objeto para Zod. También es un error de petición, pero no deberías atribuirlo a capacity ni fingir que el nombre fue validado.
+
+Ahora usas datos válidos, pero añades `role: "ADMIN"`. El esquema strict rechaza el campo inesperado. Aceptarlo sin usarlo podría tolerarse en otros contratos, pero en este curso preferimos una frontera explícita para detectar desalineaciones y evitar asignaciones accidentales.
+
+Por último, una petición válida sin sesión será 401 después de integrar autenticación. No necesitas cambiar los datos para corregir ese resultado: necesitas acreditar identidad. La misma ruta puede rechazar por causas distintas y el cliente debe poder distinguirlas.
+
+Al documentar un endpoint, escribe un request válido y dos inválidos con sus estados y formas de respuesta. Eso permite desarrollar la pantalla y las pruebas con menos interpretación personal. No basta enumerar GET y POST sin especificar qué significan sus datos.
+
+### Complemento: otras formas de comunicación
+
+[[grpc.excalidraw|El dibujo de gRPC]] utiliza cine y candybar para representar comunicación entre servicios. Puedes compararlo con nuestra API: una llamada remota mediante un contrato de operaciones es otro enfoque de integración. No hace falta dividir la discoteca en microservicios ni implementar gRPC para completar el MVP. En [[Recursos/Mapa de dibujos Excalidraw#Comunicación entre servicios: gRPC|el índice visual]] encontrarás el contexto del ejemplo.
 
 ## Práctica guiada
 

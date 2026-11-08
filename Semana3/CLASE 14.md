@@ -143,6 +143,18 @@ Un evento creado y una reserva tienen reglas distintas. No apliques indiscrimina
 
 Prueba campos vacíos, límites, valores mal formados, sesión expirada, respuesta 409 y desconexión. Navega con teclado y comprueba que el error permanece asociado al control. Luego guarda un dato válido y verifica su aparición real en el listado y la base, no solo el toast.
 
+### Caso desarrollado: la fecha del evento aparece cuatro horas corrida
+
+Una persona escribe «5 de diciembre, 22:00» en un datetime-local. El cliente concatena Z y envía `2026-12-05T22:00:00Z`. Z declara que esas 22:00 ya son UTC. Al mostrar ese instante en America/La_Paz, aparece a las 18:00 del mismo día.
+
+La intención original era 22:00 en la zona de la discoteca, no 22:00 UTC. El contrato debe convertir desde la zona de entrada acordada y transportar el instante con offset o en UTC equivalente. El formato válido por sí solo no indica que se interpretó correctamente la intención.
+
+Si el navegador del equipo trabaja en la zona acordada, new Date(localValue).toISOString aplica esa interpretación local. Si no, necesitas conversión explícita con una solución de zona apropiada. Documenta la política en vez de depender del país de quien usa la aplicación.
+
+Al recuperar la fecha, formatea con timeZone America/La_Paz para la operación del local. Prueba instantes próximos a medianoche, donde un cambio de zona puede cambiar también el día. Comprueba tanto JSON como valor mostrado.
+
+Esta clase no exige construir un calendario internacional completo, pero sí reconocer que input local, instante persistido y texto visible son representaciones diferentes. Nombrarlas y probar su frontera evita muchos bugs que parecen aleatorios.
+
 ## Práctica guiada
 
 Crear un evento y probar errores de campo, sesión expirada y desconexión.

@@ -125,6 +125,18 @@ Comprueba cuatro dimensiones: estructura con encabezados/labels, operación por 
 
 La ampliación de tema alternable puede esperar hasta que la interfaz principal y sus errores sean usables. Una pantalla sencilla y consistente permite demostrar el flujo completo sin ocultar una operación incompleta detrás de decoración.
 
+### Caso desarrollado: «Eliminar» se ve bien y no se puede usar con teclado
+
+El control se implementó con un div y onClick. En escritorio funciona con ratón y la captura parece correcta. Al recorrer con Tab, el control no recibe foco ni proporciona el mismo significado que un botón. La apariencia ocultó un problema funcional.
+
+Sustitúyelo por button con type button y un nombre que explique la acción. Mantén foco visible y una confirmación si la consecuencia lo necesita. Si abre un diálogo, el componente debe gestionar foco dentro y devolverlo al cerrar.
+
+Prueba Enter o Espacio según el comportamiento del control y verifica el recorrido sin usar ratón. No basta añadir tabIndex a cualquier cosa y asumir que ya reprodujiste toda la semántica nativa. Empieza con el elemento que corresponde a la intención.
+
+Además, si el usuario es STAFF y no puede eliminar una reserva, no muestres esa acción como invitación permanente. Aun ocultándola, la API comprueba ADMIN. La interfaz facilita la experiencia; la garantía de autorización permanece en servidor.
+
+Termina con pantalla estrecha y un nombre de cliente largo. Un botón inaccesible por desbordamiento también bloquea una operación real. Diseño, accesibilidad y permisos se comprueban como partes del mismo recorrido y no solo como una lista de estilos.
+
 ## Práctica guiada
 
 Maquetar listado y formulario del módulo, comprobando teclado y anchura móvil.
