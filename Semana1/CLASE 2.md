@@ -14,7 +14,7 @@ tags:
 [[README|Inicio]] · [[Semana1/0 INDICE|Semana 1]] · ← [[Semana1/CLASE 1|Clase 1]] · [[Semana1/CLASE 3|Clase 3]] →
 
 > [!abstract] Objetivo
-> Usar TypeScript para expresar contratos del backend sin volver a enseñar JavaScript.
+> Usar TypeScript para expresar contratos del backend.
 
 ## Antes de empezar
 
