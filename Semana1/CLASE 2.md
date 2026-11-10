@@ -91,7 +91,7 @@ Los datos externos entran como `unknown` y se validan con Zod en la clase 5. `an
 
 Un usuario en la base puede tener `passwordHash`; el contrato público solo contiene `id`, `name`, `email` y `role`. No enviar un modelo completo por comodidad.
 
-En dinero usaremos **centavos enteros**: Bs 25,50 se representa como `2550`. Para fechas HTTP usaremos ISO 8601; convertir a `Date` en el servidor y mostrar la zona horaria local en la interfaz.
+En dinero usaremos **centavos enteros**: Bs 25,50 se representa como `2550`. Para fehas HTTP usaremos ISO 8601; convertir a `Date` en el servidor y mostrar la zona horaria local en la interfaz.
 
 ### Comprobación
 
