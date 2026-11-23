@@ -131,13 +131,13 @@ No uses `down -v` para este experimento: justamente quitaría el volumen que que
 
 ### Diagnosticar los fallos más comunes
 
-| Síntoma | Causa que debes comprobar | Siguiente acción |
-| --- | --- | --- |
-| Cannot connect to Docker daemon | Motor detenido o contexto equivocado | Revisar servicio/contexto y docker version |
-| Port is already allocated | Otro proceso publica ese puerto | Cambiar puerto del host y URL local |
-| Password authentication failed | Usuario o contraseña no coinciden | Revisar URL y credenciales de la base inicializada |
-| Connection refused | Dirección, puerto o disponibilidad incorrectos | Revisar ps, logs y healthcheck |
-| Base vacía tras recrear | Se cambió/eliminó volumen o proyecto Compose | Identificar el volumen usado antes de escribir más datos |
+| Síntoma                         | Causa que debes comprobar                      | Siguiente acción                                         |
+| ------------------------------- | ---------------------------------------------- | -------------------------------------------------------- |
+| Cannot connect to Docker daemon | Motor detenido o contexto equivocado           | Revisar servicio/contexto y docker version               |
+| Port is already allocated       | Otro proceso publica ese puerto                | Cambiar puerto del host y URL local                      |
+| Password authentication failed  | Usuario o contraseña no coinciden              | Revisar URL y credenciales de la base inicializada       |
+| Connection refused              | Dirección, puerto o disponibilidad incorrectos | Revisar ps, logs y healthcheck                           |
+| Base vacía tras recrear         | Se cambió/eliminó volumen o proyecto Compose   | Identificar el volumen usado antes de escribir más datos |
 
 Cambiar `POSTGRES_PASSWORD` en un archivo no cambia la contraseña de una base ya creada. Las variables de inicialización se aplican al preparar el directorio de datos vacío. No destruyas el volumen por esa confusión: identifica la cuenta y modifica su contraseña mediante un procedimiento explícito si necesitas hacerlo.
 
