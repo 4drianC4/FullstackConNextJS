@@ -46,13 +46,11 @@ Un checkbox se maneja como boolean según su registro; un select representa opci
 
 `datetime-local` describe una fecha y hora sin zona. El contrato del backend pide un instante ISO con offset. Esta diferencia debe resolverse con un adaptador. No concatenar `Z` al final como si cualquier hora elegida estuviera en UTC.
 
-`new Date(localValue).toISOString()` interpreta el valor con la zona del navegador. Es correcto solo si esa es la zona de entrada acordada. Para el curso se trabaja con la zona local de la discoteca; si el equipo está configurado en otra zona, el resultado no expresa necesariamente la intención. Verifica la configuración o utiliza una conversión de zona explícita. La nota [[Recursos/Conceptos/Fechas dinero y contratos|Fechas, dinero y contratos]] explica la diferencia.
+`new Date(localValue).toISOString()` interpreta el valor con la zona del navegador. Es correcto solo si esa es la zona de entrada acordada. Para el curso se trabaja con la zona local de la discoteca; si el equipo está configurado en otra zona, el resultado no expresa necesariamente la intención. Verifica la configuración o utiliza una conversión de zona explícita. Las fechas se muestran en `America/La_Paz`. La nota [[Recursos/Conceptos/Fechas dinero y contratos|Fechas, dinero y contratos]] explica la diferencia.
 
 ### Un esquema, dos validaciones
 
 Instalar `react-hook-form@7`, `@hookform/resolvers` y `zod@4`. El frontend reutiliza el esquema de eventos de la clase 5, pero el servidor vuelve a validar cada petición.
-
-El contrato exige fecha ISO con zona. Un input `datetime-local` no incluye zona: convertirlo desde la hora local con `new Date(value).toISOString()` antes de validar/enviar. Documentar la zona del equipo y mostrar fechas en `America/La_Paz`.
 
 ### Formulario mínimo
 
@@ -94,13 +92,90 @@ export function EventForm() {
 }
 ```
 
-El primer ejemplo usa texto ISO para que la conversión sea explícita. En la práctica añadir el input local y un adaptador de formulario, sin cambiar el contrato de la API.
+El primer ejemplo usa texto ISO para que la conversión sea explícita. Más abajo está la versión con `datetime-local`, un adaptador y los errores del servidor asociados a cada campo, sin cambiar el contrato de la API.
 
 ### Login del personal
 
-Crear `/login` como Client Component con `signIn` de `next-auth/react`. Enviar `signIn("credentials", { email, password, redirect: false })`, mostrar un error genérico ante fallo y navegar al panel en éxito. Para salir usar `signOut`. No persistir la contraseña ni imprimirla en consola. Acuerda los nombres de campos y las respuestas con la funcionalidad de usuarios para compartir un solo flujo de acceso.
+El login es un Client Component que usa `signIn` de `next-auth/react`. Las etiquetas «Correo» y «Contraseña» y el botón «Entrar» son las que usan las pruebas de navegador de la clase 16; acuérdalas con el equipo de Usuarios para que haya un solo flujo de acceso.
 
-Un botón deshabilitado reduce envíos repetidos en la interfaz, pero no reemplaza la idempotencia del backend de ventas.
+```tsx
+// src/features/users/frontend/login-form.tsx
+"use client";
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+
+export function LoginForm() {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setPending(true);
+    const data = new FormData(event.currentTarget);
+    try {
+      const result = await signIn("credentials", {
+        email: String(data.get("email") ?? ""),
+        password: String(data.get("password") ?? ""),
+        redirect: false,
+      });
+      if (!result || result.error) {
+        setError("Correo o contraseña incorrectos");
+        return;
+      }
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setError("No se pudo conectar con el servidor");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="mx-auto max-w-sm space-y-4 p-4">
+      <h1 className="text-2xl font-bold">Acceso del personal</h1>
+      <div className="space-y-2">
+        <label htmlFor="login-email">Correo</label>
+        <input id="login-email" name="email" type="email" autoComplete="username" required
+          className="w-full rounded-md border p-2" />
+      </div>
+      <div className="space-y-2">
+        <label htmlFor="login-password">Contraseña</label>
+        <input id="login-password" name="password" type="password" autoComplete="current-password" required
+          className="w-full rounded-md border p-2" />
+      </div>
+      <p role="alert">{error}</p>
+      <button type="submit" disabled={pending}>{pending ? "Entrando…" : "Entrar"}</button>
+    </form>
+  );
+}
+```
+
+```tsx
+// src/app/login/page.tsx
+import { LoginForm } from "@/features/users/frontend/login-form";
+export default function LoginPage() {
+  return <main><LoginForm /></main>;
+}
+```
+
+```tsx
+// src/features/users/frontend/logout-button.tsx
+"use client";
+import { signOut } from "next-auth/react";
+export function LogoutButton() {
+  return <button type="button" onClick={() => signOut({ redirectTo: "/login" })}>Salir</button>;
+}
+```
+
+- `redirect: false` hace que `signIn` devuelva un resultado en vez de navegar; así puedes mostrar el error en la misma pantalla. El mensaje es genérico: no dice si el correo existe ni si la cuenta está desactivada o bloqueada por intentos.
+- `router.refresh()` vuelve a ejecutar los componentes de servidor para que lean la sesión nueva.
+- `FormData` se lee antes del primer `await`, mientras `event.currentTarget` sigue disponible.
+- No guardes la contraseña en estado, `localStorage` ni logs. `autoComplete` ayuda al gestor de contraseñas del navegador.
+- Salir siempre con `signOut`: borra la cookie de sesión correctamente.
 
 ### Un adaptador de fecha que reconoce errores
 
@@ -115,9 +190,113 @@ export function localDateTimeToIso(value: string): string | null {
 }
 ```
 
-Esta función no elige una zona distinta ni valida reglas como fecha futura: convierte según el entorno local. Mantener claras esas limitaciones evita afirmar que una conversión sintáctica resuelve todos los problemas de calendario.
+Guárdala en `src/features/events/frontend/local-date-time.ts`. Esta función no elige una zona distinta ni valida reglas como fecha futura: convierte según el entorno local. Mantener claras esas limitaciones evita afirmar que una conversión sintáctica resuelve todos los problemas de calendario.
 
 Un campo vacío o inválido produce un error de campo antes del envío. Un instante válido puede incumplir una regla del evento en el servidor. Ambas respuestas deben ser visibles sin perder lo que el usuario ya escribió.
+
+### Formulario completo: fecha local y errores del servidor
+
+Esta versión sustituye la del principio. El formulario valida el valor del input (`datetime-local`, sin zona) y la API sigue recibiendo el contrato original con ISO y offset. Los `issues` de un 400 se asocian a su campo con `setError`:
+
+```tsx
+// src/features/events/frontend/event-form.tsx
+"use client";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { createEventSchema } from "../shared/event.schema";
+import { localDateTimeToIso } from "./local-date-time";
+
+// El formulario trabaja con el texto del input; la conversión a ISO ocurre al enviar
+const eventFormSchema = createEventSchema.extend({
+  startsAt: z.string().min(1, "Elige fecha y hora"),
+});
+type EventFormValues = z.infer<typeof eventFormSchema>;
+
+const formFields = ["name", "startsAt", "capacity"] as const;
+type FormField = (typeof formFields)[number];
+const isFormField = (value: unknown): value is FormField =>
+  typeof value === "string" && (formFields as readonly string[]).includes(value);
+
+const errorBodySchema = z.object({
+  error: z.string(),
+  issues: z.array(z.object({
+    path: z.array(z.union([z.string(), z.number()])),
+    message: z.string(),
+  })).optional(),
+});
+
+export function EventForm({ onSaved }: { onSaved?: () => void }) {
+  const [message, setMessage] = useState("");
+  const { register, handleSubmit, reset, setError, formState: { errors, isSubmitting } } =
+    useForm<EventFormValues>({ resolver: zodResolver(eventFormSchema) });
+
+  const submit = handleSubmit(async (values) => {
+    setMessage("");
+    const startsAt = localDateTimeToIso(values.startsAt);
+    if (!startsAt) {
+      setError("startsAt", { message: "Fecha y hora no válidas" });
+      return;
+    }
+    try {
+      const response = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...values, startsAt }),
+      });
+      if (response.ok) {
+        reset();
+        setMessage("Evento guardado");
+        onSaved?.();
+        return;
+      }
+      const body = errorBodySchema.safeParse(await response.json().catch(() => null));
+      if (response.status === 400 && body.success && body.data.issues) {
+        for (const issue of body.data.issues) {
+          const field = issue.path[0];
+          if (isFormField(field)) setError(field, { message: issue.message });
+        }
+        return;
+      }
+      if (response.status === 401) {
+        setMessage("Tu sesión expiró. Vuelve a iniciar sesión; los datos siguen en el formulario.");
+        return;
+      }
+      setMessage(body.success ? body.data.error : `No se guardó el evento (${response.status}).`);
+    } catch {
+      setMessage("No se pudo conectar con el servidor");
+    }
+  });
+
+  return (
+    <form onSubmit={submit} noValidate className="space-y-4">
+      <label htmlFor="event-name">Nombre</label>
+      <input id="event-name" {...register("name")}
+        aria-invalid={!!errors.name} aria-describedby="event-name-error" />
+      <p id="event-name-error">{errors.name?.message}</p>
+
+      <label htmlFor="event-date">Fecha y hora (hora de La Paz)</label>
+      <input id="event-date" type="datetime-local" {...register("startsAt")}
+        aria-invalid={!!errors.startsAt} aria-describedby="event-date-error" />
+      <p id="event-date-error">{errors.startsAt?.message}</p>
+
+      <label htmlFor="event-capacity">Capacidad</label>
+      <input id="event-capacity" type="number" {...register("capacity", { valueAsNumber: true })}
+        aria-invalid={!!errors.capacity} aria-describedby="event-capacity-error" />
+      <p id="event-capacity-error">{errors.capacity?.message}</p>
+
+      <button disabled={isSubmitting} type="submit">{isSubmitting ? "Guardando…" : "Guardar"}</button>
+      <p role="status">{message}</p>
+    </form>
+  );
+}
+```
+
+- `extend` reutiliza nombre y capacidad del contrato y solo cambia `startsAt` para el formulario. El servidor sigue validando con `createEventSchema`.
+- Solo se aceptan paths que existen en el formulario (`isFormField`); un path desconocido no se convierte en un campo inventado.
+- 401, 403, 409 y 500 muestran un mensaje general y **no** vacían el formulario. Solo `response.ok` llama a `reset()` y a `onSaved`, que la clase 15 usa para recargar el listado.
+- `noValidate` desactiva los globos nativos del navegador para que los mensajes de Zod sean los únicos visibles.
 
 ### Secuencia de envío
 
@@ -126,12 +305,6 @@ Al pulsar guardar, valida valores, muestra errores si hay y deshabilita el enví
 El ejemplo comprueba response.ok antes de reset. Eso evita un formulario vacío con mensaje de éxito cuando el servidor respondió 403 o 409. Un error de red cae en catch; un 400 no lo hace automáticamente con fetch. Hay que leer el estado y su cuerpo de error según el contrato.
 
 Para errores 400 con issues, puedes mapear los paths conocidos a `setError`. No utilices cualquier path arbitrario como nombre de campo sin comprobar que pertenece al formulario. Para 401, ofrece volver a iniciar sesión; para 409, explica el conflicto; para 500, no inventes un campo culpable.
-
-### Login con nombres accesibles
-
-El formulario compartido debe tener labels «Correo» y «Contraseña» y un botón «Entrar», coherentes con las pruebas de navegador. Envía credenciales mediante signIn de la librería, muestra error genérico y navega al panel solo si la autenticación fue exitosa.
-
-No guardes password en localStorage ni añadas un log del formulario para inspeccionar el payload. Los valores de contraseña se necesitan durante el acceso, no como historial de depuración. El cierre de sesión debe usar el flujo de signOut para limpiar la sesión correctamente.
 
 ### Evitar duplicados sin culpar al usuario
 
@@ -199,7 +372,6 @@ No. La garantía debe estar en el servidor con la clave y reglas de comparación
 ## Conexiones
 
 [[Semana1/CLASE 5|Clase 5]] · [[Semana2/CLASE 8|Clase 8]] · [[Semana3/CLASE 15|Clase 15]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

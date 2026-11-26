@@ -36,7 +36,7 @@ No todas las variaciones deben ser E2E. El navegador es adecuado para comprobar 
 
 ### Protecciones de interfaz y datos
 
-Una página privada verifica sesión y redirige si falta. Después, cualquier lectura privada de servidor y operación de API verifica su acceso. No confíes todo al layout: puede reutilizarse durante navegación y no representa cada punto de entrada del backend.
+Una página privada verifica sesión y redirige si falta, con `requirePageRoles` ([[Semana3/CLASE 12#Proteger una página|clase 12]]). Después, cualquier lectura privada de servidor y operación de API verifica su acceso. No confíes todo al layout: puede reutilizarse durante navegación y no representa cada punto de entrada del backend.
 
 La interfaz puede mostrar solo acciones permitidas para reducir confusión. Si un usuario invoca una acción oculta manualmente, el backend la rechaza. Ambas comprobaciones se complementan, pero sus garantías no son iguales.
 
@@ -45,12 +45,6 @@ La interfaz puede mostrar solo acciones permitidas para reducir confusión. Si u
 Un Issue útil contiene entorno, pasos mínimos, datos sintéticos, resultado esperado, resultado real y evidencia. «La reserva no funciona» no indica si falla al cargar mesas, enviar, validar o actualizar el listado. Escribe una secuencia que otra persona pueda repetir sin preguntarte cada detalle.
 
 Distingue severidad de prioridad: una operación sin permisos puede ser crítica aunque no se vea en una demo; un borde visual pequeño puede ser urgente si impide pulsar guardar en móvil. Atiende primero acceso incorrecto, pérdida/duplicación de datos y recorridos bloqueados.
-
-### Proteger la vista y la operación
-
-Un layout puede redirigir al login para mejorar la experiencia, pero cada API y cada lectura privada de servidor vuelve a verificar permisos. No confiar exclusivamente en el layout: las navegaciones y cachés pueden reutilizarlo.
-
-En una página de servidor leer sesión con `auth()` y usar `redirect("/login")` si falta. Antes de recuperar datos privados invocar el guard de la clase 9. Ocultar acciones administrativas según rol es UX, no una autorización adicional suficiente.
 
 ### Escenarios E2E
 
@@ -68,14 +62,14 @@ El equipo de ventas debe probar la misma clave de petición dos veces; ni un dob
 
 ### Un flujo automatizado con Playwright
 
-Instalar `@playwright/test`, instalar el navegador de pruebas y configurar `webServer` o una `baseURL` local. Usar base de prueba y credenciales locales de test, nunca producción.
+La configuración de Playwright, la base de test y el helper de sesión están en [[Semana2/CLASE 10#Automatizar la matriz con sesiones reales|clase 10]]; allí ya automatizaste la matriz de permisos por HTTP. Aquí añadimos specs que controlan un navegador real.
 
 ```ts
 // tests/login.spec.ts
 import { test, expect } from "@playwright/test";
 test("el personal inicia sesión", async ({ page }) => {
-  const email = process.env.TEST_EMAIL;
-  const password = process.env.TEST_PASSWORD;
+  const email = process.env.SEED_STAFF_EMAIL;
+  const password = process.env.SEED_STAFF_PASSWORD;
   if (!email || !password) throw new Error("Faltan credenciales de prueba");
   await page.goto("/login");
   await page.getByLabel("Correo").fill(email);
@@ -87,31 +81,9 @@ test("el personal inicia sesión", async ({ page }) => {
 
 Acordar esos labels en el formulario real. Una prueba que solo abre login no verifica permisos: mantener además la matriz de peticiones directas del backend. Ampliar el flujo a crear y consultar un evento con fixtures aislados.
 
-### Refactorizar con evidencia
-
-Resolver errores primero, extraer lógica repetida cuando tenga el mismo significado y volver a ejecutar pruebas. No separar en diez archivos una función de cinco líneas sin necesidad. Abrir Issues con pasos, esperado, obtenido y evidencia sin datos privados.
-
 ### Preparar Playwright sin esconder dependencias
 
-Playwright controla un navegador real. Necesita la aplicación ejecutándose, una base de prueba preparada y usuarios de prueba. No asumas que `npm run test:e2e` creará por sí solo todo el entorno. Carga variables de prueba y ejecuta migraciones y seed contra su URL antes de arrancar el servidor.
-
-Puedes configurar `playwright.config.ts` con este punto de partida:
-
-```ts
-import { defineConfig } from "@playwright/test";
-export default defineConfig({
-  testDir: "./tests",
-  use: { baseURL: "http://127.0.0.1:3000", trace: "retain-on-failure" },
-  webServer: {
-    command: "npm run dev -- --hostname 127.0.0.1",
-    url: "http://127.0.0.1:3000/login",
-    reuseExistingServer: false,
-    timeout: 120000,
-  },
-});
-```
-
-En el entorno de test configura APP_ORIGIN y los ajustes de Auth.js con ese mismo origen. `127.0.0.1` y `localhost` no son la misma cadena de host para todas las reglas de cookies/origen. No reutilices un servidor que podría apuntar a la base de otro entorno.
+Playwright controla un navegador real. Necesita la aplicación ejecutándose, la base de test preparada y usuarios de prueba. `npm run test:e2e` no crea por sí solo ese entorno: carga `.env.test`, reconstruye la base con reset y seed (clase 10) y después ejecuta la suite. El `webServer` de `playwright.config.ts` arranca la aplicación con esas variables.
 
 El navegador de pruebas se instala con `npx playwright install chromium`. Los artefactos de trace y capturas pueden incluir datos de pantalla: utiliza únicamente fixtures y no publiques trazas con credenciales o información privada.
 
@@ -193,7 +165,6 @@ Comprueba el resultado persistido y la regla que originó el problema, no solo s
 ## Conexiones
 
 [[Semana2/CLASE 10|Clase 10]] · [[Proyecto/5. Evaluacion y entregables|Hito fullstack]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

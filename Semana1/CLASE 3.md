@@ -52,9 +52,9 @@ Desde el host, la aplicación se conecta a `localhost:5432`. Desde otro contened
 
 El mapeo `127.0.0.1:5432:5432` publica el puerto solo en la interfaz local del host. A la izquierda está el puerto del host; a la derecha el puerto interno. Si publicas `5433:5432`, PostgreSQL sigue escuchando dentro en 5432, pero tus herramientas del host usan 5433.
 
-### Imagen, contenedor y volumen
+### Instalar y comprobar Docker
 
-La imagen es la plantilla; el contenedor ejecuta un proceso; el volumen conserva datos fuera de la capa efímera del contenedor. Docker no es una máquina virtual completa. Docker Compose describe los servicios del entorno.
+En resumen: la imagen es la plantilla, el contenedor ejecuta un proceso y el volumen conserva datos fuera de la capa efímera del contenedor. Docker no es una máquina virtual completa, y Docker Compose describe los servicios del entorno.
 
 Instalar Docker Engine y el plugin Compose en Linux siguiendo [la guía oficial](https://docs.docker.com/engine/install/); en Windows/macOS usar la instalación oficial adecuada al equipo. No copiar un repositorio Debian con nombre de versión distinto al sistema real. Verificar:
 
@@ -201,7 +201,6 @@ Borrarlo destruye datos. La solución es revisar o cambiar credenciales de maner
 ## Conexiones
 
 [[Recursos/Docker/Docker|Mapa de Docker]] · [[semana4/CLASE 17|Clase 17]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

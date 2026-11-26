@@ -76,8 +76,6 @@ export function QuantityControl() {
 }
 ```
 
-Usar actualizador funcional cuando el próximo valor depende del anterior. El estado vive en el ancestro común que lo necesita. No hace falta Zustand para un formulario o contador local.
-
 ### Rutas y layouts
 
 `src/app/page.tsx` es `/`; `src/app/dashboard/events/page.tsx` es `/dashboard/events`. `layout.tsx` compone pantallas y `Link` navega entre ellas. Una ruta `[id]` recibe parámetros dinámicos; en Next.js 16 se esperan con `await` en componentes de servidor.
@@ -91,9 +89,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 }
 ```
 
-### Servidor y cliente
-
-Los componentes son de servidor por defecto. `"use client"` marca una frontera para interactividad y los módulos importados por ella. Un Client Component también puede participar en el HTML inicial del servidor: no significa que todo su trabajo ocurra exclusivamente en el navegador.
+### Qué no cruza la frontera
 
 No importar Prisma ni servicios backend desde un componente cliente. Pasar datos serializables y contratos públicos. El servidor puede consultar un servicio directamente; no necesita llamar a su propia API por HTTP. En este curso las pantallas interactivas practicarán además el consumo de las rutas REST.
 
@@ -139,6 +135,104 @@ Importar un esquema Zod puro o un tipo compartido no equivale a importar el serv
 El estado local vive asociado a posiciones y claves de componentes. Cambiar de página, desmontar o alterar una key puede reiniciarlo. Si necesitas conservar un borrador, decide dónde vive y durante cuánto tiempo; no agregues persistencia de contraseñas como solución genérica.
 
 La nota [[Recursos/Conceptos/Renderizado estado e hidratacion|Renderizado, estado e hidratación]] conecta estos términos con el recorrido de carga de una página.
+
+### Proteger una página
+
+Un componente de servidor puede leer la sesión antes de consultar nada. Añade a `src/shared/lib/access.ts` una variante del guard de la clase 9 pensada para páginas: en lugar de un 401 en JSON, redirige al login.
+
+```ts
+// src/shared/lib/access.ts (añadir)
+import { redirect } from "next/navigation";
+
+export async function requirePageRoles(allowed: readonly Role[]) {
+  try {
+    return await requireRoles(allowed);
+  } catch (error: unknown) {
+    if (error instanceof ApiError && error.status === 401) redirect("/login");
+    throw error; // 403 u otros fallos llegan a error.tsx
+  }
+}
+```
+
+```tsx
+// src/app/dashboard/users/page.tsx
+import { requirePageRoles } from "@/shared/lib/access";
+import { listUsers } from "@/features/users/backend/user.service";
+
+export default async function UsersPage() {
+  await requirePageRoles(["ADMIN"]);
+  const users = await listUsers();
+  return (
+    <section>
+      <h1>Personal</h1>
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>{user.name} · {user.active ? "Activa" : "Desactivada"}</li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+```
+
+`redirect` funciona lanzando una excepción especial de Next.js; por eso se llama dentro del `catch` y no hace falta `return`. El layout del panel puede llamar `requirePageRoles(["ADMIN", "STAFF"])` para redirigir pronto, pero cada página y cada endpoint siguen comprobando su propio permiso: el layout no se vuelve a ejecutar en todas las navegaciones.
+
+### Archivos especiales: loading, error y not-found
+
+App Router reconoce más archivos dentro de cada carpeta de ruta:
+
+```tsx
+// src/app/dashboard/loading.tsx — se muestra mientras la página de servidor espera datos
+export default function Loading() {
+  return <p role="status">Cargando…</p>;
+}
+```
+
+```tsx
+// src/app/dashboard/error.tsx — captura errores de las páginas del panel (debe ser cliente)
+"use client";
+export default function DashboardError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  return (
+    <div role="alert">
+      <p>No se pudo mostrar esta sección.</p>
+      <button type="button" onClick={reset}>Reintentar</button>
+    </div>
+  );
+}
+```
+
+```tsx
+// src/app/dashboard/events/[id]/page.tsx
+import { notFound } from "next/navigation";
+import { z } from "zod";
+import { requirePageRoles } from "@/shared/lib/access";
+import { getEvent } from "@/features/events/backend/event.service";
+import { ApiError } from "@/shared/lib/api-error";
+
+export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePageRoles(["ADMIN", "STAFF"]);
+  const parsed = z.uuid().safeParse((await params).id);
+  if (!parsed.success) notFound();
+  const event = await getEvent(parsed.data).catch((error: unknown) => {
+    if (error instanceof ApiError && error.status === 404) notFound();
+    throw error;
+  });
+  return <h1>{event.name}</h1>;
+}
+```
+
+```tsx
+// src/app/dashboard/events/[id]/not-found.tsx
+export default function EventNotFound() {
+  return <p>Ese evento no existe.</p>;
+}
+```
+
+`error.tsx` no debe mostrar `error.message` al usuario: en producción Next.js lo oculta y en desarrollo podría revelar detalles internos. Ofrece reintentar y registra el detalle en el servidor.
+
+### ¿Y las Server Actions?
+
+Next.js permite llamar funciones de servidor directamente desde un formulario con `"use server"` (Server Actions), sin escribir un Route Handler. En este curso usamos rutas REST porque hacen visible el contrato HTTP, se prueban con curl y Playwright igual que cualquier API y separan con claridad 401, 403 y 409. Si más adelante usas Server Actions, son igual de públicas que un endpoint: cada una necesita validar su entrada con Zod, llamar `requireRoles` y aplicar las mismas reglas del servicio.
 
 ### Caso desarrollado: dos incrementos producen solo uno
 
@@ -196,7 +290,6 @@ No. Empieza con estado local o elevado a un ancestro común y amplía cuando exi
 ## Conexiones
 
 [[Semana3/CLASE 11|Clase 11]] · [[Proyecto/4. Arquitectura vertical y contratos|Fronteras de la funcionalidad]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

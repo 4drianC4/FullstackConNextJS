@@ -116,7 +116,67 @@ export const { GET, POST } = handlers;
 
 `AUTH_SECRET` permanece privado. Mantener los defaults seguros de cookies de la librería y HTTPS en producción. Hashing no es cifrado reversible. HttpOnly dificulta robar la cookie desde JS, pero no elimina XSS ni sustituye protección CSRF.
 
-Antes de publicar: añadir limitación de intentos usando almacenamiento compartido o controles del proveedor de hosting, probar el bloqueo y no registrar credenciales. No basta un contador en memoria en un despliegue con varias instancias.
+### Limitar intentos de login
+
+Sin límite, cualquiera puede probar miles de contraseñas contra un correo. Un contador en memoria no sirve en producción: cada instancia tendría el suyo y se pierde al reiniciar. Este ejemplo guarda el contador en PostgreSQL, que ya comparten todas las instancias. Necesita un modelo nuevo, así que **proponlo por PR al [[Proyecto/6. Modelo de datos|modelo común]]** antes de migrar:
+
+```prisma
+model LoginThrottle {
+  key         String   @id
+  count       Int      @default(0)
+  windowStart DateTime @default(now())
+}
+```
+
+```ts
+// src/features/users/backend/login-throttle.ts
+import "server-only";
+import { prisma } from "@/shared/lib/prisma";
+
+const WINDOW_MS = 15 * 60 * 1000; // ventana de 15 minutos
+const MAX_ATTEMPTS = 5;
+
+/** Registra un intento y dice si todavía está permitido. */
+export async function consumeLoginAttempt(key: string): Promise<boolean> {
+  const now = new Date();
+  return prisma.$transaction(async (tx) => {
+    // Si la ventana anterior ya venció, el contador vuelve a empezar
+    await tx.loginThrottle.updateMany({
+      where: { key, windowStart: { lt: new Date(now.getTime() - WINDOW_MS) } },
+      data: { count: 0, windowStart: now },
+    });
+    const row = await tx.loginThrottle.upsert({
+      where: { key },
+      create: { key, count: 1, windowStart: now },
+      update: { count: { increment: 1 } },
+    });
+    return row.count <= MAX_ATTEMPTS;
+  });
+}
+
+export async function clearLoginAttempts(key: string) {
+  await prisma.loginThrottle.deleteMany({ where: { key } });
+}
+```
+
+En `authorize`, consume un intento antes de comparar la contraseña y limpia el contador al acertar:
+
+```ts
+async authorize(raw) {
+  const parsed = loginSchema.safeParse(raw);
+  if (!parsed.success) return null;
+  const email = parsed.data.email.toLowerCase();
+  const throttleKey = `login:${email}`;
+  if (!(await consumeLoginAttempt(throttleKey))) return null; // mismo mensaje genérico
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !user.active) return null;
+  if (!await bcrypt.compare(parsed.data.password, user.passwordHash)) return null;
+  await clearLoginAttempts(throttleKey);
+  return { id: user.id, name: user.name, email: user.email };
+},
+```
+
+El incremento ocurre en la base (`increment: 1`), así que dos intentos simultáneos no se pisan. Limitar por correo tiene un coste: alguien puede bloquear temporalmente a otra persona fallando a propósito. Por eso la ventana es corta y el bloqueo caduca solo. Si tu hosting ofrece limitación por IP (por ejemplo, reglas de firewall), puedes sumarla; no sustituye este control por cuenta. Prueba seis intentos fallidos seguidos, comprueba que el sexto se rechaza aunque la contraseña sea correcta, y que pasados 15 minutos vuelve a funcionar.
 
 ### Flujo de acceso completo
 
@@ -139,6 +199,31 @@ sequenceDiagram
 
 La librería gestiona endpoints y detalles de su protocolo. Tu función authorize se concentra en validar y comprobar la cuenta. No registres el objeto completo `credentials` para depurar: contiene precisamente el dato que queremos mantener privado.
 
+### Obtener una sesión real con curl
+
+Para probar endpoints protegidos necesitas la cookie que emite Auth.js. No la fabriques a mano: recórrelo igual que el navegador. El flujo de credenciales exige primero un token CSRF y después un POST de formulario:
+
+```bash
+BASE=http://localhost:3000
+read -r TEST_EMAIL
+read -rs TEST_PASSWORD   # no queda en el historial del shell
+CSRF=$(curl -s -c cookies.txt "$BASE/api/auth/csrf" | jq -r .csrfToken)
+curl -s -o /dev/null -w '%{http_code}\n' -b cookies.txt -c cookies.txt \
+  -X POST "$BASE/api/auth/callback/credentials" \
+  --data-urlencode "csrfToken=$CSRF" \
+  --data-urlencode "email=$TEST_EMAIL" \
+  --data-urlencode "password=$TEST_PASSWORD"
+curl -s -b cookies.txt "$BASE/api/auth/session"
+curl -i -b cookies.txt "$BASE/api/events"
+```
+
+1. `GET /api/auth/csrf` devuelve `{ "csrfToken": "…" }` y guarda una cookie CSRF en `cookies.txt` (`-c`).
+2. El POST a `/api/auth/callback/credentials` envía ese token con las credenciales. `--data-urlencode` manda un formulario, que es lo que espera Auth.js. Tanto si acierta como si falla responde con una redirección (302); por eso no basta con mirar el estado.
+3. `GET /api/auth/session` confirma el resultado: con sesión devuelve el usuario y sin ella `null`. Si hay sesión, `cookies.txt` contiene `authjs.session-token`.
+4. Desde ahí, `-b cookies.txt` envía la cookie en cada petición protegida. Las mutaciones necesitan además `-H 'Origin: http://localhost:3000'` (clase 9).
+
+Si no tienes `jq`, copia el `csrfToken` de la primera respuesta a mano. `cookies.txt` **es** tu sesión: no lo subas al repositorio (añádelo a `.gitignore`) y bórralo al terminar con `rm cookies.txt`. En la clase 10 automatizamos este mismo flujo.
+
 ### Entender los callbacks del ejemplo
 
 El callback jwt conserva el identificador al establecer la sesión. El callback session copia ese identificador a la representación que usa la aplicación. No copiamos passwordHash ni la contraseña. Tampoco convertimos un rol enviado por el formulario en un privilegio confiable.
@@ -157,7 +242,7 @@ Desactivar una cuenta conserva su historial de ventas. No la borres solo para qu
 
 ### Ataques y errores que no se arreglan con un botón
 
-Limitar intentos reduce ataques repetidos; el límite debe coordinarse entre instancias si el despliegue tiene más de un proceso. Un contador local no proporciona una política global. Los mensajes al cliente deben ser genéricos para no anunciar si existe cada correo.
+El límite de intentos de arriba reduce ataques repetidos. Los mensajes al cliente deben ser genéricos para no anunciar si existe cada correo.
 
 Expirar una sesión no equivale a desactivar una cuenta y cerrar sesión no es lo mismo que revocar todas las sesiones posibles. El curso implementa el flujo básico y comprueba estado vigente de cuenta en las operaciones; ampliaciones de administración de sesiones necesitan su propio diseño.
 
@@ -219,7 +304,6 @@ No. Las operaciones consultan permisos y estado actuales en la base.
 ## Conexiones
 
 [[Semana2/CLASE 9|Clase 9]] · [[Proyecto/6. Modelo de datos|Usuarios de prueba]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

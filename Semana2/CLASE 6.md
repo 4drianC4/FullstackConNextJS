@@ -72,7 +72,7 @@ export function listEvents() {
 }
 ```
 
-El límite evita devolver toda la tabla; la paginación completa es ampliación. Antes de publicar, los controladores deben incorporar los guards de la clase 9.
+El límite evita devolver toda la tabla; la paginación completa es ampliación.
 
 ### Errores compartidos
 
@@ -132,7 +132,7 @@ export async function getEvents() {
 export { getEvents as GET, postEvent as POST } from "@/features/events/backend/event.controller";
 ```
 
-Para `/api/events/[id]`, Next.js 16 entrega `params` asíncronos: `const { id } = await context.params`, con tipo `{ params: Promise<{ id: string }> }`. Validar el ID, devolver 404 si no existe y usar un esquema PATCH con al menos un campo.
+Para `/api/events/[id]`, Next.js 16 entrega `params` asíncronos: `const { id } = await context.params`, con tipo `{ params: Promise<{ id: string }> }`. Más abajo están el detalle con 404, la edición, los cambios de estado y el borrado.
 
 No borrar ventas ni entradas consumidas: conservar el historial. Una bebida en uso se desactiva con `available: false`; borrar un evento con dependencias devuelve 409.
 
@@ -172,11 +172,11 @@ export async function updateDraftEvent(id: string, input: UpdateEventInput) {
 
 La condición forma parte de la escritura, no de una consulta anterior. La transacción mantiene la edición y la lectura del resultado en la misma operación. `count` indica si una fila cumplió el filtro. En este contrato el fallo combina inexistencia y estado no editable como conflicto; si necesitas distinguir 404, documenta cómo lo harás sin perder la condición al escribir.
 
-Conecta el servicio desde un controlador que espere params, valide `id` con `z.uuid()`, valide body y transforme errores con `apiError`. Desde la clase 9 añade permisos y comprobación de origen antes de leer el cuerpo. No publiques la versión de desarrollo sin esos controles.
+Conecta el servicio desde un controlador que espere params, valide `id` con `z.uuid()`, valide body y transforme errores con `apiError`.
 
 ### Conectar PATCH sin perder la organización vertical
 
-Esta es la versión integrada del controlador, que utiliza los guards desarrollados en la clase 9. Mientras estudias esta clase, identifica el recorrido y vuelve a conectar esas protecciones cuando llegues a autenticación; las escrituras sin permiso solo se prueban localmente.
+Esta es la versión integrada del controlador, que ya usa los guards de la clase 9 (`requireRoles`, `requireSameOrigin`). Mientras estudias esta clase, identifica el recorrido; hasta tener autenticación, las escrituras sin permiso solo se prueban en local y nunca se publican. Los controladores de abajo siguen el mismo patrón.
 
 Integra estos imports con los existentes en `src/features/events/backend/event.controller.ts`; no dupliques los que ya tiene el archivo:
 
@@ -213,6 +213,143 @@ export { patchEvent as PATCH } from "@/features/events/backend/event.controller"
 Observa tres validaciones distintas: el ID identifica el recurso con formato UUID, el body expresa los campos editables y el servicio exige estado DRAFT. Si el ID tiene forma válida pero no hay un evento editable, el servicio devuelve el conflicto acordado. Un ID válido no demuestra existencia ni autorización.
 
 La respuesta contiene el registro seleccionado por el servicio, no el body original. Esta diferencia importa cuando el servidor recorta textos, convierte fechas o fija valores: el cliente debe representar lo confirmado y no asumir que todo se guardó exactamente como lo envió.
+
+### Detalle con 404 y filtros por query
+
+El detalle distingue «no existe» (404) de «existe pero no se puede editar» (409). Primero agrupa la selección pública en una constante para no repetirla en cada función del servicio:
+
+```ts
+// src/features/events/backend/event.service.ts (añadir; sustituye el listEvents inicial)
+import type { EventStatus } from "@/generated/prisma/client";
+
+const eventSelect = { id: true, name: true, startsAt: true, capacity: true, status: true } as const;
+
+export async function getEvent(id: string) {
+  const event = await prisma.event.findUnique({ where: { id }, select: eventSelect });
+  if (!event) throw new ApiError(404, "Evento no encontrado");
+  return event;
+}
+
+export function listEvents(filter: { status?: EventStatus } = {}) {
+  return prisma.event.findMany({
+    where: filter.status ? { status: filter.status } : {},
+    select: eventSelect,
+    orderBy: [{ startsAt: "desc" }, { id: "asc" }],
+    take: 50,
+  });
+}
+```
+
+Los filtros de un listado viajan en la query (`/api/events?status=OPEN`). Llegan como texto o `null`, así que se validan igual que un body:
+
+```ts
+// src/features/events/backend/event.controller.ts (añadir o sustituir)
+const listQuerySchema = z.object({
+  status: z.enum(["DRAFT", "OPEN", "CLOSED"]).optional(),
+});
+
+export async function getEvents(request: Request) {
+  try {
+    await requireRoles(["ADMIN", "STAFF"]);
+    const params = new URL(request.url).searchParams;
+    const query = listQuerySchema.parse({ status: params.get("status") ?? undefined });
+    return Response.json(await listEvents(query));
+  } catch (error: unknown) { return apiError(error); }
+}
+
+export async function getEventById(
+  _request: Request,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    await requireRoles(["ADMIN", "STAFF"]);
+    const { id } = await context.params;
+    return Response.json(await getEvent(z.uuid().parse(id)));
+  } catch (error: unknown) { return apiError(error); }
+}
+```
+
+`params.get("status") ?? undefined` convierte la ausencia (`null`) en campo omitido; `?status=ABIERTO` produce 400. Un estado válido sin resultados devuelve `200` con `[]`, no 404.
+
+### Abrir y cerrar un evento
+
+El estado avanza solo en un sentido: `DRAFT → OPEN → CLOSED`. Cada transición es una acción con su propia ruta (como el check-in de la clase 5) y la condición de origen va dentro de la escritura, igual que en la edición:
+
+```ts
+// src/features/events/backend/event.service.ts (añadir)
+const requiredFrom = { OPEN: "DRAFT", CLOSED: "OPEN" } as const;
+
+export async function changeEventStatus(id: string, to: "OPEN" | "CLOSED") {
+  const changed = await prisma.event.updateMany({
+    where: { id, status: requiredFrom[to] },
+    data: { status: to },
+  });
+  if (changed.count !== 1)
+    throw new ApiError(409, `Solo se puede pasar a ${to} desde ${requiredFrom[to]}`);
+  return getEvent(id);
+}
+```
+
+```ts
+// src/features/events/backend/event.controller.ts (añadir)
+function statusAction(to: "OPEN" | "CLOSED") {
+  return async (request: Request, context: { params: Promise<{ id: string }> }) => {
+    try {
+      await requireRoles(["ADMIN"]);
+      requireSameOrigin(request);
+      const { id } = await context.params;
+      return Response.json(await changeEventStatus(z.uuid().parse(id), to));
+    } catch (error: unknown) { return apiError(error); }
+  };
+}
+export const openEvent = statusAction("OPEN");
+export const closeEvent = statusAction("CLOSED");
+```
+
+```ts
+// src/app/api/events/[id]/open/route.ts
+export { openEvent as POST } from "@/features/events/backend/event.controller";
+// src/app/api/events/[id]/close/route.ts
+export { closeEvent as POST } from "@/features/events/backend/event.controller";
+```
+
+Abrir un evento fija su capacidad: `updateDraftEvent` ya no encuentra la fila porque exige `status: "DRAFT"`. Cerrar impide nuevas emisiones porque `issueAdmission` (clase 7) exige `status: "OPEN"`. Las dos reglas se apoyan en la misma columna sin comprobaciones previas separadas.
+
+### Eliminar un evento en DRAFT
+
+```ts
+// src/features/events/backend/event.service.ts (añadir)
+export async function deleteDraftEvent(id: string) {
+  const deleted = await prisma.event.deleteMany({ where: { id, status: "DRAFT" } });
+  if (deleted.count !== 1) throw new ApiError(409, "Solo se eliminan eventos en DRAFT");
+}
+```
+
+```ts
+// src/features/events/backend/event.controller.ts (añadir)
+export async function deleteEvent(request: Request, context: { params: Promise<{ id: string }> }) {
+  try {
+    await requireRoles(["ADMIN"]);
+    requireSameOrigin(request);
+    const { id } = await context.params;
+    await deleteDraftEvent(z.uuid().parse(id));
+    return new Response(null, { status: 204 });
+  } catch (error: unknown) { return apiError(error); }
+}
+```
+
+La ruta dinámica reúne las tres operaciones del recurso:
+
+```ts
+// src/app/api/events/[id]/route.ts
+export {
+  getEventById as GET,
+  patchEvent as PATCH,
+  deleteEvent as DELETE,
+} from "@/features/events/backend/event.controller";
+```
+
+Si el evento en DRAFT ya tiene reservas, la FK con `onDelete: Restrict` impide el borrado: Prisma lanza `P2003` y `apiError` responde 409. 204 significa éxito sin cuerpo; no envíes `Response.json(null)`.
 
 ### Borrar no siempre significa DELETE físico
 
@@ -286,7 +423,6 @@ Sus detalles internos no son el contrato público y pueden filtrar información 
 ## Conexiones
 
 [[Semana2/CLASE 9|Clase 9]] · [[Proyecto/3. Guía de Contribución y Estándares del Proyecto|Convenciones]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

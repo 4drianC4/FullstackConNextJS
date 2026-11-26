@@ -9,7 +9,7 @@ tags:
   - semana/2
 ---
 
-# Clase 7 — Relaciones, reglas de negocio y transacciones
+# Clase 7 — Reglas de negocio, transacciones e idempotencia
 
 [[README|Inicio]] · [[Semana2/0 INDICE|Semana 2]] · ← [[Semana2/CLASE 6|Clase 6]] · [[Semana2/CLASE 8|Clase 8]] →
 
@@ -21,6 +21,9 @@ tags:
 Repasa [[Semana2/CLASE 6|Clase 6]] y completa su tarea. Consulta [[Recursos/Stack y entorno|Stack y entorno]] y [[Proyecto/1. Sistema de Gestion de Discoteca|Proyecto Discoteca]].
 
 ## Desarrollo de la clase
+
+> [!note] Relaciones
+> Cómo se declaran y consultan las relaciones 1:N, 1:1 y N:M en Prisma está en [[Semana1/CLASE 4#Relaciones en Prisma: 1:N, 1:1 y N:M|Clase 4]]. Aquí las usamos para sostener reglas que afectan a varias tablas a la vez.
 
 ### Una regla que necesita resistir dos peticiones
 
@@ -97,12 +100,6 @@ if (result.count !== 1) throw new ApiError(409, "Entrada inexistente o ya utiliz
 
 Dos solicitudes simultáneas no deben producir dos ingresos exitosos. Para reservas, `@@unique([eventId, tableId])` respalda la regla y un conflicto Prisma se traduce a 409.
 
-### Dinero y ventas
-
-Recibir `[{ drinkId, quantity }]`, validar cantidades enteras positivas, agrupar IDs repetidos y consultar bebidas disponibles. El servidor calcula `unitPriceCents * quantity`, verifica enteros seguros y persiste una copia del precio en cada línea. Ese precio histórico no cambia al editar el catálogo.
-
-Usar una transacción para cabecera y líneas. Añadir una clave única de petición para no registrar dos ventas al repetir el envío; misma clave con contenido diferente debe devolver 409. Una transacción por sí sola no aporta idempotencia.
-
 ### Leer el servicio línea por línea
 
 `$transaction(async (tx) => ...)` define el conjunto que debe confirmarse. `updateMany` no significa que queramos editar varios eventos: nos permite expresar un filtro que incluye ID, estado y contador, y conocer cuántas filas lo cumplieron.
@@ -111,9 +108,196 @@ Usar una transacción para cabecera y líneas. Añadir una clave única de petic
 
 No mezcles `prisma.admission.create` fuera de `tx` dentro del callback: esa llamada podría usar una operación que no pertenece a la transacción que crees estar protegiendo. Tampoco hagas peticiones de red lentas mientras conservas bloqueos de base sin una necesidad justificada.
 
+### Dinero y ventas: el servicio completo
+
+El cliente envía solo `requestKey` y `[{ drinkId, quantity }]`. El servidor agrupa IDs repetidos, consulta bebidas disponibles, calcula `unitPriceCents * quantity`, comprueba el rango y guarda una copia del precio en cada línea. Ese precio histórico no cambia al editar el catálogo.
+
+Cabecera y líneas se crean en una transacción. La clave única de petición evita registrar dos ventas al repetir el envío; misma clave con contenido diferente devuelve 409. Una transacción por sí sola no aporta idempotencia. El algoritmo está en [[Proyecto/6. Modelo de datos#Venta idempotente: algoritmo del módulo|el modelo común]]; esta es una implementación de referencia:
+
+```ts
+// src/features/bar-sales/shared/bar-sale.schema.ts
+import { z } from "zod";
+export const createSaleSchema = z.object({
+  requestKey: z.uuid(),
+  items: z.array(z.object({
+    drinkId: z.uuid(),
+    quantity: z.number().int().min(1).max(100),
+  }).strict()).min(1).max(50),
+}).strict();
+export type CreateSaleInput = z.infer<typeof createSaleSchema>;
+```
+
+```ts
+// src/features/bar-sales/backend/bar-sale.service.ts
+import "server-only";
+import { createHash } from "node:crypto";
+import { prisma } from "@/shared/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
+import { ApiError } from "@/shared/lib/api-error";
+import type { CreateSaleInput } from "../shared/bar-sale.schema";
+
+const MAX_INT = 2_147_483_647; // límite de Int en PostgreSQL
+const saleSelect = {
+  id: true, totalCents: true, createdAt: true,
+  items: { select: { drinkId: true, quantity: true, unitPriceCents: true } },
+} satisfies Prisma.BarSaleSelect;
+
+type Line = { drinkId: string; quantity: number };
+
+// Paso 1: agrupar bebidas repetidas y ordenar por ID
+function canonicalLines(items: CreateSaleInput["items"]): Line[] {
+  const totals = new Map<string, number>();
+  for (const { drinkId, quantity } of items)
+    totals.set(drinkId, (totals.get(drinkId) ?? 0) + quantity);
+  const lines = [...totals]
+    .map(([drinkId, quantity]) => ({ drinkId, quantity }))
+    .sort((a, b) => a.drinkId.localeCompare(b.drinkId));
+  if (lines.some((line) => line.quantity > 100))
+    throw new ApiError(400, "Cantidad agregada fuera de rango");
+  return lines;
+}
+
+// Paso 2: hash del pedido (actor + líneas ordenadas, sin total)
+function requestHashOf(actorId: string, lines: Line[]) {
+  return createHash("sha256").update(JSON.stringify({ actorId, lines })).digest("hex");
+}
+
+// Pasos 3 y 5: ¿ya existe una venta con esta clave?
+async function findReplay(requestKey: string, actorId: string, requestHash: string) {
+  const found = await prisma.barSale.findUnique({
+    where: { requestKey },
+    select: { ...saleSelect, createdById: true, requestHash: true },
+  });
+  if (!found) return null;
+  if (found.createdById !== actorId || found.requestHash !== requestHash)
+    throw new ApiError(409, "Esa clave ya se usó para otra venta");
+  return { id: found.id, totalCents: found.totalCents, createdAt: found.createdAt, items: found.items };
+}
+
+export async function createSale(actorId: string, input: CreateSaleInput) {
+  const lines = canonicalLines(input.items);
+  const requestHash = requestHashOf(actorId, lines);
+
+  const previous = await findReplay(input.requestKey, actorId, requestHash);
+  if (previous) return { sale: previous, replayed: true };
+
+  try {
+    // Paso 4: precios de la base, total del servidor, cabecera y líneas juntas
+    const sale = await prisma.$transaction(async (tx) => {
+      const drinks = await tx.drink.findMany({
+        where: { id: { in: lines.map((line) => line.drinkId) }, available: true },
+        select: { id: true, priceCents: true },
+      });
+      const priceById = new Map(drinks.map((drink) => [drink.id, drink.priceCents]));
+      let totalCents = 0;
+      const items = lines.map((line) => {
+        const unitPriceCents = priceById.get(line.drinkId);
+        if (unitPriceCents === undefined)
+          throw new ApiError(409, "Alguna bebida no existe o no está disponible");
+        totalCents += unitPriceCents * line.quantity;
+        return { quantity: line.quantity, unitPriceCents, drink: { connect: { id: line.drinkId } } };
+      });
+      if (totalCents > MAX_INT) throw new ApiError(400, "Total fuera de rango");
+      return tx.barSale.create({
+        data: {
+          requestKey: input.requestKey,
+          requestHash,
+          totalCents,
+          createdBy: { connect: { id: actorId } },
+          items: { create: items },
+        },
+        select: saleSelect,
+      });
+    });
+    return { sale, replayed: false };
+  } catch (error: unknown) {
+    // Paso 5: carrera; otra petición con la misma clave terminó primero
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      const winner = await findReplay(input.requestKey, actorId, requestHash);
+      if (winner) return { sale: winner, replayed: true };
+    }
+    throw error;
+  }
+}
+```
+
+```ts
+// src/features/bar-sales/backend/bar-sale.controller.ts
+import { createSaleSchema } from "../shared/bar-sale.schema";
+import { createSale } from "./bar-sale.service";
+import { requireRoles } from "@/shared/lib/access";
+import { requireSameOrigin } from "@/shared/lib/origin";
+import { apiError } from "@/shared/lib/api-error";
+export async function postSale(request: Request) {
+  try {
+    const actor = await requireRoles(["ADMIN", "STAFF"]);
+    requireSameOrigin(request);
+    const input = createSaleSchema.parse(await request.json());
+    const { sale, replayed } = await createSale(actor.id, input);
+    return Response.json(sale, { status: replayed ? 200 : 201 });
+  } catch (error: unknown) { return apiError(error); }
+}
+```
+
+Puntos que conviene leer con calma:
+
+- El actor llega del guard (clase 9), nunca del body; por eso forma parte del hash. Una clave copiada por otra persona produce 409 y no revela la venta.
+- El total no viene del cliente: se recalcula con los precios que hay en la base dentro de la transacción. Si una bebida falta o está desactivada, el `throw` deshace toda la transacción.
+- Con cantidades de 1 a 100 y como máximo 50 líneas, cada producto cabe de sobra en un número seguro de JavaScript; el límite que importa es el `Int` de PostgreSQL.
+- `replayed` permite responder 201 la primera vez y 200 al repetir la misma intención. La interfaz trata ambas como venta confirmada.
+- `ApiError` lanzado dentro de `$transaction` provoca rollback y luego `apiError` lo traduce a HTTP.
+
 ### Unicidad de reservas
 
-La interfaz puede consultar qué mesas parecen disponibles, pero esa imagen envejece. La restricción única compuesta es el árbitro cuando dos clientes intentan reservar la misma mesa y evento. Uno crea; el otro obtiene conflicto.
+La interfaz puede consultar qué mesas parecen disponibles, pero esa imagen envejece. La restricción única compuesta es el árbitro cuando dos clientes intentan reservar la misma mesa y evento. Uno crea; el otro obtiene conflicto. No hace falta una consulta previa de «¿está libre?»: entre esa consulta y la escritura otra persona podría reservar.
+
+```ts
+// src/features/reservations/shared/reservation.schema.ts
+import { z } from "zod";
+export const createReservationSchema = z.object({
+  eventId: z.uuid(),
+  tableId: z.uuid(),
+  guestName: z.string().trim().min(2).max(100),
+}).strict();
+export type CreateReservationInput = z.infer<typeof createReservationSchema>;
+```
+
+```ts
+// src/features/reservations/backend/reservation.service.ts
+import "server-only";
+import { prisma } from "@/shared/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
+import { ApiError } from "@/shared/lib/api-error";
+import type { CreateReservationInput } from "../shared/reservation.schema";
+
+export async function createReservation(input: CreateReservationInput) {
+  try {
+    return await prisma.reservation.create({
+      data: {
+        guestName: input.guestName,
+        event: { connect: { id: input.eventId } },
+        table: { connect: { id: input.tableId } },
+      },
+      select: { id: true, eventId: true, tableId: true, guestName: true, createdAt: true },
+    });
+  } catch (error: unknown) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")
+      throw new ApiError(409, "La mesa ya está reservada para ese evento");
+    throw error;
+  }
+}
+
+// Solo ADMIN y antes de que empiece el evento (regla del modelo común)
+export async function deleteReservation(id: string) {
+  const deleted = await prisma.reservation.deleteMany({
+    where: { id, event: { startsAt: { gt: new Date() } } },
+  });
+  if (deleted.count !== 1)
+    throw new ApiError(409, "Reserva inexistente o de un evento ya iniciado");
+}
+```
+
+`P2002` es la violación de `@@unique([eventId, tableId])`; aquí lo traducimos con un mensaje propio en vez del genérico de `apiError`. Si el evento o la mesa no existen, `connect` falla con `P2025` y `apiError` responde 404. En `deleteReservation` el filtro por relación (`event: { startsAt: … }`) mete la regla de fecha dentro de la misma escritura.
 
 El mensaje correcto no es «la aplicación se rompió», sino «la mesa ya no está disponible para ese evento». Conserva la selección del evento y permite elegir otra mesa. Este ejemplo conecta integridad del backend con una UX que reconoce cambios ajenos.
 
@@ -193,7 +377,6 @@ Dentro de la transacción debes usar tx para que las consultas formen parte del 
 ## Conexiones
 
 [[Proyecto/6. Modelo de datos|Restricciones del modelo]] · [[Semana2/CLASE 10|Clase 10]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

@@ -50,8 +50,6 @@ Si no sabes un detalle, delimita qué conoces y qué consultarías. Inventar una
 
 Verificar la URL antes de presentar, usar datos de demostración y cerrar sesiones ajenas. Tener disponible un recorrido local si falla la conexión; declarar si no se pudo verificar producción. No mostrar claves, paneles privados ni información real de clientes.
 
-### Preparar tu participación
-
 Acuerda con tu equipo un recorrido breve y reparte las explicaciones para que cada integrante muestre una decisión propia. Lleva los PR y pruebas que respaldan tu aporte. La evaluación individual también considera el trabajo acumulado; no depende solo de quién maneja el teclado durante la demo.
 
 ### Guion de demostración
@@ -71,7 +69,9 @@ Repositorio de aplicación con README de arranque, migraciones, seed de prueba, 
 
 ¿Qué contrato evitó un bloqueo? ¿Qué dependencia apareció igual? ¿Qué prueba encontró un error real? ¿Cuándo la IA ayudó y cuándo hubo que corregirla?
 
-Los siguientes pasos pueden incluir paginación avanzada, inventario, reportes, QR o una función de IA dentro del producto. Cada uno necesita nuevo alcance, pruebas y revisión de costos; no se presenta como capacidad ya adquirida.
+Responde con acciones concretas. En vez de «hay que organizarnos mejor», identifica qué contrato llegó tarde, qué dato compartido faltó y qué cambio habría reducido el bloqueo. Por ejemplo: definir IDs y DTO de eventos antes de construir reservas permite avanzar sin esperar toda su interfaz.
+
+En vez de «más tests», señala el caso que escapó y el nivel adecuado: carrera real en integración, formulario en E2E o cálculo puro en unitarias. La mejora tiene valor cuando se puede convertir en una tarea comprobable.
 
 ### Preguntas de repaso razonadas
 
@@ -100,12 +100,6 @@ El lockfile y las migraciones forman parte de esa reproducción. Las claves no. 
 Muestra tu tarea, los archivos de la funcionalidad, un PR y una prueba o revisión que realizaste. El número de commits o líneas no describe calidad por sí mismo. Una corrección pequeña que evita una venta duplicada puede aportar más que una pantalla grande que no guarda datos.
 
 Si trabajaste con IA, explica una propuesta aceptada y una decisión que revisaste. Puedes demostrar comprensión siguiendo el contrato y señalando los límites de la prueba. No necesitas atribuirte escritura manual de cada carácter para ser responsable del resultado.
-
-### Retrospectiva con acciones concretas
-
-En vez de «hay que organizarnos mejor», identifica qué contrato llegó tarde, qué dato compartido faltó y qué cambio habría reducido el bloqueo. Por ejemplo: definir IDs y DTO de eventos antes de construir reservas permite avanzar sin esperar toda su interfaz.
-
-En vez de «más tests», señala el caso que escapó y el nivel adecuado: carrera real en integración, formulario en E2E o cálculo puro en unitarias. La mejora tiene valor cuando se puede convertir en una tarea comprobable.
 
 ### Siguientes pasos con alcance propio
 
@@ -169,7 +163,6 @@ Compárala con el contrato: lo excluido o acotado debe estar documentado; una ga
 ## Conexiones
 
 [[Proyecto/5. Evaluacion y entregables|Rúbrica]] · [[README|Mapa completo del curso]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

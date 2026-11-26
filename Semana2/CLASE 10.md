@@ -93,7 +93,7 @@ Usar una base separada de prueba, migraciones y fixtures. Nunca ejecutar limpiez
 | Dos emisiones para una plaza restante | Una emisión, contador consistente |
 | Dos ventas con la misma clave | Una sola venta; conflicto si cambia el contenido |
 
-Conservar evidencia en el PR: request, status y comprobación de datos. La automatización de estas peticiones es una tarea del equipo después de tener el flujo de sesión funcionando; no sustituirla por mocks que omitan permisos.
+Conservar evidencia en el PR: request, status y comprobación de datos. Más abajo está cómo automatizar esta matriz con sesiones reales; no la sustituyas por mocks que omitan permisos.
 
 ### Hito de cierre de backend
 
@@ -109,7 +109,199 @@ Un test asíncrono debe esperar su promesa. Si disparas una operación sin await
 
 Los archivos `src/**/*.test.ts` contienen pruebas de Vitest. Los specs del navegador viven en `tests` y Playwright los ejecuta con su configuración. Esta separación evita que una herramienta interprete la API de otra. La nota de stack muestra los scripts acordados.
 
-Configura el alcance de forma intencional. Si usas alias `@/`, el entorno de pruebas debe resolverlos; los ejemplos iniciales utilizan imports relativos para no añadir ese problema al primer test. No cambies imports productivos a rutas rotas para hacer pasar una prueba.
+Configura el alcance de forma intencional. Los ejemplos iniciales usan imports relativos; en cuanto un test importe código que use `@/`, configura el alias como en la sección siguiente. No cambies imports productivos a rutas rotas para hacer pasar una prueba.
+
+### Vitest con módulos de servidor
+
+Dos cosas rompen el primer test que importa un servicio: el alias `@/` y `import "server-only"`. Ese paquete lanza un error a propósito cuando se carga fuera del entorno de servidor de React, y Vitest no lo es. Configura ambas cosas una vez:
+
+```ts
+// vitest.config.ts
+import { fileURLToPath } from "node:url";
+import { defineConfig } from "vitest/config";
+export default defineConfig({
+  resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
+  test: {
+    include: ["src/**/*.test.ts"],
+    environment: "node",
+    setupFiles: ["./vitest.setup.ts"],
+  },
+});
+```
+
+```ts
+// vitest.setup.ts
+import { vi } from "vitest";
+vi.mock("server-only", () => ({})); // solo en tests: el guard de imports sigue activo en Next.js
+```
+
+Con esto puedes probar funciones puras de un servicio (por ejemplo, el agrupado de líneas de una venta). Si la función usa Prisma, necesitas la base de test de abajo; para permisos y respuestas HTTP es más fiable la integración por HTTP de la siguiente sección que llamar al controlador a mano.
+
+### Base de datos de test
+
+Las pruebas de integración crean y borran filas, así que usan su propia base, nunca la de desarrollo ni la de producción. Créala en el mismo contenedor de la clase 3:
+
+```bash
+docker compose exec db sh -c 'createdb -U "$POSTGRES_USER" discoteca_test'
+```
+
+Crea un `.env.test` local (no se versiona: `.env*` ya está en `.gitignore`) con la misma estructura que `.env`, pero apuntando a `discoteca_test`, y añade credenciales de una cuenta STAFF de prueba:
+
+```text
+DATABASE_URL=postgresql://discoteca:CAMBIAR_LOCALMENTE@localhost:5432/discoteca_test
+AUTH_SECRET=GENERAR_LOCALMENTE
+SEED_ADMIN_EMAIL=admin@example.test
+SEED_ADMIN_PASSWORD=DEFINIR_LOCALMENTE
+SEED_STAFF_EMAIL=staff@example.test
+SEED_STAFF_PASSWORD=DEFINIR_LOCALMENTE
+```
+
+El seed común solo crea el administrador. Añade dentro de `main()` de `prisma/seed.ts` la cuenta STAFF opcional:
+
+```ts
+const staffEmail = process.env.SEED_STAFF_EMAIL?.toLowerCase();
+const staffPassword = process.env.SEED_STAFF_PASSWORD;
+if (staffEmail && staffPassword) {
+  await prisma.user.upsert({
+    where: { email: staffEmail }, update: {},
+    create: { email: staffEmail, name: "Personal de prueba", role: "STAFF", passwordHash: await bcrypt.hash(staffPassword, 12) },
+  });
+}
+```
+
+Para reconstruir la base de test desde cero, carga sus variables en la terminal y ejecuta reset y seed. Las variables ya definidas en el shell tienen prioridad sobre `.env`, así que Prisma usará la URL de test:
+
+```bash
+set -a; source .env.test; set +a
+echo "$DATABASE_URL"            # comprueba que termina en /discoteca_test
+npx prisma migrate reset --force
+npm run db:seed
+```
+
+`migrate reset` borra todo lo que hay en esa base. Por eso el `echo` va antes: si ves la URL de desarrollo, para.
+
+### Automatizar la matriz con sesiones reales
+
+Playwright no solo controla navegadores: su cliente `request` hace peticiones HTTP y conserva cookies como un navegador. Lo usamos para la matriz de integración porque pasa por el login real de Auth.js (clase 8) y por los guards reales, sin mocks. Configúralo una vez; la clase 16 reutiliza este archivo para los flujos con navegador:
+
+```ts
+// playwright.config.ts
+import { defineConfig } from "@playwright/test";
+const baseURL = "http://127.0.0.1:3000";
+export default defineConfig({
+  testDir: "./tests",
+  workers: 1, // todos los tests comparten la base de test
+  use: { baseURL, trace: "retain-on-failure" },
+  webServer: {
+    command: "npm run dev -- --hostname 127.0.0.1",
+    url: `${baseURL}/api/health`,
+    reuseExistingServer: false,
+    timeout: 120_000,
+    env: { APP_ORIGIN: baseURL, AUTH_URL: baseURL },
+  },
+});
+```
+
+`webServer` arranca la aplicación con las variables de tu terminal (las de `.env.test` si hiciste `source`) más las de `env`. `reuseExistingServer: false` evita conectarse por error a un servidor de desarrollo que apunta a otra base. `127.0.0.1` y `localhost` no son el mismo origen: usa el mismo en `baseURL`, `APP_ORIGIN` y `AUTH_URL`.
+
+```ts
+// tests/helpers/session.ts
+import { request, type APIRequestContext } from "@playwright/test";
+import { z } from "zod";
+
+const BASE_URL = "http://127.0.0.1:3000";
+
+export function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`Falta ${name} en el entorno de test`);
+  return value;
+}
+
+/** Cliente sin sesión, con el Origin que exigen nuestras mutaciones. */
+export function anonymous(): Promise<APIRequestContext> {
+  return request.newContext({ baseURL: BASE_URL, extraHTTPHeaders: { Origin: BASE_URL } });
+}
+
+/** Mismo flujo que con curl: token CSRF, POST de credenciales y comprobación. */
+export async function loginAs(email: string, password: string): Promise<APIRequestContext> {
+  const api = await anonymous();
+  const { csrfToken } = z.object({ csrfToken: z.string() })
+    .parse(await (await api.get("/api/auth/csrf")).json());
+  await api.post("/api/auth/callback/credentials", {
+    form: { csrfToken, email, password },
+    maxRedirects: 0,
+  });
+  const session = z.object({ user: z.object({ id: z.string() }) }).nullable()
+    .parse(await (await api.get("/api/auth/session")).json());
+  if (!session) throw new Error("No se pudo iniciar sesión con la cuenta de prueba");
+  return api;
+}
+
+export const asAdmin = () => loginAs(requireEnv("SEED_ADMIN_EMAIL"), requireEnv("SEED_ADMIN_PASSWORD"));
+export const asStaff = () => loginAs(requireEnv("SEED_STAFF_EMAIL"), requireEnv("SEED_STAFF_PASSWORD"));
+```
+
+```ts
+// tests/api/events.spec.ts
+import { test, expect } from "@playwright/test";
+import { z } from "zod";
+import { anonymous, asAdmin, asStaff } from "../helpers/session";
+
+const validEvent = { name: "Evento de test", startsAt: "2026-12-20T22:00:00-04:00", capacity: 10 };
+
+test("GET protegido sin sesión responde 401", async () => {
+  const api = await anonymous();
+  expect((await api.get("/api/events")).status()).toBe(401);
+});
+
+test("STAFF no puede crear eventos", async () => {
+  const api = await asStaff();
+  expect((await api.post("/api/events", { data: validEvent })).status()).toBe(403);
+});
+
+test("ADMIN crea un evento y luego existe", async () => {
+  const api = await asAdmin();
+  const created = await api.post("/api/events", { data: validEvent });
+  expect(created.status()).toBe(201);
+  const { id } = z.object({ id: z.string() }).parse(await created.json());
+  expect((await api.get(`/api/events/${id}`)).status()).toBe(200);
+});
+
+test("una mutación con origen ajeno responde 403", async () => {
+  const api = await asAdmin();
+  const response = await api.post("/api/events", {
+    data: validEvent,
+    headers: { Origin: "https://otro-sitio.example" },
+  });
+  expect(response.status()).toBe(403);
+});
+```
+
+Para carreras, lanza las dos peticiones a la vez con `Promise.all` y comprueba que exactamente una gana. Adapta las rutas al contrato de tu módulo:
+
+```ts
+test("dos ingresos simultáneos: un éxito y un conflicto", async () => {
+  const api = await asStaff();
+  const issued = await api.post("/api/admissions", {
+    data: { eventId: "00000000-0000-4000-8000-000000000001", holderName: "Test" }, // evento OPEN del seed
+  });
+  const { id } = z.object({ id: z.string() }).parse(await issued.json());
+  const [a, b] = await Promise.all([
+    api.post(`/api/admissions/${id}/check-in`),
+    api.post(`/api/admissions/${id}/check-in`),
+  ]);
+  expect([a.status(), b.status()].sort()).toEqual([200, 409]);
+});
+```
+
+Ejecuta con la base de test cargada:
+
+```bash
+set -a; source .env.test; set +a
+npx playwright test tests/api
+```
+
+Las respuestas no cuentan toda la historia: en los casos de concurrencia comprueba también filas y contadores, por ejemplo consultando el detalle después o abriendo `npx prisma studio` contra la base de test.
 
 ### Datos controlados y aislamiento
 
@@ -187,7 +379,6 @@ Si no espera la operación, puede finalizar antes del resultado o de la aserció
 ## Conexiones
 
 [[Proyecto/5. Evaluacion y entregables|Hito de backend]] · [[semana4/CLASE 16|Clase 16]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

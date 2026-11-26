@@ -112,7 +112,7 @@ Añadir `web` al mismo `compose.yaml` de la clase 3:
 
 ```bash
 docker compose up -d db
-npx prisma migrate deploy
+npm run db:deploy
 npm run db:seed
 docker compose up --build -d web
 docker compose logs web
@@ -141,20 +141,69 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx prisma generate
+      - run: npm run db:generate   # lint y typecheck necesitan el cliente generado
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
 ```
 
-Este job ejecuta pruebas puras; las de integración/E2E requieren además PostgreSQL de test, migraciones, seed y servidor. Configura ese job con una base de prueba y los scripts necesarios para la suite del proyecto; no lo apuntes a producción. El deploy automático no sustituye CI.
+El cliente de Prisma se genera antes de `lint` y `typecheck` porque el código importa `@/generated/prisma`, que no está versionado; el script `build` vuelve a generarlo, lo que cuesta pocos segundos y deja el build autosuficiente para Docker y Vercel.
+
+Este job ejecuta pruebas puras. Las de integración y E2E necesitan PostgreSQL de test, migraciones, seed y servidor; añade un segundo job al mismo archivo. GitHub Actions levanta PostgreSQL como servicio, solo para ese job, y lo destruye al terminar:
+
+```yaml
+  integration:
+    runs-on: ubuntu-latest
+    needs: quality
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: discoteca_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test -d discoteca_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/discoteca_test
+      AUTH_SECRET: ci-only-not-a-production-secret-0123456789
+      SEED_ADMIN_EMAIL: admin@example.test
+      SEED_ADMIN_PASSWORD: ci-only-admin-password
+      SEED_STAFF_EMAIL: staff@example.test
+      SEED_STAFF_PASSWORD: ci-only-staff-password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run db:generate
+      - run: npm run db:deploy
+      - run: npm run db:seed
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+```
+
+Las credenciales de este job son valores desechables para una base que solo existe durante la ejecución; no sirven en ningún otro entorno. `APP_ORIGIN` y `AUTH_URL` los pone el `webServer` de Playwright (clase 10). Las trazas se suben solo si algo falla, para poder ver qué pasó. No apuntes nunca este job a producción. El deploy automático no sustituye CI.
 
 ### Despliegue en Vercel
 
 Conectar el repositorio de aplicación, configurar variables privadas y una base PostgreSQL alojada. Revisar límites del plan elegido antes de abrir cuentas. Usar una base separada para previews: las URLs de preview no son secretas por defecto.
 
-Aplicar `prisma migrate deploy` una vez por entrega contra la base correcta, antes de activar código incompatible. Configurar origen/dominio, callbacks de autenticación y limitación de intentos; crear el primer administrador por un procedimiento controlado. Verificar login, permisos y persistencia después del despliegue. Docker es otro modo de ejecución, no algo que Vercel necesite para desplegar Next.js.
+Aplicar `npm run db:deploy` (`prisma migrate deploy`) una vez por entrega contra la base correcta, antes de activar código incompatible. Configurar origen/dominio, callbacks de autenticación y la [[Semana2/CLASE 8#Limitar intentos de login|limitación de intentos]]; crear el primer administrador por un procedimiento controlado. Verificar login, permisos y persistencia después del despliegue. Docker es otro modo de ejecución, no algo que Vercel necesite para desplegar Next.js.
 
 ### Leer el Dockerfile por responsabilidades
 
@@ -186,7 +235,7 @@ flowchart TD
 
 CI es la ejecución automatizada de controles sobre los cambios. Desplegar es poner una versión en un entorno accesible. Un hosting puede desplegar automáticamente sin que tus pruebas hayan demostrado nada; vincula la integración a los controles relevantes y comprueba su configuración real.
 
-`lint` revisa reglas estáticas; `typecheck` comprueba compatibilidad de tipos; tests observan casos; build comprueba que puede generarse el artefacto. Ninguno sustituye a todos los demás. El job inicial no ejecuta E2E porque no prepara su servidor ni su base: no lo presentes como si lo hiciera.
+`lint` revisa reglas estáticas; `typecheck` comprueba compatibilidad de tipos; tests observan casos; build comprueba que puede generarse el artefacto. Ninguno sustituye a todos los demás. El job `quality` no ejecuta E2E; eso lo hace `integration`, que prepara su propia base y servidor.
 
 ### Entornos y bases separadas
 
@@ -256,7 +305,6 @@ La integración habitual de Next.js no lo necesita; son dos modos de ejecución 
 ## Conexiones
 
 [[Semana1/CLASE 3|Clase 3]] · [[Recursos/Stack y entorno|Scripts y versiones]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

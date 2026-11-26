@@ -52,15 +52,13 @@ Los métodos y estados expresan intención, pero necesitas implementar sus garan
 | 409 | Conflicto con estado o unicidad |
 | 500 | Fallo inesperado del servidor |
 
-Un cuerpo con `{ "error": "..." }` y estado 200 confunde a los consumidores. El estado debe corresponder con lo ocurrido. Tampoco prometas que todo error es del usuario: si la base no está disponible, corregir el nombre del evento no solucionará nada.
+Un JSON mal formado también es 400. Un cuerpo con `{ "error": "..." }` y estado 200 confunde a los consumidores. El estado debe corresponder con lo ocurrido. Tampoco prometas que todo error es del usuario: si la base no está disponible, corregir el nombre del evento no solucionará nada.
 
 ### Contrato antes de implementación
 
 Un contrato define campos permitidos, tipos, límites, representación de fechas, permisos, errores y forma de respuesta. El campo `capacity` no solo es number: acordamos entero entre 1 y 10000. El nombre se recorta antes de medir su longitud. La fecha incluye zona y se valida su formato; decidir si debe ser futura es otra regla del producto.
 
-### Contrato HTTP
-
-GET consulta, POST crea, PATCH modifica parcialmente y DELETE elimina según la política acordada. Usamos 200/201 para éxito, 400 para entrada inválida, 401 sin sesión, 403 sin permiso, 404 inexistente y 409 por conflicto. Un JSON mal formado también es 400.
+### Dónde vive cada pieza
 
 En Next.js las rutas viven en `src/app/api`, pero la lógica pertenece a `src/features/<funcionalidad>`. Revisar [[Proyecto/4. Arquitectura vertical y contratos|el árbol y las dependencias]].
 
@@ -214,7 +212,6 @@ No. Agrupa por funcionalidad y conserva responsabilidades claras dentro de ella.
 ## Conexiones
 
 [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura y HTTP]] · [[Semana2/CLASE 6|Clase 6]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

@@ -60,9 +60,7 @@ Un ORM mapea modelos y operaciones de código a la base. Prisma genera un client
 
 Una consulta SQL parametrizada también puede ser correcta y segura. El problema no es escribir SQL, sino concatenar valores no confiables o desconocer las garantías de la base. Aquí utilizamos Prisma para concentrarnos en reglas y contratos compartidos.
 
-### Diseñar antes de programar
-
-Identificar entidades, PK, FK, relaciones 1:N, restricciones únicas e índices. SQL no es inferior a un ORM: Prisma aporta consultas tipadas, pero seguimos necesitando entender integridad y transacciones. Un UUID no sustituye un control de acceso.
+### Un esquema común para todo el grupo
 
 Leer [[Proyecto/6. Modelo de datos|el esquema común completo]]. Todos usan el mismo modelo. Propón cambios mediante PR, sincroniza el historial integrado y acuerda cualquier migración compartida antes de generarla para evitar historiales incompatibles.
 
@@ -103,11 +101,28 @@ Completar con los modelos de la nota del proyecto. Después:
 
 ```bash
 npx prisma migrate dev --name initial
-npx prisma generate
-npx prisma db seed
+npm run db:generate
+npm run db:seed
 ```
 
-El seed se ejecuta explícitamente. `migrate dev` es para desarrollo; en producción se aplican migraciones revisadas con `migrate deploy`.
+Los scripts `db:*` están definidos en [[Recursos/Stack y entorno|Stack y entorno]] (`db:generate` = `prisma generate`, `db:seed` = `prisma db seed`, `db:deploy` = `prisma migrate deploy`); usamos esos nombres en todo el curso. En Prisma 7 el seed se ejecuta explícitamente: ni `migrate dev` ni `migrate reset` lo lanzan solos. `migrate dev` es para desarrollo; en producción se aplican migraciones revisadas con `migrate deploy`.
+
+### Leer los atributos del esquema
+
+Antes de copiar los modelos, identifica qué hace cada atributo del [[Proyecto/6. Modelo de datos|modelo común]]:
+
+| Atributo | Ejemplo | Qué garantiza |
+| --- | --- | --- |
+| `@id` | `id String @id` | Clave primaria |
+| `@default(...)` | `@default(uuid())`, `@default(now())`, `@default(DRAFT)` | Valor que pone la base o Prisma si no envías el campo |
+| `@updatedAt` | `updatedAt DateTime @updatedAt` | Prisma lo actualiza en cada `update` |
+| `?` | `checkedInAt DateTime?` | La columna admite `NULL` |
+| `@unique` | `email String @unique` | No puede haber dos filas con el mismo valor |
+| `@@unique([a, b])` | `@@unique([eventId, tableId])` | Unicidad compuesta |
+| `@@index([...])` | `@@index([eventId])` | Índice para buscar rápido; no impide duplicados |
+| `enum` | `enum Role { ADMIN STAFF }` | Solo esos valores; Prisma genera el tipo TypeScript `Role` |
+
+Un `enum` de Prisma sustituye a la unión `"ADMIN" | "STAFF"` de la clase 2 cuando el dato viene de la base: importa el tipo desde `@/generated/prisma/client` en lugar de escribir otra unión que pueda desalinearse.
 
 ### Cliente compartido
 
@@ -135,6 +150,8 @@ Reutiliza el cliente durante las recargas de desarrollo. No elimina la necesidad
 Cuando añades un campo, sigue este recorrido: decide la regla, cambia el esquema, crea la migración en desarrollo, revisa el SQL, aplica y genera el cliente. Después actualiza los servicios y contratos que dependen del campo. Un error de TypeScript tras migrar puede indicar que falta generar o que el código todavía usa el contrato antiguo.
 
 `migrate dev` ayuda a crear y aplicar migraciones en una base de desarrollo. `migrate deploy` aplica las pendientes en un entorno de entrega; no debe inventar nuevas migraciones en producción. `generate` no crea las tablas. `db seed` agrega datos de prueba, no define la estructura.
+
+`npx prisma migrate reset` borra **todos** los datos de la base apuntada, vuelve a aplicar las migraciones desde cero y deja la base vacía (luego ejecutas `npm run db:seed`). Es útil para reconstruir tu base local o la de test; nunca lo ejecutes contra una base compartida o de producción. Comprueba antes a qué `DATABASE_URL` apunta.
 
 ### Leer el cliente y una consulta
 
@@ -377,7 +394,7 @@ Antes de modificar el esquema, identifica qué consulta o recorrido lo necesita.
 
 ## Práctica guiada
 
-Generar la migración inicial y listar bebidas con Prisma Studio o un script de servidor.
+Generar la migración inicial y listar bebidas con Prisma Studio o un script de servidor. Prisma Studio se abre con `npx prisma studio`: es una interfaz web local para ver y editar filas de la base que indica `prisma.config.ts`. Úsalo para inspeccionar tu base de desarrollo; un cambio hecho a mano allí no queda en ninguna migración ni seed, así que no lo uses para «arreglar» datos que tus compañeros también necesitan.
 
 ## Tarea para casa
 
@@ -429,7 +446,6 @@ Porque la relación guarda datos propios (cantidad y precio histórico) y una ta
 ## Conexiones
 
 [[Proyecto/6. Modelo de datos|Modelo y seed]] · [[Semana2/CLASE 7|Clase 7]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

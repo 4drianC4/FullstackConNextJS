@@ -77,7 +77,9 @@ async function createSale(body: { totalCents: number; userId: string }) {
 }
 ```
 
-Problemas: confía en total y actor del cliente; no tiene guard, validación, líneas, precios históricos ni idempotencia. En parejas, escribir el contrato correcto, enumerar controles y diseñar pruebas. Este ejercicio permite completar los mismos objetivos si NVIDIA no responde o agotó la cuota.
+Problemas: confía en el total y el actor que envía el cliente; no tiene guard, validación, líneas, precios históricos ni idempotencia. El contrato correcto acepta productos, cantidades y `requestKey`; obtiene el actor de la sesión y los precios de la base, impide cantidades inválidas y duplicaciones, guarda precios históricos y devuelve la venta confirmada (compáralo con [[Semana2/CLASE 7#Dinero y ventas: el servicio completo|el servicio de la clase 7]]). No basta renombrar las variables a `validatedTotal` y `secureUserId`: la autoridad depende del origen del dato y de las comprobaciones, no del nombre.
+
+En parejas, escribid el contrato correcto, enumerad los controles y diseñad cuatro pruebas: el total manipulado no se usa, el actor manipulado no se acepta, un reintento no duplica y una clave repetida con distinto contenido genera conflicto. Una prueba de cálculo sola no protege ese recorrido. Este ejercicio cubre los mismos objetivos si NVIDIA no responde o se agotó la cuota.
 
 ### Revisar un PR asistido
 
@@ -108,14 +110,6 @@ Supón que el listado muestra mesa 1 libre para Evento A. Al confirmar, recibes 
 Si existe otra reserva, el backend puede estar funcionando correctamente y el problema es cómo la interfaz representa un estado desactualizado. La solución es mostrar conflicto y refrescar opciones, no permitir duplicados. Si no existe, revisa un fixture equivocado, un mapping incorrecto o una respuesta de otro entorno.
 
 La IA debe proponer evidencia para decidir entre posibilidades. Un arreglo sin explicación de causa puede estar atacando solo el síntoma.
-
-### Ejercicio defectuoso y contrato correcto
-
-El pseudocódigo de venta acepta total y userId del body. Una revisión razonada identifica que esos valores no son confiables. El contrato correcto acepta productos, cantidades y requestKey; obtiene el actor de sesión y precios de la base.
-
-Además debe impedir cantidades inválidas y duplicación de la misma intención, guardar precios históricos y devolver la venta confirmada. No basta cambiar los nombres a `validatedTotal` y `secureUserId`: la autoridad depende del origen y de las comprobaciones, no de cómo llamamos la variable.
-
-Diseña cuatro pruebas: total manipulado no se usa, actor manipulado no se acepta, reintento no duplica y clave repetida con distinto contenido genera conflicto. Una prueba de cálculo sola no protege ese recorrido.
 
 ### Contexto externo no equivale a instrucciones confiables
 
@@ -191,7 +185,6 @@ No adquiere autoridad automáticamente; contrasta su contenido con el objetivo y
 ## Conexiones
 
 [[semana4/CLASE 18|Clase 18]] · [[Proyecto/5. Evaluacion y entregables|Evaluación individual]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

@@ -103,12 +103,6 @@ export function EventList() {
 
 Mover el esquema de respuesta a `features/events/shared` para que sea un contrato común. Las fechas JSON son strings, no objetos `Date`.
 
-### Conectar mutaciones
-
-Elevar `revision` al componente padre. Pasar `onSaved` al formulario; llamarlo solo después de una respuesta exitosa y aumentar revisión para recargar. Así el usuario ve el dato confirmado por servidor. `router.refresh()` no vuelve a ejecutar por sí mismo un efecto cliente con dependencias sin cambios.
-
-Para entradas y ventas no aplicaremos optimistic UI: primero confirmar la operación. Una reserva rechazada con 409 conserva el formulario y explica que la mesa ya no está disponible. Una sesión expirada conduce al login sin tratar el HTML de redirección como JSON válido.
-
 ### Seguir el efecto del ejemplo
 
 El efecto crea un AbortController por lectura y se limpia al cambiar revision o desmontar. El bloque load espera la respuesta, comprueba estado, interpreta JSON y valida un array con Zod. Solo entonces publica datos al estado.
@@ -117,13 +111,84 @@ La comprobación de signal.aborted impide que una petición cancelada muestre un
 
 Abortar fetch no garantiza deshacer trabajo que el servidor ya ejecutó. En lectura sirve para manejar el ciclo de vida del cliente; en una venta no debe usarse como mecanismo de rollback. Si la conexión se corta después de guardar, el backend puede haber confirmado igualmente.
 
-### Actualizar después de guardar
+### Conectar formulario y listado
 
-Elevar revision y el callback onSaved a un padre permite conectar formulario y lista. El formulario invoca el callback solo en éxito; la lista vuelve a consultar y muestra la fuente confirmada. No es necesario escribir manualmente una copia con todas las reglas del servidor.
+Eleva `revision` a un componente padre. El formulario llama `onSaved` solo tras una respuesta exitosa; el padre aumenta la revisión y la lista vuelve a consultar, así el usuario ve el dato confirmado por el servidor. No hace falta escribir a mano una copia con todas las reglas del servidor.
 
-Esta estrategia tiene coste de red y muestra carga; es razonable para el alcance del MVP. Optimistic UI puede mejorar velocidad percibida, pero exige rollback, reconciliación e identidad temporal. No es conveniente improvisarla para una operación de aforo o venta donde un éxito falso tiene consecuencias visibles.
+```tsx
+// src/features/events/frontend/events-screen.tsx
+"use client";
+import { useState } from "react";
+import { EventForm } from "./event-form";
+import { EventList } from "./event-list";
 
-`router.refresh()` actualiza el árbol de componentes de servidor, pero no es una señal universal para volver a ejecutar cualquier efecto cliente. Si tu efecto depende de revision, cambia esa dependencia explícitamente. Si la pantalla usa datos del servidor, define su estrategia de revalidación.
+export function EventsScreen() {
+  const [revision, setRevision] = useState(0);
+  const refresh = () => setRevision((current) => current + 1);
+  return (
+    <div className="space-y-6">
+      <EventForm onSaved={refresh} />
+      <EventList revision={revision} onRefresh={refresh} />
+    </div>
+  );
+}
+```
+
+En `EventList`, sustituye el estado interno por props y trata la sesión expirada antes de leer el cuerpo:
+
+```tsx
+// src/features/events/frontend/event-list.tsx (cambios respecto del ejemplo anterior)
+import { useRouter } from "next/navigation";
+
+export function EventList({ revision, onRefresh }: { revision: number; onRefresh: () => void }) {
+  const router = useRouter();
+  // ...mismos estados events, loading y error (sin el estado revision)
+  useEffect(() => {
+    // ...igual que antes, y justo después del fetch:
+    // if (response.status === 401) { router.push("/login"); return; }
+  }, [revision, router]);
+  // El botón «Actualizar» llama onRefresh en lugar de su propio setRevision
+}
+```
+
+Una API con sesión expirada responde 401 en JSON; no esperes que una redirección a HTML pase el esquema de Zod. Esta estrategia tiene coste de red y muestra carga, algo razonable para el MVP. Para entradas y ventas no aplicamos optimistic UI: primero se confirma la operación. Optimistic UI exige rollback, reconciliación e identidad temporal, y un éxito falso de aforo o venta tiene consecuencias visibles. Una reserva rechazada con 409 conserva el formulario y explica que la mesa ya no está disponible.
+
+`router.refresh()` actualiza el árbol de componentes de servidor, pero no vuelve a ejecutar un efecto cliente cuyas dependencias no cambiaron. Si tu efecto depende de `revision`, cambia esa dependencia explícitamente.
+
+### Leer desde un Server Component
+
+La otra opción para una pantalla de solo lectura es consultar el servicio en el servidor, sin `fetch` ni estados de carga en el cliente:
+
+```tsx
+// src/app/dashboard/events/page.tsx
+import { requirePageRoles } from "@/shared/lib/access";
+import { listEvents } from "@/features/events/backend/event.service";
+
+const dateFormat = new Intl.DateTimeFormat("es-BO", {
+  dateStyle: "medium", timeStyle: "short", timeZone: "America/La_Paz",
+});
+
+export default async function EventsPage() {
+  await requirePageRoles(["ADMIN", "STAFF"]);
+  const events = await listEvents();
+  return (
+    <section>
+      <h1>Eventos</h1>
+      {events.length === 0 ? <p>No hay eventos.</p> : (
+        <ul>
+          {events.map((event) => (
+            <li key={event.id}>{event.name} · {dateFormat.format(event.startsAt)}</li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+```
+
+Aquí `startsAt` es un `Date` real: no pasó por JSON. El guard va antes de la consulta, igual que en un endpoint. Como la página lee la sesión, Next.js la renderiza en cada petición; mientras espera se muestra `loading.tsx` (clase 12). Si en esa misma página un componente cliente hace una mutación, llama `router.refresh()` al confirmar para volver a ejecutar la consulta del servidor.
+
+Elige una fuente por pantalla: o esta página de servidor, o `EventsScreen` con `fetch` y `revision`. Mezclar ambas para el mismo listado crea dos copias que hay que sincronizar.
 
 ### Una analogía para ubicar cada copia
 
@@ -207,7 +272,6 @@ No. Hay capas diferentes; revisa de dónde proviene realmente el dato de esa pan
 ## Conexiones
 
 [[Semana3/CLASE 14|Clase 14]] · [[semana4/CLASE 16|Clase 16]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

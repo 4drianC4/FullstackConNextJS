@@ -52,7 +52,7 @@ Los conceptos extensos tienen secciones desarrolladas o notas propias en [[Recur
 [[Semana2/0 INDICE|Índice y entregable de la semana]]
 
 - [[Semana2/CLASE 6|Clase 6]] — CRUD, servicios y manejo de errores.
-- [[Semana2/CLASE 7|Clase 7]] — Relaciones, reglas de negocio y transacciones.
+- [[Semana2/CLASE 7|Clase 7]] — Reglas de negocio, transacciones e idempotencia.
 - [[Semana2/CLASE 8|Clase 8]] — Autenticación y sesiones.
 - [[Semana2/CLASE 9|Clase 9]] — Autorización y protección de operaciones.
 - [[Semana2/CLASE 10|Clase 10]] — Pruebas e integración del backend.

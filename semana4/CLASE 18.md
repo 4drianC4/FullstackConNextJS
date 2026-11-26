@@ -46,15 +46,13 @@ Empieza con una rama y un estado conocido. Pide al agente localizar archivos y e
 
 La versión de herramienta del curso determina los comandos disponibles. No copies configuración de otra versión solo porque tiene el mismo nombre. Si una opción de conexión cambió, revisa ayuda y documentación correspondiente antes de editar el proyecto para compensar un problema de instalación.
 
-### Herramienta, proveedor y modelo
+### Proveedor: endpoints de NVIDIA
 
-**OpenCode** es el agente de programación que trabaja con el repositorio. **NVIDIA** proporciona inferencia; el modelo elegido responde. No son tres nombres de la misma herramienta. No se requiere OpenAI ni una suscripción de ChatGPT.
-
-Usaremos los endpoints alojados de NVIDIA disponibles en su catálogo para desarrollo. Ejecutar NVIDIA NIM localmente es otra opción que puede requerir hardware/licencia/configuración adicional; no es requisito del curso.
+En este curso OpenCode es la herramienta y NVIDIA el proveedor de inferencia. No se requiere OpenAI ni una suscripción de ChatGPT. Usaremos los endpoints alojados de NVIDIA disponibles en su catálogo para desarrollo. Ejecutar NVIDIA NIM localmente es otra opción que puede requerir hardware/licencia/configuración adicional; no es requisito del curso.
 
 ### Preparación gratuita y reproducible
 
-Esta guía utiliza la interfaz de OpenCode 1 descrita en [su referencia correspondiente](https://docs.opencode.ai/docs/). Comprueba `opencode --version` y no mezcles sus instrucciones con OpenCode 2. Consulta [[Recursos/Stack y entorno|las versiones y comandos comunes]] y confirma que tu cuenta ofrece un modelo disponible sin pago antes de empezar.
+Esta guía utiliza OpenCode 1.x (la línea estable que npm publica como `opencode-ai`; en noviembre de 2026 va por la 1.19). Consulta [su documentación](https://opencode.ai/docs/) y comprueba `opencode --version`. Si tu versión muestra comandos distintos a los de estos apuntes, sigue su ayuda (`/help`) en lugar de mezclar instrucciones de versiones diferentes. Consulta [[Recursos/Stack y entorno|las versiones y comandos comunes]] y confirma que tu cuenta ofrece un modelo disponible sin pago antes de empezar.
 
 ```bash
 npm install -g opencode-ai@1
@@ -72,7 +70,7 @@ Dentro de OpenCode:
 
 En `/connect` seleccionar **NVIDIA** y proporcionar la clave creada en [build.nvidia.com](https://build.nvidia.com/). Elegir en `/models` un modelo realmente disponible; no copiar un identificador inventado. Revisar que el modelo soporte las herramientas necesarias para la práctica.
 
-La clave se guarda mediante la conexión local, nunca en el repositorio, prompt o apuntes compartidos. No activar facturación para seguir la clase. El acceso gratuito tiene límites que pueden cambiar; si no hay cuota, trabajar en parejas o usar el ejercicio de revisión de código sin inferencia de la clase 19. No exigir compra ni asumir NIM alojado ilimitado.
+La clave se guarda mediante la conexión local, nunca en el repositorio, prompt o apuntes compartidos. No activar facturación para seguir la clase. El acceso gratuito tiene límites que pueden cambiar; si no hay cuota, trabajar en parejas o usar el ejercicio de revisión de código sin inferencia de la clase 19. No exigir compra ni asumir NIM alojado ilimitado. Si recibes rate limit, no habilites facturación por impulso: conserva el trabajo y haz la revisión equivalente con un compañero. La nota [[Recursos/Conceptos/Contexto tokens y agentes|Contexto, tokens y agentes]] explica herramienta, proveedor, modelo y límites.
 
 ### Contexto antes de generar
 
@@ -128,12 +126,6 @@ El agente puede proponer una dependencia para debounce. Antes de instalarla, pre
 Revisa los nombres de imports, la versión de APIs, la existencia de archivos y el contrato de datos. Un fragmento elegante puede usar una función de otra versión. Que compile no prueba permisos; que una prueba pase no prueba que el test esté observando la regla relevante.
 
 Si el agente cambia una restricción para que un test deje de fallar, revisa si eliminó la garantía que querías conservar. Una respuesta rápida no compensa una reserva duplicada o una venta calculada por el navegador.
-
-### Gratuidad, cuota y continuidad del ejercicio
-
-Usa el acceso sin pago que tu cuenta tenga disponible y selecciona modelos realmente listados. Si recibes rate limit o falta de cuota, no habilites facturación por impulso para completar la tarea. Conserva el trabajo y realiza la revisión equivalente con un compañero.
-
-Los endpoints alojados de NVIDIA y ejecutar NIM en tu equipo son opciones distintas. No necesitas instalar un servidor de inferencia local para practicar este flujo. La nota [[Recursos/Conceptos/Contexto tokens y agentes|Contexto, tokens y agentes]] explica herramienta, proveedor, modelo y límites sin confundirlos con capacidades del producto.
 
 ### Qué entregar para que otro pueda revisar
 
@@ -195,7 +187,6 @@ Orienta el trabajo, pero no sustituye permisos de herramienta y control del alca
 ## Conexiones
 
 [[Recursos/Fullstack con IA/Programemos como si estuviéramos en la matrix... o quizá si estamos|Mapa de IA]] · [[semana4/CLASE 19|Clase 19]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

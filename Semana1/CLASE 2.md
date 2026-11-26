@@ -30,18 +30,31 @@ Hay dos momentos distintos. En **comprobación estática**, TypeScript analiza e
 
 ### Inferencia y anotaciones
 
-TypeScript infiere muchos tipos a partir de los valores. `const capacity = 100` ya aporta información; no hace falta anotar cada número. En cambio, las fronteras de una funcionalidad se benefician de tipos explícitos: qué recibe el servicio y qué entrega al resto del sistema.
+TypeScript verifica el código antes de ejecutarlo y los tipos se eliminan al compilar: no validan automáticamente un JSON recibido por HTTP. Muchos tipos se infieren a partir de los valores: `const capacity = 100` ya aporta información y no hace falta anotar cada número. En cambio, las fronteras de una funcionalidad se benefician de tipos explícitos: qué recibe el servicio y qué entrega al resto del sistema.
 
 `string`, `number` y `boolean` describen categorías amplias. Los literales restringen valores concretos: `"ADMIN" | "STAFF"` expresa dos roles, no cualquier texto. Una unión permite representar alternativas y obliga a considerar los estados posibles.
 
 ```ts
-type EventState = "DRAFT" | "OPEN" | "CLOSED";
-function canIssueAdmission(state: EventState): boolean {
-  return state === "OPEN";
+type Role = "ADMIN" | "STAFF";
+type EventStatus = "DRAFT" | "OPEN" | "CLOSED";
+type EventSummary = {
+  id: string;
+  name: string;
+  capacity: number;
+  status: EventStatus;
+};
+function canIssueAdmission(status: EventStatus): boolean {
+  return status === "OPEN";
+}
+function availablePlaces(capacity: number, sold: number): number {
+  return Math.max(0, capacity - sold);
+}
+async function listExample(): Promise<EventSummary[]> {
+  return [];
 }
 ```
 
-`canIssueAdmission("OPEN")` cumple el contrato. `canIssueAdmission("ABIERTO")` no lo cumple aunque parezca una traducción razonable: el sistema debe acordar una representación consistente. Los textos visibles pueden traducirse sin cambiar el valor almacenado.
+`canIssueAdmission("OPEN")` cumple el contrato. `canIssueAdmission("ABIERTO")` no lo cumple aunque parezca una traducción razonable: el sistema debe acordar una representación consistente. Los textos visibles pueden traducirse sin cambiar el valor almacenado. Una función `async` siempre devuelve una `Promise`; anota `Promise<EventSummary[]>`, no `EventSummary[]`.
 
 ### Tipos de objetos y datos ausentes
 
@@ -51,33 +64,11 @@ En PATCH, omitir `name` normalmente significa conservarlo. Enviar `null` signifi
 
 Los arrays también necesitan contrato: `EventSummary[]` es una lista de resúmenes. Una lista vacía es válida y no equivale a un error ni a `null`. La interfaz deberá mostrar que todavía no hay eventos.
 
-### Tipos e inferencia
-
-TypeScript verifica código antes de ejecutarlo; los tipos se eliminan al compilar. No valida automáticamente un JSON recibido por HTTP.
-
-```ts
-type Role = "ADMIN" | "STAFF";
-type EventStatus = "DRAFT" | "OPEN" | "CLOSED";
-
-type EventSummary = {
-  id: string;
-  name: string;
-  capacity: number;
-  status: EventStatus;
-};
-
-function availablePlaces(capacity: number, sold: number): number {
-  return Math.max(0, capacity - sold);
-}
-
-async function example(): Promise<EventSummary[]> {
-  return [];
-}
-```
-
-Usar `type` o `interface` para contratos, uniones para estados y `?` para datos opcionales. Distinguir `undefined` (ausencia) de `null` (valor explícitamente vacío). No forzar con `as` datos que todavía no se verificaron.
+Usa `type` o `interface` para contratos, uniones para estados y `?` para datos opcionales. Distingue `undefined` (ausencia) de `null` (valor explícitamente vacío). No fuerces con `as` datos que todavía no se verificaron.
 
 ### unknown y estrechamiento
+
+Un `unknown` dice «todavía no sé qué llegó». Para utilizarlo necesitas evidencia: comprobar si es un objeto, un string o una instancia de Error. Este paso se llama estrechamiento o *narrowing*: el código reduce las posibilidades del tipo.
 
 ```ts
 function errorMessage(error: unknown): string {
@@ -85,17 +76,27 @@ function errorMessage(error: unknown): string {
 }
 ```
 
-Los datos externos entran como `unknown` y se validan con Zod en la clase 5. `any` desactiva comprobaciones y no se utiliza en nuestros ejemplos.
+Una conversión `as EventSummary` solo cambia lo que cree el compilador; no inspecciona el objeto real. Si la respuesta trae `{ "capacity": "muchas" }`, un `as` no transforma ese texto en un número. Los datos externos entran como `unknown` y se validan con Zod en la clase 5. `any` desactiva comprobaciones y no se utiliza en nuestros ejemplos.
 
 ### Contrato público frente a modelo persistido
 
 Un usuario en la base puede tener `passwordHash`; el contrato público solo contiene `id`, `name`, `email` y `role`. No enviar un modelo completo por comodidad.
 
-En dinero usaremos **centavos enteros**: Bs 25,50 se representa como `2550`. Para fehas HTTP usaremos ISO 8601; convertir a `Date` en el servidor y mostrar la zona horaria local en la interfaz.
-
-### Comprobación
+### Comprobación y alias de imports
 
 En la aplicación usar `strict: true` y el script `typecheck: tsc --noEmit`. Resolver el error, no silenciarlo. Todavía no usamos JSX: los archivos son `.ts`.
+
+`create-next-app` configura en `tsconfig.json` el alias `@/`, que usaremos desde la clase 4:
+
+```json
+{
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/*"] }
+  }
+}
+```
+
+`import { prisma } from "@/shared/lib/prisma"` apunta a `src/shared/lib/prisma.ts` desde cualquier carpeta, sin cadenas como `../../../`. El alias lo entiende TypeScript y Next.js; otras herramientas, como Vitest, necesitan su propia configuración (clase 10).
 
 ### Componer contratos sin duplicar información
 
@@ -131,17 +132,11 @@ function formatResult(result: Result<number>): string {
 
 `T` es un parámetro de tipo: permite describir la misma estructura para distintos valores. Dentro de la rama `ok`, TypeScript conoce `value`; fuera de ella no debes asumir que existe. No necesitas crear genéricos para cada función del curso, pero entenderlos ayuda a leer librerías.
 
-### Por qué unknown no es un obstáculo
-
-Un `unknown` dice «todavía no sé qué llegó». Para utilizarlo, necesitas evidencia: comprobar si es un objeto, un string o una instancia de Error. Una conversión `as EventSummary` solo cambia lo que cree el compilador; no inspecciona el objeto real.
-
-Supón que la respuesta trae `{ "capacity": "muchas" }`. Un `as` no transforma ese texto en un número. En la clase de Zod construiremos el análisis que rechaza esa entrada y entrega un valor validado. Este paso se llama estrechamiento o narrowing cuando el código reduce las posibilidades del tipo.
-
 ### Fechas, números y transporte
 
-El tipo `number` no expresa por sí mismo «entero positivo». Para precios acordamos centavos enteros y comprobamos sus límites. `2550` representa Bs 25,50; el formato con coma y símbolo pertenece a la presentación.
+El tipo `number` no expresa por sí mismo «entero positivo». Para dinero usamos **centavos enteros** y comprobamos sus límites. `2550` representa Bs 25,50; el formato con coma y símbolo pertenece a la presentación.
 
-Una fecha `Date` del servidor se serializa como texto al responder JSON. Un contrato HTTP debe decir que la fecha es string ISO, no prometer un objeto con métodos como `getFullYear()`. Reconstruir una Date y decidir zona horaria es un paso posterior.
+Una fecha `Date` del servidor se serializa como texto al responder JSON. Un contrato HTTP debe decir que la fecha es string ISO, no prometer un objeto con métodos como `getFullYear()`. El servidor convierte ese ISO 8601 a `Date`; la interfaz muestra la hora en la zona local acordada.
 
 ### Leer un error de TypeScript
 
@@ -205,7 +200,6 @@ Puede contener campos privados y acopla el contrato público a cambios internos 
 ## Conexiones
 
 [[Proyecto/4. Arquitectura vertical y contratos|Contratos por funcionalidad]] · [[Semana1/CLASE 5|Clase 5]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

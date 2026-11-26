@@ -75,7 +75,13 @@ Los enlaces de notas como `[[Semana1/CLASE 1|nombre legible]]` conectan temas; l
 
 Estos apuntes se consultan desde la bóveda. Para programar, trabaja en **el repositorio de aplicación** del grupo y sigue [[Recursos/Stack y entorno|las versiones y comandos comunes]]. Si estudias por tu cuenta, crea esa aplicación en otra carpeta con la receta enlazada. Su página inicial puede permanecer mientras construyes el backend. Tu aporte pertenece a una funcionalidad vertical de la discoteca.
 
-### Flujo mínimo de Git
+### Git con una tarea pequeña
+
+Un repositorio registra cambios de archivos. Tu copia local y GitHub no son la misma ubicación: un commit guarda una versión local; `push` la publica en el remoto. Si todavía no hiciste commit, subir una rama no conserva lo que hay en tu editor.
+
+El directorio de trabajo contiene tus archivos actuales. El área de preparación, o staging, reúne los cambios que quieres incluir en el siguiente commit. Esta distinción permite corregir dos cosas y publicarlas por separado cuando resuelven problemas diferentes.
+
+Supón que añades el contrato de eventos. Primero sincroniza `main` y crea una rama descriptiva:
 
 ```bash
 git clone URL_DEL_REPOSITORIO_DE_APLICACION
@@ -85,30 +91,16 @@ git pull --ff-only
 git switch -c feat/events-create
 ```
 
-Después de trabajar: revisar `git diff`, seleccionar archivos, hacer commit y push. Abrir PR hacia `main`; un compañero revisa y el instructor integra. No usamos una rama `dev` adicional en este curso.
+Edita el archivo de tu funcionalidad. Revisa con `git status` qué cambió y con `git diff` el contenido. Añade solo los archivos que existan en tu tarea, comprueba `git diff --staged`, crea un commit que explique el resultado y publica la rama:
 
 ```bash
 git add src/features/events
+git diff --staged
 git commit -m "feat: agrega contrato de eventos"
 git push -u origin feat/events-create
 ```
 
-`git add` debe mencionar los archivos que realmente existan en la tarea. Ante un conflicto, hablar con quien modificó la misma zona y verificar el resultado; no aceptar ambas versiones sin leerlas.
-
-### Git explicado con una tarea pequeña
-
-Un repositorio registra cambios de archivos. Tu copia local y GitHub no son la misma ubicación: un commit guarda una versión local; `push` la publica en el remoto. Si todavía no hiciste commit, subir una rama no conserva mágicamente lo que hay en tu editor.
-
-El directorio de trabajo contiene tus archivos actuales. El área de preparación, o staging, reúne los cambios que quieres incluir en el siguiente commit. Esta distinción permite corregir dos cosas y publicarlas por separado cuando resuelven problemas diferentes.
-
-Supón que añades el contrato de eventos:
-
-1. Sincroniza `main` y crea una rama descriptiva.
-2. Edita el archivo de tu funcionalidad.
-3. Ejecuta `git status` para ver qué cambió y `git diff` para leer el contenido del cambio.
-4. Añade ese archivo con `git add RUTA_REAL` y comprueba `git diff --staged`.
-5. Crea un commit que explique el resultado y publica tu rama.
-6. Abre un Pull Request con contexto y una forma de comprobarlo.
+Después abre un Pull Request hacia `main` con contexto y una forma de comprobarlo; un compañero revisa y el instructor integra. No usamos una rama `dev` adicional en este curso.
 
 Una rama es una referencia a una línea de trabajo; no necesita duplicar todo el proyecto en otra carpeta. Un PR permite discutir la integración de una rama y revisar su diferencia respecto de la base. No es una garantía automática de calidad: alguien debe leer y comprobar el cambio.
 
@@ -116,7 +108,7 @@ Una rama es una referencia a una línea de trabajo; no necesita duplicar todo el
 
 Explica qué problema resuelve, qué archivo agregaste y cómo comprobarlo. Por ejemplo: «Define el contrato de creación de eventos, limita el nombre y exige capacidad positiva. Se probó un evento válido y otro sin nombre». Esta descripción ayuda mucho más que «subo lo que hice».
 
-Si otra persona modifica el mismo contrato, pueden aparecer conflictos al integrar. Git marca zonas que no puede combinar con seguridad. Lee ambas intenciones, acuerda el resultado y vuelve a comprobar el código. Aceptar las dos versiones sin revisar puede duplicar funciones o conservar condiciones incompatibles.
+Si otra persona modifica el mismo contrato, pueden aparecer conflictos al integrar. Git marca las zonas que no puede combinar con seguridad. Habla con quien modificó esa zona, lee ambas intenciones, acuerda el resultado y vuelve a comprobar el código. Aceptar las dos versiones sin revisar puede duplicar funciones o conservar condiciones incompatibles.
 
 ### Herramientas y archivos que conviene distinguir
 
@@ -186,7 +178,6 @@ Archivo y comando exactos, resultado esperado, mensaje real y pasos para reprodu
 ## Conexiones
 
 [[Recursos/Obsidian - Guia del curso|Obsidian]] · [[Proyecto/3. Guía de Contribución y Estándares del Proyecto|Contribución]] · [[Proyecto/2. Tareas por funcionalidad|Asignaciones]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

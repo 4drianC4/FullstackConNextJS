@@ -50,9 +50,7 @@ Las props se parecen a argumentos de función. El padre decide qué datos entreg
 
 TypeScript ayuda a comprobar los nombres y tipos. Si `DrinkCard` exige `priceCents`, pasar `price` no cumple el contrato. Esto detecta una desalineación antes de descubrir que la pantalla muestra NaN.
 
-### Componentes y JSX
-
-React describe la interfaz mediante componentes. JSX permite expresar esa estructura en `.tsx`; no es un string HTML. Usar `className`, expresiones entre llaves y un único contenedor de retorno.
+### Primer componente: tarjeta de bebida
 
 ```tsx
 // src/features/drinks/frontend/drink-card.tsx
@@ -76,7 +74,7 @@ export function DrinkCard({ drink }: { drink: DrinkSummary }) {
 }
 ```
 
-Las props son entradas de solo lectura. Un componente hijo no modifica el objeto del padre. Extraer el tipo al contrato compartido al integrarlo con el backend; no mantener dos definiciones contradictorias.
+Al integrarlo con el backend, extrae el tipo al contrato compartido; no mantengas dos definiciones contradictorias.
 
 ### Listas y composición
 
@@ -88,11 +86,7 @@ export function DrinkList({ drinks }: { drinks: DrinkSummary[] }) {
 }
 ```
 
-La key es un identificador estable. No usar el índice de una lista que cambia. Mostrar estados condicionales con expresiones; no añadir estado a información que puede derivarse de las props.
-
-### Ubicación
-
-La tarjeta pertenece a `features/drinks/frontend`. Un botón compartido pertenece a `shared/ui`. No convertir todo en componente global solo porque tiene pocas líneas. En esta clase usamos fixtures, sin llamadas a la API todavía.
+No añadas estado a información que puede derivarse de las props. La `key` se explica más abajo.
 
 ### Seguir el ejemplo de tarjeta
 
@@ -120,7 +114,7 @@ Cuidado con `{count && <p>...</p>}` si count puede ser 0: podrías renderizar un
 
 Una página puede combinar título, filtros, listado y estado vacío. Extraer componentes ayuda cuando cada uno tiene significado claro, se repite o evita mezclar varias responsabilidades. Crear un componente por cada span no mejora automáticamente la lectura.
 
-`features/drinks/frontend` contiene piezas de bebidas. `shared/ui` contiene controles transversales, como un botón con estilo común. Evita que un botón global conozca la tabla Drink o el endpoint de reservas: esa dependencia invierte la separación que estamos construyendo.
+`features/drinks/frontend` contiene piezas de bebidas. `shared/ui` contiene controles transversales, como un botón con estilo común. Evita que un botón global conozca la tabla Drink o el endpoint de reservas: esa dependencia invierte la separación que estamos construyendo. En esta clase usamos fixtures, sin llamadas a la API todavía.
 
 ### Recorrido de comprobación
 
@@ -184,7 +178,6 @@ No. Es un resultado válido que merece un estado visible propio.
 ## Conexiones
 
 [[Semana1/CLASE 2|Clase 2]] · [[Semana3/CLASE 12|Clase 12]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 

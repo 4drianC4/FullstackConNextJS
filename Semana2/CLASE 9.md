@@ -24,7 +24,7 @@ Repasa [[Semana2/CLASE 8|Clase 8]] y completa su tarea. Consulta [[Recursos/Stac
 
 ### Decidir quién puede hacer qué
 
-Una sesión válida identifica a una cuenta, pero no autoriza cualquier comportamiento. STAFF puede emitir entradas y registrar ventas; ADMIN puede además administrar eventos, catálogo y cuentas. Esta matriz convierte una idea informal de roles en reglas revisables.
+Una sesión válida identifica a una cuenta, pero no autoriza cualquier comportamiento. STAFF puede emitir entradas y registrar ventas; ADMIN puede además administrar eventos, catálogo y cuentas. Esta matriz convierte una idea informal de roles en reglas revisables; la completa está en [[Proyecto/4. Arquitectura vertical y contratos|contratos y permisos]]. Saber quién inició sesión no permite asumir que puede editar eventos o administrar usuarios, ni confiar en un `userId` o `role` enviado por el navegador.
 
 El permiso se comprueba por operación y, cuando hay datos privados, también por recurso. Si en una ampliación cada cliente solo pudiera leer sus reservas, verificar «está logueado» sería insuficiente: habría que filtrar por su identidad. En el MVP el panel es interno y ambos roles consultan los datos operativos definidos en el contrato.
 
@@ -45,10 +45,6 @@ Los Route Handlers se tratan como entradas públicas de red. Cada operación sen
 Sin sesión válida respondemos 401. Con identidad válida pero permiso insuficiente respondemos 403. En ciertos productos, responder 404 para recursos privados evita confirmar su existencia; si eliges eso, documenta la política y úsala de forma coherente. No cambies estados al azar según la pantalla.
 
 La API entrega JSON de error. Redirigir una API al formulario de login puede acabar devolviendo HTML con estado 200 tras seguir la redirección, y el cliente fallará al intentar interpretarlo como datos.
-
-### Autenticar no equivale a autorizar
-
-Saber quién inició sesión no permite asumir que puede editar eventos o administrar usuarios. Consultar la matriz de permisos en [[Proyecto/4. Arquitectura vertical y contratos|contratos y permisos]]. No confiar en un `userId` o `role` enviado por el navegador.
 
 ### Guard común: identidad vigente desde la base
 
@@ -90,7 +86,7 @@ El actor de una venta se obtiene del guard: `const actor = await requireRoles(["
 
 ### Middleware/Proxy y vistas
 
-En Next.js 16 la convención se llama `proxy.ts`. Puede servir para redirigir pronto, pero no lo necesitamos para la garantía de permisos: el guard debe permanecer en los endpoints. No afirmar que ocultar un botón protege una operación. Una API responde 401/403 JSON, no HTML de login como si fuera un resultado correcto.
+En Next.js 16 la convención se llama `proxy.ts`. Puede servir para redirigir pronto, pero no lo necesitamos para la garantía de permisos: el guard debe permanecer en los endpoints.
 
 Las operaciones por cookies también necesitan protección ante CSRF: en las rutas de mutación propias comprobar `Origin` contra el origen configurado y rechazar orígenes ajenos antes de ejecutar cambios. Auth.js gestiona su propio flujo; no copiar ese supuesto a nuestras APIs.
 
@@ -149,6 +145,100 @@ Repite la misma operación sin cookie, con STAFF, con ADMIN, con cuenta desactiv
 
 Si un test solo confirma que el menú no muestra «Administración», todavía no verificó el backend. Debe existir una petición directa que obtenga 403 y una comprobación de base que confirme que el recurso no cambió.
 
+### Caso práctico: administrar cuentas del personal
+
+El equipo de Usuarios aplica todo lo anterior: solo ADMIN crea cuentas, el rol lo fija el servidor y desactivar conserva el historial.
+
+```ts
+// src/features/users/shared/user.schema.ts
+import { z } from "zod";
+export const createStaffSchema = z.object({
+  name: z.string().trim().min(2).max(100),
+  email: z.email().transform((email) => email.toLowerCase()),
+  password: z.string().min(8)
+    .refine((s) => new TextEncoder().encode(s).length <= 72, "Máximo 72 bytes"),
+}).strict();
+export const setActiveSchema = z.object({ active: z.boolean() }).strict();
+export type CreateStaffInput = z.infer<typeof createStaffSchema>;
+```
+
+```ts
+// src/features/users/backend/user.service.ts
+import "server-only";
+import bcrypt from "bcryptjs";
+import { prisma } from "@/shared/lib/prisma";
+import { ApiError } from "@/shared/lib/api-error";
+import type { CreateStaffInput } from "../shared/user.schema";
+
+const publicUser = { id: true, name: true, email: true, role: true, active: true } as const;
+
+export async function createStaff(input: CreateStaffInput) {
+  return prisma.user.create({
+    data: {
+      name: input.name,
+      email: input.email,
+      passwordHash: await bcrypt.hash(input.password, 12),
+      role: "STAFF", // nunca del body
+    },
+    select: publicUser,
+  });
+}
+
+export function listUsers() {
+  return prisma.user.findMany({
+    select: publicUser,
+    orderBy: [{ name: "asc" }, { id: "asc" }],
+    take: 100,
+  });
+}
+
+export async function setUserActive(actorId: string, userId: string, active: boolean) {
+  if (actorId === userId && !active)
+    throw new ApiError(409, "No puedes desactivar tu propia cuenta");
+  const changed = await prisma.user.updateMany({ where: { id: userId }, data: { active } });
+  if (changed.count !== 1) throw new ApiError(404, "Usuario no encontrado");
+  return prisma.user.findUniqueOrThrow({ where: { id: userId }, select: publicUser });
+}
+```
+
+```ts
+// src/features/users/backend/user.controller.ts
+import { z } from "zod";
+import { createStaffSchema, setActiveSchema } from "../shared/user.schema";
+import { createStaff, listUsers, setUserActive } from "./user.service";
+import { requireRoles } from "@/shared/lib/access";
+import { requireSameOrigin } from "@/shared/lib/origin";
+import { apiError } from "@/shared/lib/api-error";
+
+export async function getUsers() {
+  try {
+    await requireRoles(["ADMIN"]);
+    return Response.json(await listUsers());
+  } catch (error: unknown) { return apiError(error); }
+}
+
+export async function postUser(request: Request) {
+  try {
+    await requireRoles(["ADMIN"]);
+    requireSameOrigin(request);
+    const input = createStaffSchema.parse(await request.json());
+    return Response.json(await createStaff(input), { status: 201 });
+  } catch (error: unknown) { return apiError(error); }
+}
+
+export async function patchUser(request: Request, context: { params: Promise<{ id: string }> }) {
+  try {
+    const actor = await requireRoles(["ADMIN"]);
+    requireSameOrigin(request);
+    const { id } = await context.params;
+    const { active } = setActiveSchema.parse(await request.json());
+    return Response.json(await setUserActive(actor.id, z.uuid().parse(id), active));
+  } catch (error: unknown) { return apiError(error); }
+}
+```
+
+Rutas: `src/app/api/users/route.ts` exporta `getUsers as GET` y `postUser as POST`; `src/app/api/users/[id]/route.ts` exporta `patchUser as PATCH`. Un correo repetido viola `@unique` y `apiError` lo convierte en 409. Impedir que un ADMIN se desactive a sí mismo evita el caso más común de quedarse sin administradores; una regla completa («siempre al menos un ADMIN activo») necesitaría contar administradores dentro de una transacción. Como `requireRoles` consulta `active` en cada petición, la cuenta desactivada pierde acceso en la siguiente operación aunque conserve la cookie.
+
 ### Caso desarrollado: el cliente intenta vender a nombre de otra persona
 
 STAFF envía una venta con sus productos, pero agrega `createdById` de ADMIN. Una interfaz normal nunca mostraría ese campo, pero una petición manual puede incluirlo. La seguridad no puede depender de que el formulario sea amable.
@@ -205,7 +295,6 @@ Para que cambios de rol y desactivaciones tengan efecto aunque la cookie aún no
 ## Conexiones
 
 [[Semana2/CLASE 8|Clase 8]] · [[Semana2/CLASE 10|Clase 10]] · [[Proyecto/4. Arquitectura vertical y contratos|Arquitectura vertical]] · [[Proyecto/5. Evaluacion y entregables|Evaluación y entregables]]
-
 
 ---
 
