@@ -272,6 +272,7 @@ model Drink {
   id   String @id @default(uuid())
   tags Tag[]
 }
+
 model Tag {
   id     String  @id @default(uuid())
   drinks Drink[]
