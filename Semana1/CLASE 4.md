@@ -111,16 +111,16 @@ Los scripts `db:*` están definidos en [[Recursos/Stack y entorno|Stack y entorn
 
 Antes de copiar los modelos, identifica qué hace cada atributo del [[Proyecto/6. Modelo de datos|modelo común]]:
 
-| Atributo | Ejemplo | Qué garantiza |
-| --- | --- | --- |
-| `@id` | `id String @id` | Clave primaria |
-| `@default(...)` | `@default(uuid())`, `@default(now())`, `@default(DRAFT)` | Valor que pone la base o Prisma si no envías el campo |
-| `@updatedAt` | `updatedAt DateTime @updatedAt` | Prisma lo actualiza en cada `update` |
-| `?` | `checkedInAt DateTime?` | La columna admite `NULL` |
-| `@unique` | `email String @unique` | No puede haber dos filas con el mismo valor |
-| `@@unique([a, b])` | `@@unique([eventId, tableId])` | Unicidad compuesta |
-| `@@index([...])` | `@@index([eventId])` | Índice para buscar rápido; no impide duplicados |
-| `enum` | `enum Role { ADMIN STAFF }` | Solo esos valores; Prisma genera el tipo TypeScript `Role` |
+| Atributo           | Ejemplo                                                  | Qué garantiza                                              |
+| ------------------ | -------------------------------------------------------- | ---------------------------------------------------------- |
+| `@id`              | `id String @id`                                          | Clave primaria                                             |
+| `@default(...)`    | `@default(uuid())`, `@default(now())`, `@default(DRAFT)` | Valor que pone la base o Prisma si no envías el campo      |
+| `@updatedAt`       | `updatedAt DateTime @updatedAt`                          | Prisma lo actualiza en cada `update`                       |
+| `?`                | `checkedInAt DateTime?`                                  | La columna admite `NULL`                                   |
+| `@unique`          | `email String @unique`                                   | No puede haber dos filas con el mismo valor                |
+| `@@unique([a, b])` | `@@unique([eventId, tableId])`                           | Unicidad compuesta                                         |
+| `@@index([...])`   | `@@index([eventId])`                                     | Índice para buscar rápido; no impide duplicados            |
+| `enum`             | `enum Role { ADMIN STAFF }`                              | Solo esos valores; Prisma genera el tipo TypeScript `Role` |
 
 Un `enum` de Prisma sustituye a la unión `"ADMIN" | "STAFF"` de la clase 2 cuando el dato viene de la base: importa el tipo desde `@/generated/prisma/client` en lugar de escribir otra unión que pueda desalinearse.
 
