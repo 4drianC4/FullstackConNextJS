@@ -96,7 +96,7 @@ El primer ejemplo usa texto ISO para que la conversión sea explícita. Más aba
 
 ### Login del personal
 
-El login es un Client Component que usa `signIn` de `next-auth/react`. Las etiquetas «Correo» y «Contraseña» y el botón «Entrar» son las que usan las pruebas de navegador de la clase 16; acuérdalas con el equipo de Usuarios para que haya un solo flujo de acceso.
+El login es un Client Component que usa `signIn` de `next-auth/react`. Las etiquetas «Correo» y «Contraseña» y el botón «Entrar» son las que usan las pruebas de navegador de la clase 16; acuérdalas con quien tiene la tarea de login (equipo Usuarios y eventos) para que haya un solo flujo de acceso.
 
 ```tsx
 // src/features/users/frontend/login-form.tsx

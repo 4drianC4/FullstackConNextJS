@@ -58,7 +58,7 @@ Distingue severidad de prioridad: una operación sin permisos puede ser crítica
 | Cuenta desactivada mantiene cookie antigua | Próxima operación rechazada |
 | API desconectada | Mensaje y opción de reintento |
 
-El equipo de ventas debe probar la misma clave de petición dos veces; ni un doble clic ni un reintento deben duplicar la venta.
+Quien tiene la tarea «Crear venta» (equipo Barra) debe probar la misma clave de petición dos veces; ni un doble clic ni un reintento deben duplicar la venta.
 
 ### Un flujo automatizado con Playwright
 

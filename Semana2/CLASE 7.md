@@ -287,7 +287,7 @@ export async function createReservation(input: CreateReservationInput) {
   }
 }
 
-// Solo ADMIN y antes de que empiece el evento (regla del modelo común)
+// Ampliación opcional: solo ADMIN y antes de que empiece el evento
 export async function deleteReservation(id: string) {
   const deleted = await prisma.reservation.deleteMany({
     where: { id, event: { startsAt: { gt: new Date() } } },

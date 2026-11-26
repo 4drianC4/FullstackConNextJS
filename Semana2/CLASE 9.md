@@ -147,7 +147,7 @@ Si un test solo confirma que el menú no muestra «Administración», todavía n
 
 ### Caso práctico: administrar cuentas del personal
 
-El equipo de Usuarios aplica todo lo anterior: solo ADMIN crea cuentas, el rol lo fija el servidor y desactivar conserva el historial.
+La tarea de cuentas STAFF (equipo Usuarios y eventos) aplica todo lo anterior: solo ADMIN crea cuentas, el rol lo fija el servidor y desactivar conserva el historial.
 
 ```ts
 // src/features/users/shared/user.schema.ts
